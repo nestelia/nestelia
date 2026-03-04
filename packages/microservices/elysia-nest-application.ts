@@ -3,6 +3,7 @@ import type { Elysia } from "elysia";
 import { addGlobalExceptionFilter } from "../core/src/core/elysia-plugin.factory";
 import { DIContainer, type Type } from "../core/src/di";
 import type { ExceptionFilter } from "../core/src/exceptions";
+import { HttpException } from "../core/src/exceptions/http-exception";
 import { getLifecycleManager } from "../core/src/lifecycle";
 import {
   CATCH_EXCEPTIONS_METADATA,
@@ -424,7 +425,18 @@ export class ElysiaNestApplication {
       const exception =
         ctx.error instanceof Error ? ctx.error : new Error(String(ctx.error));
 
-      return this.runFiltersForHttp(exception, buildHttpContext(ctx));
+      const filtered = await this.runFiltersForHttp(exception, buildHttpContext(ctx));
+      if (filtered !== undefined) return filtered;
+
+      // No global filter handled the error — return a safe fallback so Elysia
+      // never forwards raw error.message (which may contain file paths or
+      // internal implementation details) to the client.
+      if (exception instanceof HttpException) {
+        ctx.set.status = exception.statusCode;
+        return exception.getResponse();
+      }
+      ctx.set.status = 500;
+      return { statusCode: 500, message: "Internal server error" };
     });
 
     this.httpServer.onAfterHandle(async (rawCtx) => {
