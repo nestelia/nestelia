@@ -93,6 +93,16 @@ To run docs locally:
 bun run docs:dev
 ```
 
+## Claude Code Skill
+
+A [Claude Code](https://claude.ai/claude-code) skill is available for elysia-nest. It provides scaffolding templates, decorator usage, and best practices directly in your AI assistant.
+
+```bash
+npx skills add kiyasov/elysia-nest
+```
+
+Once installed, Claude Code will automatically use the correct patterns when working with `@kiyasov/elysia-nest`.
+
 ## License
 
 [MIT](https://github.com/kiyasov/elysia-nest/blob/main/LICENSE) © [Islam Kiiasov](https://github.com/kiyasov)

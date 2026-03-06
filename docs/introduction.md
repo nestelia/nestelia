@@ -71,6 +71,16 @@ const app = await createElysiaApplication(AppModule);
 app.listen(3000);
 ```
 
+## Claude Code Skill
+
+A [Claude Code](https://claude.ai/claude-code) skill is available for elysia-nest. It provides scaffolding templates, decorator usage, and best practices directly in your AI assistant.
+
+```bash
+npx skills add kiyasov/elysia-nest
+```
+
+Once installed, Claude Code will automatically use the correct patterns when working with `@kiyasov/elysia-nest`.
+
 ## Next Steps
 
 - [Installation](/getting-started/installation) — Install @kiyasov/elysia-nest and its peer dependencies.
