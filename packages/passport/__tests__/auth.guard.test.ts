@@ -1,6 +1,7 @@
 import "reflect-metadata";
 
 import { afterEach, describe, expect, it } from "bun:test";
+import type { ExecutionContext } from "@kiyasov/elysia-nest";
 import { AuthGuard } from "../src/auth.guard";
 import { clearStrategyRegistries } from "../src/passport-strategy";
 
@@ -8,17 +9,17 @@ afterEach(() => {
   clearStrategyRegistries();
 });
 
-function makeContext(request: unknown) {
+function makeContext(request: unknown): ExecutionContext {
   return {
-    switchToHttp: () => ({ getRequest: () => request }),
-    switchToRpc: () => ({}),
-    switchToWs: () => ({}),
-    getClass: () => Object,
+    switchToHttp: () => ({ getRequest: () => request, getResponse: () => undefined }),
+    switchToRpc: () => ({ getData: () => undefined, getContext: () => undefined }),
+    switchToWs: () => ({ getData: () => undefined, getClient: () => undefined }),
+    getClass: <T>() => Object as unknown as T,
     getHandler: () => () => {},
     getArgByIndex: () => undefined,
     getArgs: () => [],
     getType: () => "http" as const,
-  };
+  } as unknown as ExecutionContext;
 }
 
 describe("AuthGuard", () => {

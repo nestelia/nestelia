@@ -17,7 +17,7 @@ class MockPubSub implements PubSubEngine {
     this.handlers.delete(id);
   }
 
-  publish(trigger: string, message: unknown): void {
+  async publish(trigger: string, message: unknown): Promise<void> {
     for (const handler of this.handlers.values()) {
       handler(message);
     }

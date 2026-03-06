@@ -28,7 +28,8 @@ describe("MessageSerializer", () => {
     it("parses valid JSON buffer back to object", () => {
       const s = new MessageSerializer();
       const buf = Buffer.from(JSON.stringify({ n: 42 }));
-      expect(s.parse(buf)).toEqual({ n: 42 });
+      const result = s.parse<{ n: number }>(buf);
+      expect((result as { n: number }).n).toBe(42);
     });
 
     it("returns raw buffer for invalid JSON", () => {
