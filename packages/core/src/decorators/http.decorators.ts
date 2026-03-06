@@ -1,14 +1,13 @@
 import "reflect-metadata";
 
-import type { TSchema } from "@sinclair/typebox";
-import { Kind } from "@sinclair/typebox";
-
 import type { ExecutionContext } from "../interfaces/execution-context.interface";
 import { PARAMS_METADATA, ROUTE_METADATA } from "./constants";
 import type { ParamMetadata, RouteMetadata } from "./types";
 
+import type { TSchema } from "@sinclair/typebox";
+
 function isTypeBoxSchema(value: unknown): value is TSchema {
-  return typeof value === "object" && value !== null && Kind in value;
+  return typeof value === "object" && value !== null && Symbol.for("TypeBox.Kind") in value;
 }
 
 type CustomParamFactory = (data: unknown, context: ExecutionContext) => unknown;
