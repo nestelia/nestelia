@@ -150,7 +150,6 @@
     }
   },
   "devDependencies": {
-    "@sinclair/typebox": "^0.34.48",
     "elysia": "^1.4.27",
     "reflect-metadata": "^0.2.2",
     "@apollo/server": "^5.4.0",

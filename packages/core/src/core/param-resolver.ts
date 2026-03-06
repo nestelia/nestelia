@@ -81,6 +81,12 @@ export async function resolveParam(
         return data
           ? elysiaContext.request.headers.get(data)
           : elysiaContext.request.headers;
+      case "cookies": {
+        const cookies = (elysiaContext as unknown as { cookie?: Record<string, { value: unknown }> }).cookie;
+        return data
+          ? cookies?.[data]?.value
+          : cookies;
+      }
       case "ip":
         return (
           elysiaContext.request.headers.get("x-forwarded-for") ||

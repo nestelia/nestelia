@@ -4,9 +4,7 @@ import type { ExecutionContext } from "../interfaces/execution-context.interface
 import { PARAMS_METADATA, ROUTE_METADATA } from "./constants";
 import type { ParamMetadata, RouteMetadata } from "./types";
 
-import type { TSchema } from "@sinclair/typebox";
-
-function isTypeBoxSchema(value: unknown): value is TSchema {
+function isTypeBoxSchema(value: unknown): value is object {
   return typeof value === "object" && value !== null && Symbol.for("TypeBox.Kind") in value;
 }
 
@@ -83,7 +81,7 @@ export function createParamDecorator(
 }
 
 function createSchemaParamDecorator(paramType: string) {
-  return (schema: TSchema): ParameterDecorator => {
+  return (schema: object): ParameterDecorator => {
     if (!isTypeBoxSchema(schema)) {
       throw new Error(`Schema is required for ${paramType} decorator`);
     }
@@ -115,16 +113,19 @@ function createSchemaParamDecorator(paramType: string) {
 }
 
 export const Body = createSchemaParamDecorator("body") as (
-  schema: TSchema,
+  schema: object,
 ) => ParameterDecorator;
 export const Param = createSchemaParamDecorator("param") as (
-  schema: TSchema,
+  schema: object,
 ) => ParameterDecorator;
 export const Query = createSchemaParamDecorator("query") as (
-  schema: TSchema,
+  schema: object,
 ) => ParameterDecorator;
 export const Headers = (property?: string): ParameterDecorator =>
   createParamDecorator("headers", property)();
+
+export const Cookies = (property?: string): ParameterDecorator =>
+  createParamDecorator("cookies", property)();
 
 export const Req = createParamDecorator("request");
 export const Request = Req;
