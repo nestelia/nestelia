@@ -4,7 +4,7 @@
 const Param: (schema) => ParameterDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/http.decorators.ts:121](https://github.com/kiyasov/elysia-nest/blob/main/packages/core/src/decorators/http.decorators.ts#L121)
+Defined in: [packages/core/src/decorators/http.decorators.ts:120](https://github.com/kiyasov/elysia-nest/blob/main/packages/core/src/decorators/http.decorators.ts#L120)
 
 ## Parameters
 

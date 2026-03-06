@@ -4,7 +4,7 @@
 const ElysiaContext: () => ParameterDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/http.decorators.ts:138](https://github.com/kiyasov/elysia-nest/blob/main/packages/core/src/decorators/http.decorators.ts#L138)
+Defined in: [packages/core/src/decorators/http.decorators.ts:137](https://github.com/kiyasov/elysia-nest/blob/main/packages/core/src/decorators/http.decorators.ts#L137)
 
 ## Returns
 
