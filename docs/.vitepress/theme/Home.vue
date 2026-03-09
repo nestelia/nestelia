@@ -55,7 +55,7 @@ const packages = [
     emoji: '⏰',
     desc: '@Cron, @Interval, @Timeout — task scheduling powered by node-cron.',
     gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-    link: '/nestelia/packages/scheduler',
+    link: '/packages/scheduler',
   },
   {
     name: 'Microservices',
@@ -63,7 +63,7 @@ const packages = [
     emoji: '🔗',
     desc: 'TCP and Redis transports with @MessagePattern and @EventPattern.',
     gradient: 'linear-gradient(135deg, #38bdf8, #6366f1)',
-    link: '/nestelia/packages/microservices',
+    link: '/packages/microservices',
   },
   {
     name: 'Apollo / GraphQL',
@@ -71,7 +71,7 @@ const packages = [
     emoji: '◈',
     desc: 'Code-first GraphQL with @Resolver, @Query, @Mutation, @Subscription.',
     gradient: 'linear-gradient(135deg, #e879f9, #6366f1)',
-    link: '/nestelia/packages/apollo',
+    link: '/packages/apollo',
   },
   {
     name: 'Passport',
@@ -79,7 +79,7 @@ const packages = [
     emoji: '🛂',
     desc: 'AuthGuard and PassportStrategy — drop-in authentication strategies.',
     gradient: 'linear-gradient(135deg, #22c55e, #06b6d4)',
-    link: '/nestelia/packages/passport',
+    link: '/packages/passport',
   },
   {
     name: 'Cache',
@@ -87,7 +87,7 @@ const packages = [
     emoji: '⚡',
     desc: 'CacheModule with @CacheKey, @CacheTTL and pluggable cache stores.',
     gradient: 'linear-gradient(135deg, #2dd4bf, #60a5fa)',
-    link: '/nestelia/packages/cache',
+    link: '/packages/cache',
   },
   {
     name: 'RabbitMQ',
@@ -95,7 +95,7 @@ const packages = [
     emoji: '🐇',
     desc: '@RabbitSubscribe and @RabbitRPC over AMQP via amqplib.',
     gradient: 'linear-gradient(135deg, #fb923c, #f43f5e)',
-    link: '/nestelia/packages/rabbitmq',
+    link: '/packages/rabbitmq',
   },
   {
     name: 'Testing',
@@ -103,7 +103,7 @@ const packages = [
     emoji: '🧪',
     desc: 'Test.createTestingModule — isolated module testing with mock providers.',
     gradient: 'linear-gradient(135deg, #818cf8, #e879f9)',
-    link: '/nestelia/packages/testing',
+    link: '/packages/testing',
   },
   {
     name: 'GraphQL PubSub',
@@ -111,7 +111,7 @@ const packages = [
     emoji: '📡',
     desc: 'Redis-backed PubSub for real-time GraphQL subscriptions.',
     gradient: 'linear-gradient(135deg, #c084fc, #fb7185)',
-    link: '/nestelia/packages/graphql-pubsub',
+    link: '/packages/graphql-pubsub',
   },
 ]
 

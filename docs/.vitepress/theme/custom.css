@@ -123,23 +123,6 @@ pre,
 }
 
 @media (min-width: 960px) {
-  /* Pull logo out of flow → it sits in the sidebar area */
-  .VPNavBar .title {
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-  }
-
-  /* Content fills full nav width; left-padding = sidebar width */
-  .VPNavBar .content {
-    padding-left: var(--vp-sidebar-width, 272px) !important;
-    padding-right: 28px !important;
-  }
-
   /* Center search, push nav/socials to the right */
   .VPNavBarSearch {
     flex: 1;
