@@ -217,8 +217,8 @@ app.listen(3000)
 
         <!-- CTAs -->
         <div class="hero-ctas">
-          <a class="cta-primary" href="/nestelia/introduction">Get Started</a>
-          <a class="cta-ghost"  href="/nestelia/getting-started/quick-start">Quick Start →</a>
+          <a class="cta-primary" href="/introduction">Get Started</a>
+          <a class="cta-ghost"  href="/getting-started/quick-start">Quick Start →</a>
         </div>
 
         <!-- Install command -->
