@@ -6,11 +6,11 @@ import pkg from "../package.json";
 export default defineConfig({
   title: "nestelia",
   description: "A modular, decorator-driven framework built on top of Elysia and Bun",
-  base: "/nestelia/",
+  base: "/",
   ignoreDeadLinks: true,
 
   head: [
-    ["link", { rel: "icon", href: "/nestelia/favicon.svg" }],
+    ["link", { rel: "icon", href: "/favicon.svg" }],
     [
       "link",
       {
