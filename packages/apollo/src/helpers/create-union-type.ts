@@ -38,7 +38,7 @@ export function createUnionType<
    * May return a type name string or a class constructor from the union.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  resolveType?: (value: any) => string | T[number] | null | undefined;
+  resolveType?: (value: any) => string | (new (...args: any[]) => object) | null | undefined;
   /** Description of the union type. */
   description?: string;
 }): new (...args: unknown[]) => InstanceType<T[number]> {
