@@ -1,6 +1,7 @@
 import { defineConfig } from "vitepress";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
+import pkg from "../package.json";
 
 export default defineConfig({
   title: "nestelia",
@@ -650,6 +651,9 @@ export default defineConfig({
   },
 
   vite: {
+    define: {
+      __PKG_VERSION__: JSON.stringify(pkg.version),
+    },
     plugins: [tailwindcss()],
     resolve: {
       alias: [

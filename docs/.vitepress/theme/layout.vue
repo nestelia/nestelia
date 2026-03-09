@@ -13,29 +13,18 @@ const enableTransitions = () =>
     window.matchMedia('(prefers-reduced-motion: no-preference)').matches
 
 provide('toggle-appearance', async ({ clientX: x, clientY: y }: MouseEvent) => {
-    if (!enableTransitions() || !window?.localStorage) {
+    if (!enableTransitions()) {
         darkTheme.value = !darkTheme.value
         return
     }
 
-    const lastSwitch = window.localStorage.getItem('theme-switch')
-    if (lastSwitch !== null && !isNaN(+lastSwitch)) {
-        const lastSwitchTime = +lastSwitch
-        if (Date.now() - lastSwitchTime > 3 * 60 * 1000) {
-            if (document.documentElement.classList.contains('-animated'))
-                document.documentElement.classList.remove('-animated')
-        } else {
-            document.documentElement.classList.add('-animated')
-        }
-    }
+    document.documentElement.style.setProperty('--vt-x', `${x}px`)
+    document.documentElement.style.setProperty('--vt-y', `${y}px`)
 
-    window.localStorage.setItem('theme-switch', Date.now().toString())
-
-    if (document.startViewTransition !== undefined)
-        await document.startViewTransition(async () => {
-            darkTheme.value = !darkTheme.value
-            await nextTick()
-        }).ready
+    await document.startViewTransition(async () => {
+        darkTheme.value = !darkTheme.value
+        await nextTick()
+    }).ready
 })
 
 const onNewPage = () => {
@@ -65,16 +54,6 @@ router.onAfterRouteChange = () => {
 </template>
 
 <style>
-:root {
-    --switch-duration: 1.75s;
-    --switch-name: scale;
-}
-
-.-animated {
-    --switch-duration: 1s;
-    --switch-name: scale-fast;
-}
-
 .VPSwitchAppearance {
     width: 22px !important;
 }
