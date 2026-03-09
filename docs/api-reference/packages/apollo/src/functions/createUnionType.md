@@ -19,10 +19,10 @@ The returned class can be used as a `@Field(() => UnionType)` type.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options` | \{ `description?`: `string`; `name`: `string`; `resolveType?`: (`value`) => `string` \| `T`\[`number`\] \| `null` \| `undefined`; `types`: () => `T`; \} | Union type configuration. |
+| `options` | \{ `description?`: `string`; `name`: `string`; `resolveType?`: (`value`) => `string` \| (...`args`) => `object` \| `null` \| `undefined`; `types`: () => `T`; \} | Union type configuration. |
 | `options.description?` | `string` | Description of the union type. |
 | `options.name` | `string` | Name of the union type in the GraphQL schema. |
-| `options.resolveType?` | (`value`) => `string` \| `T`\[`number`\] \| `null` \| `undefined` | Function to determine the concrete type of a resolved value. May return a type name string or a class constructor from the union. |
+| `options.resolveType?` | (`value`) => `string` \| (...`args`) => `object` \| `null` \| `undefined` | Function to determine the concrete type of a resolved value. May return a type name string or a class constructor from the union. |
 | `options.types` | () => `T` | Factory function returning array of types in the union. |
 
 ## Returns

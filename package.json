@@ -1,6 +1,6 @@
 {
   "name": "@kiyasov/elysia-nest",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "Modular framework with decorators, dependency injection, modules and lifecycle hooks for Elysia",
   "type": "module",
   "author": {
