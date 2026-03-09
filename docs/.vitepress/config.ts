@@ -29,8 +29,8 @@ export default defineConfig({
 
   themeConfig: {
     logo: {
-      light: "/logo/light.svg",
-      dark: "/logo/dark.svg",
+      light: { src: "/logo/light.svg", width: 120, height: 24 },
+      dark: { src: "/logo/dark.svg", width: 120, height: 24 },
     },
 
     // SVG logo already contains "nestelia" text — hide the duplicate title
