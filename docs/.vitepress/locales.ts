@@ -1,0 +1,276 @@
+import { arSection, docSection } from "./sidebar-helpers";
+
+// ── API reference sidebar (shared, language-agnostic) ─────────────────────────
+
+export const apiSidebar = [
+  arSection("Overview", [["Index", "index/README"]]),
+  arSection("Decorators", [
+    ["Module",               "index/functions/Module"],
+    ["Controller",           "index/functions/Controller"],
+    ["Global",               "index/functions/Global"],
+    ["Injectable",           "index/functions/Injectable"],
+    ["Inject",               "index/functions/Inject"],
+    ["Optional",             "index/functions/Optional"],
+    ["Catch",                "index/functions/Catch"],
+    ["Header",               "index/functions/Header"],
+    ["HttpCode",             "index/functions/HttpCode"],
+    ["Middleware",           "index/functions/Middleware"],
+    ["Schema",               "index/functions/Schema"],
+    ["SetMetadata",          "index/functions/SetMetadata"],
+    ["UseGuards",            "index/functions/UseGuards"],
+    ["UseInterceptors",      "index/functions/UseInterceptors"],
+    ["applyDecorators",      "index/functions/applyDecorators"],
+    ["createParamDecorator", "index/functions/createParamDecorator"],
+  ]),
+  arSection("HTTP Methods", [
+    ["Get",     "index/variables/Get"],
+    ["Post",    "index/variables/Post"],
+    ["Put",     "index/variables/Put"],
+    ["Patch",   "index/variables/Patch"],
+    ["Delete",  "index/variables/Delete"],
+    ["All",     "index/variables/All"],
+    ["Head",    "index/variables/Head"],
+    ["Options", "index/variables/Options"],
+  ]),
+  arSection("Parameter Decorators", [
+    ["Body",     "index/variables/Body"],
+    ["Param",    "index/variables/Param"],
+    ["Query",    "index/variables/Query"],
+    ["Headers",  "index/variables/Headers"],
+    ["Req",      "index/variables/Req"],
+    ["Request",  "index/variables/Request"],
+    ["Res",      "index/variables/Res"],
+    ["Response", "index/variables/Response"],
+    ["Ip",       "index/variables/Ip"],
+    ["Ctx",      "index/variables/Ctx"],
+    ["Session",  "index/variables/Session"],
+  ]),
+  arSection("Exceptions", [
+    ["HttpException",         "index/classes/HttpException"],
+    ["BadRequestException",   "index/classes/BadRequestException"],
+    ["ForbiddenException",    "index/classes/ForbiddenException"],
+    ["NotFoundException",     "index/classes/NotFoundException"],
+    ["UnauthorizedException", "index/classes/UnauthorizedException"],
+  ]),
+  arSection("Classes", [
+    ["Logger",                    "index/classes/Logger"],
+    ["ConsoleLogger",             "index/classes/ConsoleLogger"],
+    ["ModuleRef",                 "index/classes/ModuleRef"],
+    ["Reflector",                 "index/classes/Reflector"],
+    ["Container",                 "index/classes/Container"],
+    ["HttpAdapterHost",           "index/classes/HttpAdapterHost"],
+    ["StreamableFile",            "index/classes/StreamableFile"],
+    ["ConfigurableModuleBuilder", "index/classes/ConfigurableModuleBuilder"],
+  ]),
+  arSection("Interfaces", [
+    ["CanActivate",               "index/interfaces/CanActivate"],
+    ["ExceptionFilter",           "index/interfaces/ExceptionFilter"],
+    ["PipeTransform",             "index/interfaces/PipeTransform"],
+    ["NestInterceptor",           "index/interfaces/NestInterceptor"],
+    ["CallHandler",               "index/interfaces/CallHandler"],
+    ["ExecutionContext",          "index/interfaces/ExecutionContext"],
+    ["ElysiaNestMiddleware",      "index/interfaces/ElysiaNestMiddleware"],
+    ["ModuleMetadata",            "index/interfaces/ModuleMetadata"],
+    ["DynamicModule",             "index/interfaces/DynamicModule"],
+    ["OnModuleInit",              "index/interfaces/OnModuleInit"],
+    ["OnApplicationBootstrap",    "index/interfaces/OnApplicationBootstrap"],
+    ["OnModuleDestroy",           "index/interfaces/OnModuleDestroy"],
+    ["BeforeApplicationShutdown", "index/interfaces/BeforeApplicationShutdown"],
+  ]),
+  arSection("Enumerations", [
+    ["HttpStatus", "index/enumerations/HttpStatus"],
+    ["Scope",      "index/enumerations/Scope"],
+  ]),
+  arSection("Application", [
+    ["createElysiaApplication",  "index/functions/createElysiaApplication"],
+    ["createElysiaPlugin",       "index/functions/createElysiaPlugin"],
+    ["addGlobalExceptionFilter", "index/functions/addGlobalExceptionFilter"],
+    ["forwardRef",               "index/functions/forwardRef"],
+  ]),
+  arSection("Scheduler", [
+    ["README",            "packages/scheduler/src/README"],
+    ["ScheduleModule",    "packages/scheduler/src/classes/ScheduleModule"],
+    ["SchedulerRegistry", "packages/scheduler/src/classes/SchedulerRegistry"],
+    ["CronExpressions",   "packages/scheduler/src/classes/CronExpressions"],
+    ["@Cron",             "packages/scheduler/src/functions/Cron"],
+    ["@Interval",         "packages/scheduler/src/functions/Interval"],
+    ["@Timeout",          "packages/scheduler/src/functions/Timeout"],
+    ["@ScheduleAt",       "packages/scheduler/src/functions/ScheduleAt"],
+  ]),
+  arSection("Microservices", [
+    ["README",                "packages/microservices/README"],
+    ["ElysiaNestApplication", "packages/microservices/classes/ElysiaNestApplication"],
+    ["ClientProxy",           "packages/microservices/classes/ClientProxy"],
+    ["BaseServer",            "packages/microservices/classes/BaseServer"],
+    ["TcpClient",             "packages/microservices/classes/TcpClient"],
+    ["TcpServer",             "packages/microservices/classes/TcpServer"],
+    ["RedisClient",           "packages/microservices/classes/RedisClient"],
+    ["RedisServer",           "packages/microservices/classes/RedisServer"],
+    ["Transport",             "packages/microservices/enumerations/Transport"],
+  ]),
+  arSection("Apollo / GraphQL", [
+    ["README",        "packages/apollo/src/README"],
+    ["GraphQLModule", "packages/apollo/src/classes/GraphQLModule"],
+    ["@Resolver",     "packages/apollo/src/functions/Resolver"],
+    ["@Query",        "packages/apollo/src/functions/Query"],
+    ["@Mutation",     "packages/apollo/src/functions/Mutation"],
+    ["@Subscription", "packages/apollo/src/functions/Subscription"],
+    ["@ObjectType",   "packages/apollo/src/functions/ObjectType"],
+    ["@Field",        "packages/apollo/src/functions/Field"],
+    ["@Args",         "packages/apollo/src/functions/Args"],
+  ]),
+  arSection("Passport", [
+    ["README",           "packages/passport/src/README"],
+    ["AuthGuard",        "packages/passport/src/functions/AuthGuard"],
+    ["PassportStrategy", "packages/passport/src/functions/PassportStrategy"],
+  ]),
+  arSection("Cache", [
+    ["README",           "packages/cache/src/README"],
+    ["CacheModule",      "packages/cache/src/classes/CacheModule"],
+    ["Cache",            "packages/cache/src/classes/Cache"],
+    ["CacheInterceptor", "packages/cache/src/classes/CacheInterceptor"],
+    ["@CacheKey",        "packages/cache/src/functions/CacheKey"],
+    ["@CacheTTL",        "packages/cache/src/functions/CacheTTL"],
+  ]),
+  arSection("RabbitMQ", [
+    ["README",           "packages/rabbitmq/src/README"],
+    ["RabbitMQModule",   "packages/rabbitmq/src/classes/RabbitMQModule"],
+    ["AmqpConnection",   "packages/rabbitmq/src/classes/AmqpConnection"],
+    ["@RabbitSubscribe", "packages/rabbitmq/src/functions/RabbitSubscribe"],
+    ["@RabbitRPC",       "packages/rabbitmq/src/functions/RabbitRPC"],
+  ]),
+  arSection("GraphQL PubSub", [
+    ["README",              "packages/graphql-pubsub/src/README"],
+    ["GraphQLPubSubModule", "packages/graphql-pubsub/src/classes/GraphQLPubSubModule"],
+    ["RedisPubSub",         "packages/graphql-pubsub/src/classes/RedisPubSub"],
+  ]),
+  arSection("Testing", [
+    ["README",               "packages/testing/src/README"],
+    ["Test",                 "packages/testing/src/classes/Test"],
+    ["TestingModule",        "packages/testing/src/classes/TestingModule"],
+    ["TestingModuleBuilder", "packages/testing/src/classes/TestingModuleBuilder"],
+  ]),
+];
+
+// ── English locale ────────────────────────────────────────────────────────────
+
+const enDocs = [
+  docSection("Getting Started", [
+    ["Introduction", "introduction"],
+    ["Installation", "getting-started/installation"],
+    ["Quick Start",  "getting-started/quick-start"],
+  ]),
+  docSection("Core Concepts", [
+    ["Modules",      "core-concepts/modules"],
+    ["Controllers",  "core-concepts/controllers"],
+    ["Bootstrap",    "core-concepts/bootstrap"],
+  ]),
+  docSection("Features", [
+    ["HTTP Decorators",      "features/http-decorators"],
+    ["Parameter Decorators", "features/parameter-decorators"],
+    ["Dependency Injection", "features/dependency-injection"],
+    ["Lifecycle Hooks",      "features/lifecycle-hooks"],
+    ["Middleware",           "features/middleware"],
+    ["Exception Handling",   "features/exception-handling"],
+    ["Guards",               "features/guards"],
+    ["Interceptors",         "features/interceptors"],
+    ["Pipes",                "features/pipes"],
+  ]),
+  docSection("Packages", [
+    ["Overview",         "packages/overview"],
+    ["Scheduler",        "packages/scheduler"],
+    ["Microservices",    "packages/microservices"],
+    ["Apollo / GraphQL", "packages/apollo"],
+    ["Passport",         "packages/passport"],
+    ["Testing",          "packages/testing"],
+    ["Cache",            "packages/cache"],
+    ["RabbitMQ",         "packages/rabbitmq"],
+    ["GraphQL PubSub",   "packages/graphql-pubsub"],
+  ]),
+  docSection("Advanced", [
+    ["Custom Providers",   "advanced/custom-providers"],
+    ["Forward References", "advanced/forward-ref"],
+    ["Container API",      "advanced/container-api"],
+    ["Swagger",            "advanced/swagger"],
+  ]),
+];
+
+export const enLocale = {
+  label: "English",
+  lang: "en-US",
+  themeConfig: {
+    nav: [
+      { text: "Documentation", link: "/introduction" },
+      { text: "API Reference", link: "/api-reference/index/README" },
+      { text: "GitHub",        link: "https://github.com/kiyasov/nestelia" },
+    ],
+    sidebar: { "/": enDocs, "/api-reference/": apiSidebar },
+    editLink: {
+      pattern: "https://github.com/kiyasov/nestelia/edit/main/docs/:path",
+      text: "Edit this page on GitHub",
+    },
+    footer: { message: "Released under the MIT License." },
+  },
+};
+
+// ── Russian locale ────────────────────────────────────────────────────────────
+
+const ruDocs = [
+  docSection("Начало работы", [
+    ["Введение",      "introduction"],
+    ["Установка",     "getting-started/installation"],
+    ["Быстрый старт", "getting-started/quick-start"],
+  ], "/ru"),
+  docSection("Основные концепции", [
+    ["Модули",      "core-concepts/modules"],
+    ["Контроллеры", "core-concepts/controllers"],
+    ["Bootstrap",   "core-concepts/bootstrap"],
+  ], "/ru"),
+  docSection("Возможности", [
+    ["HTTP Декораторы",        "features/http-decorators"],
+    ["Декораторы параметров",  "features/parameter-decorators"],
+    ["Внедрение зависимостей", "features/dependency-injection"],
+    ["Lifecycle Hooks",        "features/lifecycle-hooks"],
+    ["Middleware",             "features/middleware"],
+    ["Обработка исключений",   "features/exception-handling"],
+    ["Guards",                 "features/guards"],
+    ["Interceptors",           "features/interceptors"],
+    ["Pipes",                  "features/pipes"],
+  ], "/ru"),
+  docSection("Пакеты", [
+    ["Обзор",            "packages/overview"],
+    ["Scheduler",        "packages/scheduler"],
+    ["Microservices",    "packages/microservices"],
+    ["Apollo / GraphQL", "packages/apollo"],
+    ["Passport",         "packages/passport"],
+    ["Testing",          "packages/testing"],
+    ["Cache",            "packages/cache"],
+    ["RabbitMQ",         "packages/rabbitmq"],
+    ["GraphQL PubSub",   "packages/graphql-pubsub"],
+  ], "/ru"),
+  docSection("Продвинутые темы", [
+    ["Пользовательские провайдеры", "advanced/custom-providers"],
+    ["Forward References",          "advanced/forward-ref"],
+    ["Container API",               "advanced/container-api"],
+    ["Swagger",                     "advanced/swagger"],
+  ], "/ru"),
+];
+
+export const ruLocale = {
+  label: "Русский",
+  lang: "ru-RU",
+  link: "/ru/",
+  themeConfig: {
+    nav: [
+      { text: "Документация", link: "/ru/introduction" },
+      { text: "API Reference", link: "/api-reference/index/README" },
+      { text: "GitHub",        link: "https://github.com/kiyasov/nestelia" },
+    ],
+    sidebar: { "/ru/": ruDocs, "/api-reference/": apiSidebar },
+    editLink: {
+      pattern: "https://github.com/kiyasov/nestelia/edit/main/docs/:path",
+      text: "Редактировать на GitHub",
+    },
+    footer: { message: "Распространяется по лицензии MIT." },
+  },
+};

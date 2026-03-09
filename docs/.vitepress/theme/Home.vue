@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useHomeI18n } from './home-i18n'
 
 declare const __PKG_VERSION__: string
 
 const copied = ref(false)
 const version = __PKG_VERSION__
+const t = useHomeI18n()
 
 async function copyInstall() {
   await navigator.clipboard.writeText('bun add nestelia')
@@ -49,81 +51,18 @@ function hl(code: string): string {
 
 
 const packages = [
-  {
-    name: 'Scheduler',
-    import: 'nestelia/scheduler',
-    emoji: '⏰',
-    desc: '@Cron, @Interval, @Timeout — task scheduling powered by node-cron.',
-    gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)',
-    link: '/packages/scheduler',
-  },
-  {
-    name: 'Microservices',
-    import: 'nestelia/microservices',
-    emoji: '🔗',
-    desc: 'TCP and Redis transports with @MessagePattern and @EventPattern.',
-    gradient: 'linear-gradient(135deg, #38bdf8, #6366f1)',
-    link: '/packages/microservices',
-  },
-  {
-    name: 'Apollo / GraphQL',
-    import: 'nestelia/apollo',
-    emoji: '◈',
-    desc: 'Code-first GraphQL with @Resolver, @Query, @Mutation, @Subscription.',
-    gradient: 'linear-gradient(135deg, #e879f9, #6366f1)',
-    link: '/packages/apollo',
-  },
-  {
-    name: 'Passport',
-    import: 'nestelia/passport',
-    emoji: '🛂',
-    desc: 'AuthGuard and PassportStrategy — drop-in authentication strategies.',
-    gradient: 'linear-gradient(135deg, #22c55e, #06b6d4)',
-    link: '/packages/passport',
-  },
-  {
-    name: 'Cache',
-    import: 'nestelia/cache',
-    emoji: '⚡',
-    desc: 'CacheModule with @CacheKey, @CacheTTL and pluggable cache stores.',
-    gradient: 'linear-gradient(135deg, #2dd4bf, #60a5fa)',
-    link: '/packages/cache',
-  },
-  {
-    name: 'RabbitMQ',
-    import: 'nestelia/rabbitmq',
-    emoji: '🐇',
-    desc: '@RabbitSubscribe and @RabbitRPC over AMQP via amqplib.',
-    gradient: 'linear-gradient(135deg, #fb923c, #f43f5e)',
-    link: '/packages/rabbitmq',
-  },
-  {
-    name: 'Testing',
-    import: 'nestelia/testing',
-    emoji: '🧪',
-    desc: 'Test.createTestingModule — isolated module testing with mock providers.',
-    gradient: 'linear-gradient(135deg, #818cf8, #e879f9)',
-    link: '/packages/testing',
-  },
-  {
-    name: 'GraphQL PubSub',
-    import: 'nestelia/graphql-pubsub',
-    emoji: '📡',
-    desc: 'Redis-backed PubSub for real-time GraphQL subscriptions.',
-    gradient: 'linear-gradient(135deg, #c084fc, #fb7185)',
-    link: '/packages/graphql-pubsub',
-  },
+  { name: 'Scheduler',        import: 'nestelia/scheduler',        emoji: '⏰', gradient: 'linear-gradient(135deg, #f59e0b, #ef4444)', link: '/packages/scheduler' },
+  { name: 'Microservices',    import: 'nestelia/microservices',    emoji: '🔗', gradient: 'linear-gradient(135deg, #38bdf8, #6366f1)', link: '/packages/microservices' },
+  { name: 'Apollo / GraphQL', import: 'nestelia/apollo',           emoji: '◈',  gradient: 'linear-gradient(135deg, #e879f9, #6366f1)', link: '/packages/apollo' },
+  { name: 'Passport',         import: 'nestelia/passport',         emoji: '🛂', gradient: 'linear-gradient(135deg, #22c55e, #06b6d4)', link: '/packages/passport' },
+  { name: 'Cache',            import: 'nestelia/cache',            emoji: '⚡', gradient: 'linear-gradient(135deg, #2dd4bf, #60a5fa)', link: '/packages/cache' },
+  { name: 'RabbitMQ',         import: 'nestelia/rabbitmq',         emoji: '🐇', gradient: 'linear-gradient(135deg, #fb923c, #f43f5e)', link: '/packages/rabbitmq' },
+  { name: 'Testing',          import: 'nestelia/testing',          emoji: '🧪', gradient: 'linear-gradient(135deg, #818cf8, #e879f9)', link: '/packages/testing' },
+  { name: 'GraphQL PubSub',   import: 'nestelia/graphql-pubsub',   emoji: '📡', gradient: 'linear-gradient(135deg, #c084fc, #fb7185)', link: '/packages/graphql-pubsub' },
 ]
 
-const showcase = [
-  {
-    title: 'Decorator-driven Routing',
-    paragraphs: [
-      '@Controller, @Get, @Post, @Body and more — a clean, declarative decorator API running natively on Elysia.',
-      'Nestelia maps each decorated route directly to an Elysia handler, giving you full type inference and schema validation at the framework layer.',
-    ],
-    filename: 'users.controller.ts',
-    code: hl(`import { Controller, Get, Post, Body } from 'nestelia'
+const showcaseFiles = [
+  { filename: 'users.controller.ts', code: hl(`import { Controller, Get, Post, Body } from 'nestelia'
 import { CreateUserDto } from './dto'
 
 @Controller('/users')
@@ -138,16 +77,8 @@ export class UsersController {
   create(@Body() dto: CreateUserDto) {
     return dto
   }
-}`),
-  },
-  {
-    title: 'Dependency Injection',
-    paragraphs: [
-      'Constructor-based DI with singleton, transient, and request scopes powered by reflect-metadata.',
-      'Mark any class with @Injectable() and declare it as a provider — nestelia resolves the full dependency graph automatically at bootstrap.',
-    ],
-    filename: 'users.service.ts',
-    code: hl(`import { Injectable } from 'nestelia'
+}`) },
+  { filename: 'users.service.ts', code: hl(`import { Injectable } from 'nestelia'
 
 @Injectable()
 export class UsersService {
@@ -161,24 +92,15 @@ export class UsersService {
     this.users.push(dto)
     return dto
   }
-}`),
-  },
-  {
-    title: 'Modular Architecture',
-    paragraphs: [
-      'Encapsulate controllers, providers, and imports into cohesive, reusable modules with a clear, explicit structure.',
-      'One call to createElysiaApplication wires up the entire dependency graph and returns a ready Elysia instance.',
-    ],
-    filename: 'main.ts',
-    code: hl(`import 'reflect-metadata'
+}`) },
+  { filename: 'main.ts', code: hl(`import 'reflect-metadata'
 import { createElysiaApplication } from 'nestelia'
 import { AppModule } from './app.module'
 
 const app = await createElysiaApplication(AppModule)
 
 app.listen(3000)
-// Listening on http://localhost:3000`),
-  },
+// Listening on http://localhost:3000`) },
 ]
 </script>
 
@@ -200,36 +122,36 @@ app.listen(3000)
           rel="noopener noreferrer"
         >
           <span class="pill-dot" />
-          v{{ version }} released
+          v{{ version }} {{ t.pill.released }}
           <span class="pill-sep">·</span>
-          View on GitHub
+          {{ t.pill.github }}
           <span class="pill-arrow">↗</span>
         </a>
 
         <!-- Main title -->
-        <h1 class="hero-title">nestelia</h1>
+        <h1 class="hero-title">Nestelia</h1>
 
         <!-- Tagline -->
         <p class="hero-tagline">
-          Modular framework for Elysia and Bun.<br>
-          Decorators · DI · Modules · Elysia speed.
+          {{ t.tagline[0] }}<br>
+          {{ t.tagline[1] }}
         </p>
 
         <!-- CTAs -->
         <div class="hero-ctas">
-          <a class="cta-primary" href="/introduction">Get Started</a>
-          <a class="cta-ghost"  href="/getting-started/quick-start">Quick Start →</a>
+          <a class="cta-primary" :href="t.links.intro">{{ t.cta.start }}</a>
+          <a class="cta-ghost"  :href="t.links.quick">{{ t.cta.quick }}</a>
         </div>
 
         <!-- Install command -->
         <button
           class="install"
-          :aria-label="copied ? 'Copied!' : 'Copy install command'"
+          :aria-label="copied ? t.copy.done : t.copy.idle"
           @click="copyInstall"
         >
           <span class="install-prompt">$</span>
           <code class="install-text">bun add nestelia</code>
-          <span class="install-badge">{{ copied ? 'Copied!' : 'Copy' }}</span>
+          <span class="install-badge">{{ copied ? t.copy.done : t.copy.idle }}</span>
         </button>
 
       </div>
@@ -239,21 +161,21 @@ app.listen(3000)
     <section class="showcase">
       <div class="showcase-inner">
         <div
-          v-for="(item, i) in showcase"
-          :key="item.title"
+          v-for="(sf, i) in showcaseFiles"
+          :key="sf.filename"
           class="showcase-item"
         >
           <!-- Timeline column -->
           <div class="s-timeline" aria-hidden="true">
             <div class="s-dot" />
-            <div v-if="i < showcase.length - 1" class="s-line" />
+            <div v-if="i < showcaseFiles.length - 1" class="s-line" />
           </div>
 
           <!-- Content: text + code -->
           <div class="s-content">
             <div class="s-text">
-              <h2 class="s-title">{{ item.title }}</h2>
-              <p v-for="p in item.paragraphs" :key="p" class="s-para">{{ p }}</p>
+              <h2 class="s-title">{{ t.showcase[i].title }}</h2>
+              <p v-for="para in t.showcase[i].paragraphs" :key="para" class="s-para">{{ para }}</p>
             </div>
 
             <div class="s-code-wrap">
@@ -261,9 +183,9 @@ app.listen(3000)
                 <span class="s-code-dot" style="background:#ff5f57" />
                 <span class="s-code-dot" style="background:#febc2e" />
                 <span class="s-code-dot" style="background:#28c840" />
-                <span class="s-code-filename">{{ item.filename }}</span>
+                <span class="s-code-filename">{{ sf.filename }}</span>
               </div>
-              <pre class="s-pre"><code v-html="item.code" /></pre>
+              <pre class="s-pre"><code v-html="sf.code" /></pre>
             </div>
           </div>
         </div>
@@ -274,8 +196,8 @@ app.listen(3000)
     <section class="pkg-section">
       <div class="pkg-inner">
         <div class="section-header">
-          <h2 class="section-title">Ecosystem</h2>
-          <p class="section-sub">Optional packages — install only what you need.</p>
+          <h2 class="section-title">{{ t.ecosystem.title }}</h2>
+          <p class="section-sub">{{ t.ecosystem.sub }}</p>
         </div>
         <div class="pkg-grid">
           <a
@@ -290,7 +212,7 @@ app.listen(3000)
                 <span class="pkg-name">{{ p.name }}</span>
                 <code class="pkg-import">{{ p.import }}</code>
               </div>
-              <p class="pkg-desc">{{ p.desc }}</p>
+              <p class="pkg-desc">{{ t.packages[p.name] }}</p>
             </div>
           </a>
         </div>

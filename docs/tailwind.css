@@ -1331,3 +1331,32 @@ div[class*='language-'] {
     width: 120px !important;
     height: 24px !important;
 }
+
+/* Show current language code in the translations button */
+.VPNavBarTranslations .text::after {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    margin-left: 2px;
+}
+
+html[lang="en-US"] .VPNavBarTranslations .text::after {
+    content: "EN";
+}
+
+html[lang="ru-RU"] .VPNavBarTranslations .text::after {
+    content: "RU";
+}
+
+/* Current language label */
+.VPNavBarTranslations .items .title {
+    color: var(--vp-c-brand-1) !important;
+    font-weight: 700 !important;
+    background: none;
+}
+
+/* Inactive language hover — neutral, no brand color */
+.VPNavBarTranslations .VPMenuLink .link:hover {
+    color: var(--vp-c-text-1) !important;
+    background-color: var(--vp-c-default-soft) !important;
+}
