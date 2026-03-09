@@ -324,7 +324,7 @@ export class SchemaBuilder {
 
       const ownerName = this.getFieldOwnerName(f.target);
       result[f.name] = {
-        type: this.resolveOutputType(f.typeFn, f.nullable, `${ownerName}.${f.name}`),
+        type: this.resolveOutputType(f.typeFn, f.nullable, `${ownerName}.${f.name}`, f.sourceLocation),
         description: f.description,
         deprecationReason: f.deprecationReason,
         resolve: (parent: unknown) => {
@@ -458,7 +458,7 @@ export class SchemaBuilder {
     for (const f of fields) {
       const ownerName = this.getFieldOwnerName(f.target);
       result[f.name] = {
-        type: this.resolveInputType(f.typeFn, f.nullable, `${ownerName}.${f.name}`),
+        type: this.resolveInputType(f.typeFn, f.nullable, `${ownerName}.${f.name}`, f.sourceLocation),
         description: f.description,
         deprecationReason: f.deprecationReason,
         defaultValue: f.defaultValue,
@@ -535,18 +535,20 @@ export class SchemaBuilder {
     typeFn: (() => unknown) | undefined,
     nullable?: boolean,
     fieldContext?: string,
+    sourceLocation?: string,
   ): GraphQLOutputType {
     const raw = typeFn ? typeFn() : undefined;
-    return this.resolveScalarOrRef(raw, nullable, fieldContext) as GraphQLOutputType;
+    return this.resolveScalarOrRef(raw, nullable, fieldContext, sourceLocation) as GraphQLOutputType;
   }
 
   private resolveInputType(
     typeFn: (() => unknown) | undefined,
     nullable?: boolean,
     fieldContext?: string,
+    sourceLocation?: string,
   ): GraphQLInputType {
     const raw = typeFn ? typeFn() : undefined;
-    return this.resolveScalarOrRef(raw, nullable, fieldContext) as GraphQLInputType;
+    return this.resolveScalarOrRef(raw, nullable, fieldContext, sourceLocation) as GraphQLInputType;
   }
 
   /**
@@ -557,9 +559,10 @@ export class SchemaBuilder {
     value: unknown,
     nullable: boolean | undefined,
     fieldContext?: string,
+    sourceLocation?: string,
   ): GraphQLOutputType | GraphQLInputType {
     if (Array.isArray(value)) {
-      const inner = this.resolveScalarOrRef(value[0], false, fieldContext);
+      const inner = this.resolveScalarOrRef(value[0], false, fieldContext, sourceLocation);
       const list = new GraphQLList(
         inner as GraphQLOutputType & GraphQLInputType,
       );
@@ -665,8 +668,10 @@ export class SchemaBuilder {
           gqlType = known as GraphQLOutputType;
         } else {
           const typeName = ctor.name ?? String(ctor);
+          const loc1 = fieldContext ? ` on field "${fieldContext}"` : "";
+          const src1 = sourceLocation ? ` (defined at ${sourceLocation})` : "";
           throw new Error(
-            `[GraphQL] Cannot determine GraphQL type for "${typeName}". ` +
+            `[GraphQL] Cannot determine GraphQL type for "${typeName}"${loc1}${src1}. ` +
               `Provide an explicit type factory: @Field(() => ${typeName}). ` +
               `If this is an enum, make sure to call registerEnumType(${typeName}, { name: '${typeName}' }).`,
           );
@@ -681,15 +686,18 @@ export class SchemaBuilder {
         enumMeta?.name ??
         (value as { name?: string }).name ??
         String(value);
+      const loc2 = fieldContext ? ` on field "${fieldContext}"` : "";
+      const src2 = sourceLocation ? ` (defined at ${sourceLocation})` : "";
       throw new Error(
-        `[GraphQL] Cannot determine GraphQL type for "${typeName}". ` +
+        `[GraphQL] Cannot determine GraphQL type for "${typeName}"${loc2}${src2}. ` +
           `If this is an enum, call registerEnumType(${typeName}, { name: '${typeName}' }) ` +
           `and use @Field(() => ${typeName}).`,
       );
     } else {
       const location = fieldContext ? ` on field "${fieldContext}"` : "";
+      const src3 = sourceLocation ? ` (defined at ${sourceLocation})` : "";
       throw new Error(
-        `[GraphQL] @Field() type could not be inferred${location}. ` +
+        `[GraphQL] @Field() type could not be inferred${location}${src3}. ` +
           `Provide an explicit type factory: @Field(() => YourType).`,
       );
     }
