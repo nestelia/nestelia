@@ -30,12 +30,19 @@ describe("BooksResolver", () => {
     expect(resolver.book(999)).toBeNull();
   });
 
-  it("adds a book", () => {
+  it("adds a book with default publishedAt", () => {
     const book = resolver.addBook("Brave New World", "Aldous Huxley");
     expect(book.title).toBe("Brave New World");
     expect(book.author).toBe("Aldous Huxley");
     expect(book.id).toBe(3);
+    expect(book.publishedAt).toBeInstanceOf(Date);
     expect(resolver.books()).toHaveLength(3);
+  });
+
+  it("adds a book with explicit publishedAt", () => {
+    const date = new Date("2000-01-01");
+    const book = resolver.addBook("Book", "Author", date);
+    expect(book.publishedAt).toEqual(date);
   });
 
   it("assigns incrementing ids to added books", () => {

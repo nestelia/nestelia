@@ -1,4 +1,11 @@
-import { Field, Int, ObjectType } from "../../../packages/apollo/src";
+import {
+  Field,
+  GraphQLDateTime,
+  GraphQLJSON,
+  GraphQLURL,
+  Int,
+  ObjectType,
+} from "../../../packages/apollo/src";
 
 @ObjectType()
 export class Book {
@@ -10,4 +17,13 @@ export class Book {
 
   @Field(() => String)
   author!: string;
+
+  @Field(() => GraphQLDateTime)
+  publishedAt!: Date;
+
+  @Field(() => GraphQLURL, { nullable: true })
+  coverUrl?: string;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata?: Record<string, unknown>;
 }

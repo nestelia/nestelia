@@ -28,6 +28,12 @@ export * from "./upload";
 // Compatibility alias
 export { FieldResolver as ResolveField } from "./decorators";
 
+/** Built-in custom scalars: GraphQLDateTime, GraphQLJSON, GraphQLURL, GraphQLBigInt, GraphQLEmailAddress, GraphQLUUID. */
+export * from "./scalars";
+
+/** Pagination helpers: PageInfo, Paginated, createEdgeType, createConnectionType. */
+export * from "./pagination";
+
 // Re-export common GraphQL types
 export {
   GraphQLBoolean,
@@ -40,3 +46,4 @@ export {
   GraphQLSchema,
   GraphQLString,
 } from "graphql";
+

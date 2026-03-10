@@ -15,6 +15,7 @@
 | [GraphQLSchema](classes/GraphQLSchema.md) | Schema Definition |
 | [ID](classes/ID.md) | Marker class for GraphQL ID scalar. Use with @Field(() => ID). |
 | [Int](classes/Int.md) | Marker class for GraphQL Int scalar. Use with @Field(() => Int). |
+| [PageInfo](classes/PageInfo.md) | Standard Relay-style PageInfo object. Included in every Connection type. |
 | [SchemaBuilder](classes/SchemaBuilder.md) | Builds a GraphQL schema from decorator metadata stored in [typeMetadataStorage](variables/typeMetadataStorage.md). Follows the code-first schema generation pattern. |
 | [TypeMetadataStorage](classes/TypeMetadataStorage.md) | Global storage for GraphQL type metadata. Fields are stored separately from type declarations. globalThis ensures a single instance even with symlink-based module resolution. |
 | [UserInputError](classes/UserInputError.md) | Error thrown when the user input is invalid. |
@@ -27,6 +28,8 @@
 | [Args](functions/Args.md) | Decorator for resolver arguments. |
 | [ArgsType](functions/ArgsType.md) | ArgsType decorator for marking classes as GraphQL arguments DTOs. |
 | [Context](functions/Context.md) | Decorator for the GraphQL context. Provides access to the GraphQL request context. |
+| [createConnectionType](functions/createConnectionType.md) | Creates a Relay-style Connection type for a given node class. Fields: `edges`, `pageInfo`, `totalCount`. |
+| [createEdgeType](functions/createEdgeType.md) | Creates a Relay-style Edge type for a given node class. Fields: `node`, `cursor`. |
 | [createUnionType](functions/createUnionType.md) | createUnionType function for creating GraphQL union types. |
 | [Directive](functions/Directive.md) | Decorator for GraphQL Directive. |
 | [Enum](functions/Enum.md) | Decorator for GraphQL Enum. |
@@ -37,6 +40,7 @@
 | [InterfaceType](functions/InterfaceType.md) | Decorator for GraphQL Interface. |
 | [Mutation](functions/Mutation.md) | Decorator for a GraphQL Mutation. |
 | [ObjectType](functions/ObjectType.md) | Decorator for GraphQL Object Type. |
+| [Paginated](functions/Paginated.md) | Creates a simple paginated response type for a given item class. Fields: `items`, `total`, `hasNextPage`, `hasPreviousPage`. |
 | [Parent](functions/Parent.md) | Decorator for the parent/root value in a field resolver. Provides access to the parent object from the field resolver. |
 | [processMultipartRequest](functions/processMultipartRequest.md) | Processes a GraphQL multipart request per the [GraphQL multipart request spec](https://github.com/jaydenseric/graphql-multipart-request-spec). |
 | [Query](functions/Query.md) | Decorator for a GraphQL Query. |
@@ -118,12 +122,18 @@
 | [FIELD\_RESOLVER\_METADATA](variables/FIELD_RESOLVER_METADATA.md) | Metadata key for |
 | [GQL\_OPTIONS\_METADATA](variables/GQL_OPTIONS_METADATA.md) | Metadata key for GraphQL options. |
 | [GqlExecutionContext](variables/GqlExecutionContext.md) | Utility for creating GraphQL execution contexts. Provides access to resolver arguments, context, and GraphQL-specific information. |
+| [GraphQLBigInt](variables/GraphQLBigInt.md) | GraphQL scalar for JavaScript bigint values. Serialized as a string to avoid precision loss. |
 | [GraphQLBoolean](variables/GraphQLBoolean.md) | - |
+| [GraphQLDateTime](variables/GraphQLDateTime.md) | GraphQL scalar that serializes JS Date to/from ISO 8601 strings. |
+| [GraphQLEmailAddress](variables/GraphQLEmailAddress.md) | GraphQL scalar for email address strings (basic RFC format validation). |
 | [GraphQLFloat](variables/GraphQLFloat.md) | - |
 | [GraphQLID](variables/GraphQLID.md) | - |
 | [GraphQLInt](variables/GraphQLInt.md) | - |
+| [GraphQLJSON](variables/GraphQLJSON.md) | GraphQL scalar that accepts any JSON-serializable value. |
 | [GraphQLString](variables/GraphQLString.md) | - |
 | [GraphQLUpload](variables/GraphQLUpload.md) | GraphQL scalar type for handling file uploads. Implements the GraphQL multipart request specification. |
+| [GraphQLURL](variables/GraphQLURL.md) | GraphQL scalar for validated URL strings. |
+| [GraphQLUUID](variables/GraphQLUUID.md) | GraphQL scalar for UUID strings (any version, canonical lowercase format). |
 | [HIDDEN\_FIELDS\_METADATA](variables/HIDDEN_FIELDS_METADATA.md) | Metadata key for hidden fields. |
 | [INFO\_METADATA](variables/INFO_METADATA.md) | Metadata key for |
 | [INPUT\_TYPE\_METADATA](variables/INPUT_TYPE_METADATA.md) | Metadata key for |

@@ -1,6 +1,7 @@
 import { Injectable } from "nestelia";
 import {
   Args,
+  GraphQLDateTime,
   Int,
   Mutation,
   Query,
@@ -13,8 +14,21 @@ import { Book } from "./book.type";
 @Injectable()
 export class BooksResolver {
   private store: Book[] = [
-    { id: 1, title: "The Great Gatsby", author: "F. Scott Fitzgerald" },
-    { id: 2, title: "1984", author: "George Orwell" },
+    {
+      id: 1,
+      title: "The Great Gatsby",
+      author: "F. Scott Fitzgerald",
+      publishedAt: new Date("1925-04-10"),
+      coverUrl: "https://example.com/gatsby.jpg",
+      metadata: { genre: "novel", pages: 180 },
+    },
+    {
+      id: 2,
+      title: "1984",
+      author: "George Orwell",
+      publishedAt: new Date("1949-06-08"),
+      metadata: { genre: "dystopia", pages: 328 },
+    },
   ];
   private nextId = 3;
 
@@ -32,8 +46,14 @@ export class BooksResolver {
   addBook(
     @Args("title") title: string,
     @Args("author") author: string,
+    @Args("publishedAt", { type: () => GraphQLDateTime, nullable: true }) publishedAt?: Date,
   ): Book {
-    const book: Book = { id: this.nextId++, title, author };
+    const book: Book = {
+      id: this.nextId++,
+      title,
+      author,
+      publishedAt: publishedAt ?? new Date(),
+    };
     this.store.push(book);
     return book;
   }
