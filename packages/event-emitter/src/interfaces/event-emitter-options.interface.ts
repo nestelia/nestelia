@@ -32,7 +32,7 @@ export interface EventEmitterModuleOptions {
 
   /**
    * If `true`, registers `EventEmitterModule` as a global module so
-   * `EventEmitter2` is available throughout the application without
+   * `EventEmitterService` is available throughout the application without
    * re-importing the module.
    *
    * @default false

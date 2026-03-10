@@ -4,7 +4,7 @@ import { describe, expect, it } from "bun:test";
 
 import { EVENT_EMITTER_TOKEN } from "../src/event-emitter.constants";
 import { EventEmitterModule } from "../src/event-emitter.module";
-import { EventEmitter2 } from "../src/event-emitter.service";
+import { EventEmitterService } from "../src/event-emitter.service";
 
 describe("EventEmitterModule.forRoot — shape", () => {
   it("returns a valid DynamicModule", () => {
@@ -12,7 +12,7 @@ describe("EventEmitterModule.forRoot — shape", () => {
     expect(mod.module).toBe(EventEmitterModule);
     expect(Array.isArray(mod.providers)).toBe(true);
     expect(mod.exports).toContain(EVENT_EMITTER_TOKEN);
-    expect(mod.exports).toContain(EventEmitter2);
+    expect(mod.exports).toContain(EventEmitterService);
   });
 
   it("global defaults to false", () => {
@@ -29,24 +29,24 @@ describe("EventEmitterModule.forRoot — shape", () => {
     expect(providers.some((p) => p.provide === EVENT_EMITTER_TOKEN)).toBe(true);
   });
 
-  it("provides EventEmitter2 class token", () => {
+  it("provides EventEmitterService class token", () => {
     const mod = EventEmitterModule.forRoot();
     const providers = mod.providers as { provide: unknown }[];
-    expect(providers.some((p) => p.provide === EventEmitter2)).toBe(true);
+    expect(providers.some((p) => p.provide === EventEmitterService)).toBe(true);
   });
 
   it("both tokens resolve to the same instance", () => {
     const mod = EventEmitterModule.forRoot();
     const providers = mod.providers as { provide: unknown; useValue?: unknown }[];
     const tokenProvider = providers.find((p) => p.provide === EVENT_EMITTER_TOKEN);
-    const classProvider = providers.find((p) => p.provide === EventEmitter2);
+    const classProvider = providers.find((p) => p.provide === EventEmitterService);
     expect(tokenProvider?.useValue).toBe(classProvider?.useValue);
   });
 
-  it("passes options to EventEmitter2", () => {
+  it("passes options to EventEmitterService", () => {
     const mod = EventEmitterModule.forRoot({ wildcard: true });
     const providers = mod.providers as { provide: unknown; useValue?: unknown }[];
-    const provider = providers.find((p) => p.provide === EventEmitter2);
-    expect(provider?.useValue).toBeInstanceOf(EventEmitter2);
+    const provider = providers.find((p) => p.provide === EventEmitterService);
+    expect(provider?.useValue).toBeInstanceOf(EventEmitterService);
   });
 });

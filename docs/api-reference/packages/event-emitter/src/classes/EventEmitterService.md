@@ -1,4 +1,4 @@
-# Class: EventEmitter2
+# Class: EventEmitterService
 
 Defined in: [packages/event-emitter/src/event-emitter.service.ts:61](https://github.com/kiyasov/nestelia/blob/main/packages/event-emitter/src/event-emitter.service.ts#L61)
 
@@ -13,7 +13,7 @@ to inject this service.
 ```typescript
 @Injectable()
 export class OrderService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     await this.events.emitAsync('order.created', order);
@@ -28,7 +28,7 @@ export class OrderService {
 ### Constructor
 
 ```ts
-new EventEmitter2(options?): EventEmitter2;
+new EventEmitterService(options?): EventEmitterService;
 ```
 
 Defined in: [packages/event-emitter/src/event-emitter.service.ts:67](https://github.com/kiyasov/nestelia/blob/main/packages/event-emitter/src/event-emitter.service.ts#L67)
@@ -41,7 +41,7 @@ Defined in: [packages/event-emitter/src/event-emitter.service.ts:67](https://git
 
 #### Returns
 
-`EventEmitter2`
+`EventEmitterService`
 
 ## Methods
 

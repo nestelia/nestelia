@@ -20,7 +20,7 @@ import { EventEmitterModule } from "nestelia/event-emitter";
   imports: [
     EventEmitterModule.forRoot({
       wildcard: true,  // "order.*" 및 "**" 패턴 활성화
-      global: true,    // EventEmitter2를 전역으로 사용 가능하게
+      global: true,    // EventEmitterService를 전역으로 사용 가능하게
     }),
   ],
 })
@@ -29,15 +29,15 @@ export class AppModule {}
 
 ## 이벤트 발송
 
-`EventEmitter2`를 주입하고 `emitAsync`(모든 핸들러 대기) 또는 `emit`(발송 후 잊기)를 호출합니다:
+`EventEmitterService`를 주입하고 `emitAsync`(모든 핸들러 대기) 또는 `emit`(발송 후 잊기)를 호출합니다:
 
 ```typescript
 import { Injectable } from "nestelia";
-import { EventEmitter2 } from "nestelia/event-emitter";
+import { EventEmitterService } from "nestelia/event-emitter";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     await this.events.emitAsync("order.created", order);
@@ -91,7 +91,7 @@ export class NotificationListener {
 | 내보내기 | 설명 |
 |---------|------|
 | `EventEmitterModule` | 모듈 클래스 |
-| `EventEmitter2` | 주입 가능한 이벤트 이미터 서비스 |
+| `EventEmitterService` | 주입 가능한 이벤트 이미터 서비스 |
 | `OnEvent(event, opts?)` | 이벤트 핸들러 메서드 데코레이터 |
 | `InjectEventEmitter()` | 파라미터 데코레이터 단축키 |
 | `EVENT_EMITTER_TOKEN` | 주입 토큰 |

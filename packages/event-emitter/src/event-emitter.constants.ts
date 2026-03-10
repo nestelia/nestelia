@@ -1,5 +1,5 @@
 /**
- * Injection token for the EventEmitter2 instance.
+ * Injection token for the EventEmitterService instance.
  *
  * @publicApi
  */

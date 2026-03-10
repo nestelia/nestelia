@@ -47,7 +47,7 @@ function matchWildcard(pattern: string, event: string, delimiter: string): boole
  * ```typescript
  * @Injectable()
  * export class OrderService {
- *   constructor(private readonly events: EventEmitter2) {}
+ *   constructor(private readonly events: EventEmitterService) {}
  *
  *   async placeOrder(order: Order) {
  *     await this.events.emitAsync('order.created', order);
@@ -58,7 +58,7 @@ function matchWildcard(pattern: string, event: string, delimiter: string): boole
  * @publicApi
  */
 @Injectable()
-export class EventEmitter2 {
+export class EventEmitterService {
   private readonly handlers: HandlerRegistration[] = [];
   private readonly wildcard: boolean;
   private readonly delimiter: string;
@@ -199,7 +199,7 @@ export class EventEmitter2 {
       this.handlers.filter((r) => r.pattern === pattern).length >= this.maxListeners
     ) {
       console.warn(
-        `[EventEmitter2] Possible memory leak: ${this.maxListeners}+ listeners for "${pattern}". ` +
+        `[EventEmitterService] Possible memory leak: ${this.maxListeners}+ listeners for "${pattern}". ` +
           `Increase maxListeners via EventEmitterModule.forRoot({ maxListeners: N }).`,
       );
     }

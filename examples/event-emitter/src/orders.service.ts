@@ -1,14 +1,14 @@
 import { Injectable } from "nestelia";
 import { randomUUID } from "node:crypto";
 
-import { EventEmitter2 } from "../../../packages/event-emitter/src";
+import { EventEmitterService } from "../../../packages/event-emitter/src";
 import type { Order } from "./schema";
 
 @Injectable()
 export class OrdersService {
   private readonly orders: Order[] = [];
 
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async create(product: string, amount: number, email: string): Promise<Order> {
     const order: Order = { id: randomUUID(), product, amount, email };

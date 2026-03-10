@@ -2,12 +2,12 @@ import { Container, Injectable, STATIC_CONTEXT } from "nestelia";
 import type { OnApplicationBootstrap } from "nestelia";
 
 import { ON_EVENT_METADATA } from "./event-emitter.constants";
-import { EventEmitter2 } from "./event-emitter.service";
+import { EventEmitterService } from "./event-emitter.service";
 import type { OnEventMetadata } from "./interfaces";
 
 /**
  * Scans all providers registered in the DI container for `@OnEvent`-decorated
- * methods and registers them with the `EventEmitter2` instance.
+ * methods and registers them with the `EventEmitterService` instance.
  *
  * Runs automatically during `onApplicationBootstrap`.
  *
@@ -15,7 +15,7 @@ import type { OnEventMetadata } from "./interfaces";
  */
 @Injectable()
 export class EventEmitterExplorer implements OnApplicationBootstrap {
-  constructor(private readonly eventEmitter: EventEmitter2) {}
+  constructor(private readonly eventEmitter: EventEmitterService) {}
 
   onApplicationBootstrap(): void {
     for (const moduleRef of Container.instance.getModules().values()) {

@@ -2,13 +2,13 @@ import "reflect-metadata";
 
 import { describe, expect, it, beforeEach } from "bun:test";
 
-import { EventEmitter2 } from "../src/event-emitter.service";
+import { EventEmitterService } from "../src/event-emitter.service";
 
-describe("EventEmitter2 — basic", () => {
-  let emitter: EventEmitter2;
+describe("EventEmitterService — basic", () => {
+  let emitter: EventEmitterService;
 
   beforeEach(() => {
-    emitter = new EventEmitter2();
+    emitter = new EventEmitterService();
   });
 
   it("emits to registered handler", async () => {
@@ -101,11 +101,11 @@ describe("EventEmitter2 — basic", () => {
   });
 });
 
-describe("EventEmitter2 — wildcard", () => {
-  let emitter: EventEmitter2;
+describe("EventEmitterService — wildcard", () => {
+  let emitter: EventEmitterService;
 
   beforeEach(() => {
-    emitter = new EventEmitter2({ wildcard: true });
+    emitter = new EventEmitterService({ wildcard: true });
   });
 
   it("'*' matches any single segment", async () => {
@@ -141,7 +141,7 @@ describe("EventEmitter2 — wildcard", () => {
   });
 
   it("custom delimiter", async () => {
-    const e2 = new EventEmitter2({ wildcard: true, delimiter: ":" });
+    const e2 = new EventEmitterService({ wildcard: true, delimiter: ":" });
     let called = false;
     e2.on("order:*", () => { called = true; });
     await e2.emitAsync("order:created", null);

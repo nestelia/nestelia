@@ -8,7 +8,7 @@
  *
  * @example
  * ```typescript
- * import { EventEmitterModule, EventEmitter2, OnEvent } from 'nestelia/event-emitter';
+ * import { EventEmitterModule, EventEmitterService, OnEvent } from 'nestelia/event-emitter';
  *
  * @Module({
  *   imports: [EventEmitterModule.forRoot({ wildcard: true })],

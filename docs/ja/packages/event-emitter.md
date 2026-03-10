@@ -20,7 +20,7 @@ import { EventEmitterModule } from "nestelia/event-emitter";
   imports: [
     EventEmitterModule.forRoot({
       wildcard: true,  // "order.*" や "**" パターンを有効化
-      global: true,    // EventEmitter2 をアプリ全体で利用可能に
+      global: true,    // EventEmitterService をアプリ全体で利用可能に
     }),
   ],
 })
@@ -29,15 +29,15 @@ export class AppModule {}
 
 ## イベントの送信
 
-`EventEmitter2` を注入し、`emitAsync`（全ハンドラーを待機）または `emit`（ファイア＆フォーゲット）を呼び出します：
+`EventEmitterService` を注入し、`emitAsync`（全ハンドラーを待機）または `emit`（ファイア＆フォーゲット）を呼び出します：
 
 ```typescript
 import { Injectable } from "nestelia";
-import { EventEmitter2 } from "nestelia/event-emitter";
+import { EventEmitterService } from "nestelia/event-emitter";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     await this.events.emitAsync("order.created", order);
@@ -91,7 +91,7 @@ export class NotificationListener {
 | エクスポート | 説明 |
 |------------|------|
 | `EventEmitterModule` | モジュールクラス |
-| `EventEmitter2` | インジェクタブルなイベントエミッターサービス |
+| `EventEmitterService` | インジェクタブルなイベントエミッターサービス |
 | `OnEvent(event, opts?)` | イベントハンドラーメソッドデコレーター |
 | `InjectEventEmitter()` | パラメーターデコレーターの省略形 |
 | `EVENT_EMITTER_TOKEN` | インジェクショントークン |

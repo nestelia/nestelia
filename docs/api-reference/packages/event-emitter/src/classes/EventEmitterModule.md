@@ -5,7 +5,7 @@ Defined in: [packages/event-emitter/src/event-emitter.module.ts:57](https://gith
 Module that integrates a typed, wildcard-capable event emitter into nestelia's
 dependency injection system.
 
-Register once at the application root and inject `EventEmitter2` anywhere.
+Register once at the application root and inject `EventEmitterService` anywhere.
 Methods decorated with `@OnEvent()` on any provider are automatically wired
 up during bootstrap — no manual registration needed.
 
@@ -22,7 +22,7 @@ Emitting events:
 ```typescript
 @Injectable()
 export class OrderService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     await this.events.emitAsync('order.created', order);

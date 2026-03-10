@@ -20,7 +20,7 @@ import { EventEmitterModule } from "nestelia/event-emitter";
   imports: [
     EventEmitterModule.forRoot({
       wildcard: true,  // включить паттерны "order.*" и "**"
-      global: true,    // EventEmitter2 доступен везде
+      global: true,    // EventEmitterService доступен везде
     }),
   ],
 })
@@ -29,16 +29,16 @@ export class AppModule {}
 
 ## Отправка событий
 
-Инжектируйте `EventEmitter2` и вызывайте `emitAsync` (ожидает все обработчики) или `emit` (fire-and-forget):
+Инжектируйте `EventEmitterService` и вызывайте `emitAsync` (ожидает все обработчики) или `emit` (fire-and-forget):
 
 ```typescript
 import { Injectable } from "nestelia";
-import { EventEmitter2 } from "nestelia/event-emitter";
+import { EventEmitterService } from "nestelia/event-emitter";
 import type { Order } from "./order.schema";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     // ... сохранение заказа ...
@@ -54,12 +54,12 @@ export class OrdersService {
 
 ```typescript
 import { Injectable } from "nestelia";
-import { InjectEventEmitter, EventEmitter2 } from "nestelia/event-emitter";
+import { InjectEventEmitter, EventEmitterService } from "nestelia/event-emitter";
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @InjectEventEmitter() private readonly events: EventEmitter2,
+    @InjectEventEmitter() private readonly events: EventEmitterService,
   ) {}
 }
 ```
@@ -138,7 +138,7 @@ export class AuditListener {
 | `maxListeners` | `number` | `10` | Максимум обработчиков на событие |
 | `global` | `boolean` | `false` | Зарегистрировать как глобальный модуль |
 
-## API EventEmitter2
+## API EventEmitterService
 
 | Метод | Сигнатура | Описание |
 |-------|-----------|----------|
@@ -155,7 +155,7 @@ export class AuditListener {
 | Экспорт | Описание |
 |---------|----------|
 | `EventEmitterModule` | Класс модуля |
-| `EventEmitter2` | Инжектируемый сервис эмиттера |
+| `EventEmitterService` | Инжектируемый сервис эмиттера |
 | `OnEvent(event, opts?)` | Декоратор метода для обработчиков |
 | `InjectEventEmitter()` | Сокращённый декоратор параметра |
 | `EVENT_EMITTER_TOKEN` | Токен инжекции |

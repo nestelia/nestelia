@@ -2,14 +2,14 @@ import { DynamicModule, Module } from "nestelia";
 
 import { EVENT_EMITTER_TOKEN } from "./event-emitter.constants";
 import { EventEmitterExplorer } from "./event-emitter.explorer";
-import { EventEmitter2 } from "./event-emitter.service";
+import { EventEmitterService } from "./event-emitter.service";
 import type { EventEmitterModuleOptions } from "./interfaces";
 
 /**
  * Module that integrates a typed, wildcard-capable event emitter into nestelia's
  * dependency injection system.
  *
- * Register once at the application root and inject `EventEmitter2` anywhere.
+ * Register once at the application root and inject `EventEmitterService` anywhere.
  * Methods decorated with `@OnEvent()` on any provider are automatically wired
  * up during bootstrap — no manual registration needed.
  *
@@ -26,7 +26,7 @@ import type { EventEmitterModuleOptions } from "./interfaces";
  * ```typescript
  * @Injectable()
  * export class OrderService {
- *   constructor(private readonly events: EventEmitter2) {}
+ *   constructor(private readonly events: EventEmitterService) {}
  *
  *   async placeOrder(order: Order) {
  *     await this.events.emitAsync('order.created', order);
@@ -61,7 +61,7 @@ export class EventEmitterModule {
    * @param options - Optional configuration.
    */
   static forRoot(options: EventEmitterModuleOptions = {}): DynamicModule {
-    const emitterService = new EventEmitter2(options);
+    const emitterService = new EventEmitterService(options);
 
     return {
       module: EventEmitterModule,
@@ -72,12 +72,12 @@ export class EventEmitterModule {
           useValue: emitterService,
         },
         {
-          provide: EventEmitter2,
+          provide: EventEmitterService,
           useValue: emitterService,
         },
         EventEmitterExplorer,
       ],
-      exports: [EVENT_EMITTER_TOKEN, EventEmitter2],
+      exports: [EVENT_EMITTER_TOKEN, EventEmitterService],
     };
   }
 }

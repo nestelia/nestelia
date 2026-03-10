@@ -8,7 +8,7 @@ dependency injection system.
 ## Example
 
 ```typescript
-import { EventEmitterModule, EventEmitter2, OnEvent } from 'nestelia/event-emitter';
+import { EventEmitterModule, EventEmitterService, OnEvent } from 'nestelia/event-emitter';
 
 @Module({
   imports: [EventEmitterModule.forRoot({ wildcard: true })],
@@ -20,14 +20,14 @@ export class AppModule {}
 
 | Class | Description |
 | ------ | ------ |
-| [EventEmitter2](classes/EventEmitter2.md) | Injectable event emitter service. |
 | [EventEmitterModule](classes/EventEmitterModule.md) | Module that integrates a typed, wildcard-capable event emitter into nestelia's dependency injection system. |
+| [EventEmitterService](classes/EventEmitterService.md) | Injectable event emitter service. |
 
 ## Functions
 
 | Function | Description |
 | ------ | ------ |
-| [InjectEventEmitter](functions/InjectEventEmitter.md) | Parameter decorator that injects the `EventEmitter2` instance. |
+| [InjectEventEmitter](functions/InjectEventEmitter.md) | Parameter decorator that injects the `EventEmitterService` instance. |
 | [OnEvent](functions/OnEvent.md) | Marks a method as a listener for the given event (or wildcard pattern). |
 
 ## Interfaces
@@ -42,5 +42,5 @@ export class AppModule {}
 
 | Variable | Description |
 | ------ | ------ |
-| [EVENT\_EMITTER\_TOKEN](variables/EVENT_EMITTER_TOKEN.md) | Injection token for the EventEmitter2 instance. |
+| [EVENT\_EMITTER\_TOKEN](variables/EVENT_EMITTER_TOKEN.md) | Injection token for the EventEmitterService instance. |
 | [ON\_EVENT\_METADATA](variables/ON_EVENT_METADATA.md) | Metadata key used by |

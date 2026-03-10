@@ -5,24 +5,24 @@ import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 import { Test } from "../../../packages/testing/src";
 import {
   EVENT_EMITTER_TOKEN,
-  EventEmitter2,
+  EventEmitterService,
 } from "../../../packages/event-emitter/src";
 import { NotificationListener } from "./notification.listener";
 import { OrdersService } from "./orders.service";
 
 let service: OrdersService;
 let listener: NotificationListener;
-let emitter: EventEmitter2;
+let emitter: EventEmitterService;
 
 beforeEach(async () => {
-  emitter = new EventEmitter2({ wildcard: true });
+  emitter = new EventEmitterService({ wildcard: true });
 
   const moduleRef = await Test.createTestingModule({
     providers: [
       OrdersService,
       NotificationListener,
       { provide: EVENT_EMITTER_TOKEN, useValue: emitter },
-      { provide: EventEmitter2, useValue: emitter },
+      { provide: EventEmitterService, useValue: emitter },
     ],
   }).compile();
 

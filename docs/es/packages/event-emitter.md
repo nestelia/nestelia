@@ -20,7 +20,7 @@ import { EventEmitterModule } from "nestelia/event-emitter";
   imports: [
     EventEmitterModule.forRoot({
       wildcard: true,  // habilitar patrones "order.*" y "**"
-      global: true,    // hacer EventEmitter2 disponible globalmente
+      global: true,    // hacer EventEmitterService disponible globalmente
     }),
   ],
 })
@@ -29,15 +29,15 @@ export class AppModule {}
 
 ## Emitiendo eventos
 
-Inyecta `EventEmitter2` y llama a `emitAsync` (espera todos los handlers) o `emit` (dispara y olvida):
+Inyecta `EventEmitterService` y llama a `emitAsync` (espera todos los handlers) o `emit` (dispara y olvida):
 
 ```typescript
 import { Injectable } from "nestelia";
-import { EventEmitter2 } from "nestelia/event-emitter";
+import { EventEmitterService } from "nestelia/event-emitter";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     await this.events.emitAsync("order.created", order);
@@ -91,7 +91,7 @@ Habilita `wildcard: true` en `forRoot` para usar patrones estilo glob:
 | Exportación | Descripción |
 |-------------|-------------|
 | `EventEmitterModule` | Clase del módulo |
-| `EventEmitter2` | Servicio de emisor de eventos inyectable |
+| `EventEmitterService` | Servicio de emisor de eventos inyectable |
 | `OnEvent(event, opts?)` | Decorador de método para handlers |
 | `InjectEventEmitter()` | Atajo para decorador de parámetro |
 | `EVENT_EMITTER_TOKEN` | Token de inyección |

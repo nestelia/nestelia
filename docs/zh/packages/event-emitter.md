@@ -20,7 +20,7 @@ import { EventEmitterModule } from "nestelia/event-emitter";
   imports: [
     EventEmitterModule.forRoot({
       wildcard: true,  // 启用 "order.*" 和 "**" 模式
-      global: true,    // 使 EventEmitter2 全局可用
+      global: true,    // 使 EventEmitterService 全局可用
     }),
   ],
 })
@@ -29,15 +29,15 @@ export class AppModule {}
 
 ## 发送事件
 
-注入 `EventEmitter2` 并调用 `emitAsync`（等待所有处理器）或 `emit`（即发即忘）：
+注入 `EventEmitterService` 并调用 `emitAsync`（等待所有处理器）或 `emit`（即发即忘）：
 
 ```typescript
 import { Injectable } from "nestelia";
-import { EventEmitter2 } from "nestelia/event-emitter";
+import { EventEmitterService } from "nestelia/event-emitter";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     await this.events.emitAsync("order.created", order);
@@ -91,7 +91,7 @@ export class NotificationListener {
 | 导出 | 描述 |
 |------|------|
 | `EventEmitterModule` | 模块类 |
-| `EventEmitter2` | 可注入的事件发射器服务 |
+| `EventEmitterService` | 可注入的事件发射器服务 |
 | `OnEvent(event, opts?)` | 事件处理方法装饰器 |
 | `InjectEventEmitter()` | 参数装饰器简写 |
 | `EVENT_EMITTER_TOKEN` | 注入令牌 |

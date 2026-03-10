@@ -20,7 +20,7 @@ import { EventEmitterModule } from "nestelia/event-emitter";
   imports: [
     EventEmitterModule.forRoot({
       wildcard: true,  // enable "order.*" and "**" patterns
-      global: true,    // make EventEmitter2 available everywhere
+      global: true,    // make EventEmitterService available everywhere
     }),
   ],
 })
@@ -29,16 +29,16 @@ export class AppModule {}
 
 ## Emitting events
 
-Inject `EventEmitter2` and call `emitAsync` (awaits all handlers) or `emit` (fire-and-forget):
+Inject `EventEmitterService` and call `emitAsync` (awaits all handlers) or `emit` (fire-and-forget):
 
 ```typescript
 import { Injectable } from "nestelia";
-import { EventEmitter2 } from "nestelia/event-emitter";
+import { EventEmitterService } from "nestelia/event-emitter";
 import type { Order } from "./order.schema";
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly events: EventEmitter2) {}
+  constructor(private readonly events: EventEmitterService) {}
 
   async placeOrder(order: Order) {
     // ... persist order ...
@@ -54,12 +54,12 @@ Shorthand for `@Inject(EVENT_EMITTER_TOKEN)`:
 
 ```typescript
 import { Injectable } from "nestelia";
-import { InjectEventEmitter, EventEmitter2 } from "nestelia/event-emitter";
+import { InjectEventEmitter, EventEmitterService } from "nestelia/event-emitter";
 
 @Injectable()
 export class NotificationService {
   constructor(
-    @InjectEventEmitter() private readonly events: EventEmitter2,
+    @InjectEventEmitter() private readonly events: EventEmitterService,
   ) {}
 }
 ```
@@ -138,7 +138,7 @@ export class AuditListener {
 | `maxListeners` | `number` | `10` | Max listeners per event before a warning |
 | `global` | `boolean` | `false` | Register as a global module |
 
-## EventEmitter2 API
+## EventEmitterService API
 
 | Method | Signature | Description |
 |--------|-----------|-------------|
@@ -155,7 +155,7 @@ export class AuditListener {
 | Export | Description |
 |--------|-------------|
 | `EventEmitterModule` | Module class |
-| `EventEmitter2` | Injectable event emitter service |
+| `EventEmitterService` | Injectable event emitter service |
 | `OnEvent(event, opts?)` | Method decorator for event handlers |
 | `InjectEventEmitter()` | Parameter decorator shorthand |
 | `EVENT_EMITTER_TOKEN` | Injection token |
