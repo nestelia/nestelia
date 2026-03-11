@@ -1,6 +1,6 @@
 # Interface: RpcArgumentsHost
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:15](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L15)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:15](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L15)
 
 RPC context interface
 
@@ -12,7 +12,7 @@ RPC context interface
 getContext<T>(): T;
 ```
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:17](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L17)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:17](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L17)
 
 #### Type Parameters
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/interfaces/execution-context.interface.ts:17](htt
 getData<T>(): T;
 ```
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:16](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L16)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:16](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L16)
 
 #### Type Parameters
 

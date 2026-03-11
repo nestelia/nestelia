@@ -1,6 +1,6 @@
 # Class: HttpAdapterHost
 
-Defined in: [packages/core/src/core/http-adapter.ts:19](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/core/http-adapter.ts#L19)
+Defined in: [packages/core/src/core/http-adapter.ts:19](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/http-adapter.ts#L19)
 
 Host class for accessing the HTTP adapter.
 Used to abstract the underlying HTTP server.
@@ -15,7 +15,7 @@ Used to abstract the underlying HTTP server.
 get httpAdapter(): HttpAdapter | undefined;
 ```
 
-Defined in: [packages/core/src/core/http-adapter.ts:25](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/core/http-adapter.ts#L25)
+Defined in: [packages/core/src/core/http-adapter.ts:25](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/http-adapter.ts#L25)
 
 Get the HTTP adapter instance
 
@@ -29,7 +29,7 @@ Get the HTTP adapter instance
 set httpAdapter(adapter): void;
 ```
 
-Defined in: [packages/core/src/core/http-adapter.ts:32](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/core/http-adapter.ts#L32)
+Defined in: [packages/core/src/core/http-adapter.ts:32](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/http-adapter.ts#L32)
 
 Set the HTTP adapter instance
 

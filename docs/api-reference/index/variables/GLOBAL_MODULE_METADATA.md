@@ -4,4 +4,4 @@
 const GLOBAL_MODULE_METADATA: "module:global" = "module:global";
 ```
 
-Defined in: [packages/core/src/decorators/constants.ts:35](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/decorators/constants.ts#L35)
+Defined in: [packages/core/src/decorators/constants.ts:35](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/constants.ts#L35)

@@ -4,7 +4,7 @@
 function OnEvent(event, options?): MethodDecorator;
 ```
 
-Defined in: [packages/event-emitter/src/decorators/on-event.decorator.ts:46](https://github.com/kiyasov/nestelia/blob/main/packages/event-emitter/src/decorators/on-event.decorator.ts#L46)
+Defined in: [packages/event-emitter/src/decorators/on-event.decorator.ts:46](https://github.com/nestelia/nestelia/blob/main/packages/event-emitter/src/decorators/on-event.decorator.ts#L46)
 
 Marks a method as a listener for the given event (or wildcard pattern).
 

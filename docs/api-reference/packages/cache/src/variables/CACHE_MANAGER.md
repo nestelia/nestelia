@@ -4,7 +4,7 @@
 const CACHE_MANAGER: "CACHE_MANAGER" = "CACHE_MANAGER";
 ```
 
-Defined in: [packages/cache/src/cache.constants.ts:10](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.constants.ts#L10)
+Defined in: [packages/cache/src/cache.constants.ts:10](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.constants.ts#L10)
 
 Injection token for the CacheManager provider.
 

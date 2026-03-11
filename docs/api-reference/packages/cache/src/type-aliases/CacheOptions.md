@@ -4,7 +4,7 @@
 type CacheOptions<T> = CacheManagerOptions & T;
 ```
 
-Defined in: [packages/cache/src/interfaces/cache-module.interface.ts:21](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/interfaces/cache-module.interface.ts#L21)
+Defined in: [packages/cache/src/interfaces/cache-module.interface.ts:21](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/interfaces/cache-module.interface.ts#L21)
 
 Cache options combining cache manager options with store-specific configuration.
 

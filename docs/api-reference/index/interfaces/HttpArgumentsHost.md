@@ -1,6 +1,6 @@
 # Interface: HttpArgumentsHost
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:5](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L5)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:5](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L5)
 
 HTTP context interface for request/response access
 
@@ -12,7 +12,7 @@ HTTP context interface for request/response access
 getNext<T>(): T;
 ```
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:8](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L8)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:8](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L8)
 
 #### Type Parameters
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/interfaces/execution-context.interface.ts:8](http
 getRequest<T>(): T;
 ```
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:6](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L6)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:6](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L6)
 
 #### Type Parameters
 
@@ -52,7 +52,7 @@ Defined in: [packages/core/src/interfaces/execution-context.interface.ts:6](http
 getResponse<T>(): T;
 ```
 
-Defined in: [packages/core/src/interfaces/execution-context.interface.ts:7](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L7)
+Defined in: [packages/core/src/interfaces/execution-context.interface.ts:7](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interfaces/execution-context.interface.ts#L7)
 
 #### Type Parameters
 

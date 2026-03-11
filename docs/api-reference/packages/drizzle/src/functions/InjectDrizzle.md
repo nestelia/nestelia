@@ -4,7 +4,7 @@
 function InjectDrizzle(tag?): ParameterDecorator;
 ```
 
-Defined in: [packages/drizzle/src/decorators/inject-drizzle.decorator.ts:35](https://github.com/kiyasov/nestelia/blob/main/packages/drizzle/src/decorators/inject-drizzle.decorator.ts#L35)
+Defined in: [packages/drizzle/src/decorators/inject-drizzle.decorator.ts:35](https://github.com/nestelia/nestelia/blob/main/packages/drizzle/src/decorators/inject-drizzle.decorator.ts#L35)
 
 Parameter/property decorator that injects a Drizzle ORM database instance.
 

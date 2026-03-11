@@ -4,7 +4,7 @@
 const ON_EVENT_METADATA: "__onEvent__" = "__onEvent__";
 ```
 
-Defined in: [packages/event-emitter/src/event-emitter.constants.ts:12](https://github.com/kiyasov/nestelia/blob/main/packages/event-emitter/src/event-emitter.constants.ts#L12)
+Defined in: [packages/event-emitter/src/event-emitter.constants.ts:12](https://github.com/nestelia/nestelia/blob/main/packages/event-emitter/src/event-emitter.constants.ts#L12)
 
 **`Internal`**
 

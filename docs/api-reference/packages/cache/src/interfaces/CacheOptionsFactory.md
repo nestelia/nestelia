@@ -1,6 +1,6 @@
 # Interface: CacheOptionsFactory\<T\>
 
-Defined in: [packages/cache/src/interfaces/cache-module.interface.ts:50](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/interfaces/cache-module.interface.ts#L50)
+Defined in: [packages/cache/src/interfaces/cache-module.interface.ts:50](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/interfaces/cache-module.interface.ts#L50)
 
 Factory interface for creating cache options.
 
@@ -23,7 +23,7 @@ createCacheOptions():
 | Promise<CacheOptions<T>>;
 ```
 
-Defined in: [packages/cache/src/interfaces/cache-module.interface.ts:58](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/interfaces/cache-module.interface.ts#L58)
+Defined in: [packages/cache/src/interfaces/cache-module.interface.ts:58](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/interfaces/cache-module.interface.ts#L58)
 
 Creates cache options.
 

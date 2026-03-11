@@ -4,7 +4,7 @@
 function Header(name, value): MethodDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/header.decorator.ts:27](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/decorators/header.decorator.ts#L27)
+Defined in: [packages/core/src/decorators/header.decorator.ts:27](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/header.decorator.ts#L27)
 
 Decorator that sets HTTP headers for the response.
 

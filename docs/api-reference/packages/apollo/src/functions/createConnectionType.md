@@ -4,7 +4,7 @@
 function createConnectionType<T>(NodeType, EdgeType?): AnyConstructor;
 ```
 
-Defined in: [packages/apollo/src/pagination.ts:103](https://github.com/kiyasov/nestelia/blob/main/packages/apollo/src/pagination.ts#L103)
+Defined in: [packages/apollo/src/pagination.ts:103](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/pagination.ts#L103)
 
 Creates a Relay-style Connection type for a given node class.
 Fields: `edges`, `pageInfo`, `totalCount`.

@@ -4,7 +4,7 @@
 const DRIZZLE_INSTANCE: "DRIZZLE_INSTANCE" = "DRIZZLE_INSTANCE";
 ```
 
-Defined in: [packages/drizzle/src/drizzle.constants.ts:8](https://github.com/kiyasov/nestelia/blob/main/packages/drizzle/src/drizzle.constants.ts#L8)
+Defined in: [packages/drizzle/src/drizzle.constants.ts:8](https://github.com/nestelia/nestelia/blob/main/packages/drizzle/src/drizzle.constants.ts#L8)
 
 Default injection token for the Drizzle ORM database instance.
 

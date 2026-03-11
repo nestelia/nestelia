@@ -1,6 +1,6 @@
 # Class: CacheModule
 
-Defined in: [packages/cache/src/cache.module.ts:77](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.module.ts#L77)
+Defined in: [packages/cache/src/cache.module.ts:77](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.module.ts#L77)
 
 Module that provides caching functionality for nestelia.
 
@@ -53,7 +53,7 @@ export class AppModule {}
 new CacheModule(): CacheModule;
 ```
 
-Defined in: [packages/core/src/module-utils/interfaces/configurable-module-cls.interface.ts:22](https://github.com/kiyasov/nestelia/blob/main/packages/core/src/module-utils/interfaces/configurable-module-cls.interface.ts#L22)
+Defined in: [packages/core/src/module-utils/interfaces/configurable-module-cls.interface.ts:22](https://github.com/nestelia/nestelia/blob/main/packages/core/src/module-utils/interfaces/configurable-module-cls.interface.ts#L22)
 
 #### Returns
 
@@ -73,7 +73,7 @@ ConfigurableModuleClass.constructor
 static forRoot<T>(options?): DynamicModule;
 ```
 
-Defined in: [packages/cache/src/cache.module.ts:90](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.module.ts#L90)
+Defined in: [packages/cache/src/cache.module.ts:90](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.module.ts#L90)
 
 #### Type Parameters
 
@@ -99,7 +99,7 @@ Defined in: [packages/cache/src/cache.module.ts:90](https://github.com/kiyasov/n
 static forRootAsync<T>(options): DynamicModule;
 ```
 
-Defined in: [packages/cache/src/cache.module.ts:96](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.module.ts#L96)
+Defined in: [packages/cache/src/cache.module.ts:96](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.module.ts#L96)
 
 #### Type Parameters
 
@@ -125,7 +125,7 @@ Defined in: [packages/cache/src/cache.module.ts:96](https://github.com/kiyasov/n
 static register<T>(options?): DynamicModule;
 ```
 
-Defined in: [packages/cache/src/cache.module.ts:78](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.module.ts#L78)
+Defined in: [packages/cache/src/cache.module.ts:78](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.module.ts#L78)
 
 #### Type Parameters
 
@@ -157,7 +157,7 @@ ConfigurableModuleClass.register
 static registerAsync<T>(options): DynamicModule;
 ```
 
-Defined in: [packages/cache/src/cache.module.ts:84](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.module.ts#L84)
+Defined in: [packages/cache/src/cache.module.ts:84](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.module.ts#L84)
 
 #### Type Parameters
 

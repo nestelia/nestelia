@@ -1,6 +1,6 @@
 # Class: Cache
 
-Defined in: [packages/cache/src/cache.module.ts:19](https://github.com/kiyasov/nestelia/blob/main/packages/cache/src/cache.module.ts#L19)
+Defined in: [packages/cache/src/cache.module.ts:19](https://github.com/nestelia/nestelia/blob/main/packages/cache/src/cache.module.ts#L19)
 
 Empty base class that will be merged with the Cache interface. 
 
