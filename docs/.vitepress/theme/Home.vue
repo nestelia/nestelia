@@ -355,7 +355,7 @@ app.listen(3000)
   align-items: center;
   padding: 12px 28px;
   border-radius: 10px;
-  background: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-dark);
   color: #fff !important;
   font-size: 15px;
   font-weight: 600;
@@ -363,9 +363,9 @@ app.listen(3000)
   transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
 }
 .cta-primary:hover {
-  background: var(--vp-c-brand-2);
+  background: #9e2055;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(240, 98, 146, 0.35);
+  box-shadow: 0 6px 20px rgba(186, 45, 101, 0.35);
 }
 
 .cta-ghost {
@@ -565,16 +565,16 @@ app.listen(3000)
 
 /* Syntax highlight tokens */
 .s-pre :deep(i) { font-style: normal; }
-.s-pre :deep(.hk) { color: #8250df; } /* keywords */
+.s-pre :deep(.hk) { color: #6f3fc1; } /* keywords */
 .s-pre :deep(.hs) { color: #116329; } /* strings  */
 .s-pre :deep(.hd) { color: #cf222e; } /* decorators */
 .s-pre :deep(.ht) { color: #0550ae; } /* types    */
-.s-pre :deep(.hc) { color: #6e7781; } /* comments */
+.s-pre :deep(.hc) { color: #4f5b67; } /* comments */
 .dark .s-pre :deep(.hk) { color: #c084fc; }
 .dark .s-pre :deep(.hs) { color: #86efac; }
 .dark .s-pre :deep(.hd) { color: #f472b6; }
 .dark .s-pre :deep(.ht) { color: #93c5fd; }
-.dark .s-pre :deep(.hc) { color: #4b5563; }
+.dark .s-pre :deep(.hc) { color: #8a96a4; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -685,7 +685,7 @@ app.listen(3000)
 .pkg-import {
   font-family: 'Geist Mono', ui-monospace, monospace;
   font-size: 11.5px;
-  color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-dark);
   background: var(--vp-c-brand-soft);
   padding: 1px 7px;
   border-radius: 5px;

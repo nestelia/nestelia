@@ -453,10 +453,11 @@ function onMouseMove(e: MouseEvent) {
         <div
             ref="el"
             role="button"
+            aria-label="Search"
             :aria-owns="results?.length ? 'localsearch-list' : undefined"
-            aria-expanded="true"
+            :aria-expanded="String(showSearch)"
             aria-haspopup="listbox"
-            aria-labelledby="localsearch-label"
+            :aria-labelledby="showSearch ? 'localsearch-label' : undefined"
             class="VPLocalSearchBox"
             :class="{ 'pointer-events-none': !showSearch }"
         >
