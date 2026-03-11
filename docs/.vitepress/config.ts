@@ -23,8 +23,11 @@ export default defineConfig({
   },
 
   head: [
-    // Anti-FOUC: set dark background immediately before any stylesheet loads
-    ["style", {}, `html.dark,html.dark body{background:#1b1b1f;color-scheme:dark}`],
+    // Anti-FOUC: apply dark class and background before CSSOM is built.
+    // Runs while the render-blocking stylesheet is still downloading, so when
+    // CSS is finally parsed the .dark class is already on <html> and dark-mode
+    // variables resolve correctly — no white flash on Cmd+R / hard reload.
+    ["script", {}, `(function(){try{var p=localStorage.getItem("vitepress-theme-appearance")||"auto";var d=p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme:dark)").matches);if(d){var e=document.documentElement;e.classList.add("dark");e.style.colorScheme="dark";e.style.background="#1b1b1f"}}catch(e){}})();`],
 
     // Favicon
     ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
