@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vitepress dev",
-    "build": "vitepress build",
+    "build": "bun run scripts/gen-llms-full.ts && vitepress build",
     "preview": "vitepress preview"
   },
   "devDependencies": {

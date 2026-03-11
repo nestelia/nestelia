@@ -424,7 +424,7 @@ app.listen(3000)
   padding: 2px 9px;
   border-radius: 5px;
   background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-3);
+  color: var(--vp-c-text-2);
   border: 1px solid var(--vp-c-divider);
   margin-left: 4px;
   user-select: none;
@@ -542,10 +542,10 @@ app.listen(3000)
   margin-left: 8px;
   font-family: 'Geist Mono', ui-monospace, monospace;
   font-size: 12px;
-  color: rgba(0, 0, 0, 0.35);
+  color: rgba(0, 0, 0, 0.56);
 }
 .dark .s-code-filename {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgba(255, 255, 255, 0.56);
 }
 
 .s-pre {

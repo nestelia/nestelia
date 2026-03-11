@@ -1,0 +1,4096 @@
+# Nestelia — Full Documentation
+
+> This file contains the complete Nestelia documentation in a single page.
+
+> For the structured index see https://nestelia.dev/llms.txt
+
+
+
+---
+<!-- Source: introduction.md -->
+
+# nestelia
+
+**nestelia** is a modular, decorator-driven framework built on top of [Elysia](https://elysiajs.com/) and [Bun](https://bun.sh/). It provides decorators, dependency injection, modules, and lifecycle hooks for building structured server-side applications.
+
+::: warning
+nestelia is under active development. APIs may change before the stable release.
+:::
+
+## Why nestelia?
+
+Elysia is one of the fastest Bun-native HTTP frameworks. nestelia adds a structured, modular architecture on top of it — without sacrificing Elysia's performance.
+
+- **Decorators** — `@Controller`, `@Get`, `@Post`, `@Body`, `@Param`, and more
+- **Dependency Injection** — constructor-based DI with singleton, transient, and request scopes
+- **Modules** — encapsulate controllers, providers, and imports into cohesive units
+- **Lifecycle Hooks** — `OnModuleInit`, `OnApplicationBootstrap`, `OnModuleDestroy`, and others
+- **Guards, Interceptors, Pipes** — request pipeline extensibility
+- **Middleware** — class-based and functional middleware support
+- **Exception Handling** — built-in HTTP exceptions with automatic error responses
+- **TypeBox validation** — schema-based request validation via Elysia's native TypeBox integration
+
+## Packages
+
+Beyond the core, nestelia ships optional packages:
+
+| Package | Description |
+|---------|-------------|
+| `nestelia/scheduler` | Cron jobs, intervals, and timeouts |
+| `nestelia/microservices` | Redis, RabbitMQ, TCP transports |
+| `nestelia/apollo` | Apollo GraphQL code-first integration |
+| `nestelia/passport` | Passport.js authentication strategies |
+| `nestelia/testing` | Isolated test modules with provider overrides |
+| `nestelia/cache` | HTTP response caching with decorators |
+| `nestelia/rabbitmq` | Advanced RabbitMQ messaging |
+| `nestelia/graphql-pubsub` | Redis PubSub for GraphQL subscriptions |
+
+## Quick Example
+
+```typescript
+import { createElysiaApplication, Controller, Get, Module, Injectable, Inject } from "nestelia";
+
+@Injectable()
+class GreetService {
+  hello() {
+    return { message: "Hello from nestelia!" };
+  }
+}
+
+@Controller("/greet")
+class GreetController {
+  constructor(@Inject(GreetService) private greet: GreetService) {}
+
+  @Get("/")
+  sayHello() {
+    return this.greet.hello();
+  }
+}
+
+@Module({
+  controllers: [GreetController],
+  providers: [GreetService],
+})
+class AppModule {}
+
+const app = await createElysiaApplication(AppModule);
+app.listen(3000);
+```
+
+## Claude Code Skill
+
+A [Claude Code](https://claude.ai/claude-code) skill is available for nestelia. It provides scaffolding templates, decorator usage, and best practices directly in your AI assistant.
+
+```bash
+npx skills add kiyasov/nestelia
+```
+
+Once installed, Claude Code will automatically use the correct patterns when working with `nestelia`.
+
+## Next Steps
+
+- [Installation](/getting-started/installation) — Install nestelia and its peer dependencies.
+- [Quick Start](/getting-started/quick-start) — Build your first CRUD app in 5 minutes.
+- [Modules](/core-concepts/modules) — Learn how modules organize your application.
+- [Dependency Injection](/features/dependency-injection) — Constructor-based DI with multiple scopes.
+
+---
+<!-- Source: getting-started/installation.md -->
+
+## Prerequisites
+
+- [Bun](https://bun.sh/) v1.0 or later
+- TypeScript 5.0+
+
+## Install
+
+```bash
+bun add nestelia elysia
+```
+
+nestelia requires `elysia` ^1.2.0 as a peer dependency.
+
+## TypeScript Configuration
+
+nestelia relies on decorators and metadata reflection. Make sure your `tsconfig.json` includes:
+
+```json
+{
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strict": true,
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler"
+  }
+}
+```
+
+## Optional Peer Dependencies
+
+All subpaths are included in the `nestelia` package. Install only the peer dependencies you need:
+
+```bash
+# Microservices — Redis transport
+bun add ioredis
+
+# Microservices — RabbitMQ transport
+bun add amqplib
+
+# Apollo GraphQL
+bun add @apollo/server graphql graphql-ws
+
+# Passport authentication
+bun add passport
+
+# Cache manager
+bun add cache-manager
+
+# RabbitMQ messaging
+bun add amqplib
+
+# GraphQL PubSub (Redis)
+bun add ioredis
+```
+
+## Verify Installation
+
+Create a minimal app to verify everything works:
+
+```typescript
+import { createElysiaApplication, Controller, Get, Module } from "nestelia";
+
+@Controller("/")
+class AppController {
+  @Get("/")
+  hello() {
+    return { status: "ok" };
+  }
+}
+
+@Module({ controllers: [AppController] })
+class AppModule {}
+
+const app = await createElysiaApplication(AppModule);
+app.listen(3000, () => {
+  console.log("Running on http://localhost:3000");
+});
+```
+
+```bash
+bun run app.ts
+```
+
+---
+<!-- Source: getting-started/quick-start.md -->
+
+This guide walks you through building a simple Users API with nestelia.
+
+## 1. Create the Service
+
+Services hold your business logic and are marked with `@Injectable()` so the DI container can manage them.
+
+```typescript
+import { Injectable } from "nestelia";
+
+@Injectable()
+class UserService {
+  private users = [{ id: 1, name: "John" }];
+
+  findAll() {
+    return this.users;
+  }
+
+  findById(id: number) {
+    return this.users.find((u) => u.id === id);
+  }
+
+  create(user: { name: string }) {
+    const newUser = { id: this.users.length + 1, ...user };
+    this.users.push(newUser);
+    return newUser;
+  }
+}
+```
+
+## 2. Create the Controller
+
+Controllers define HTTP routes. Use `@Controller` to set a route prefix and HTTP decorators for individual methods.
+
+```typescript
+import { t } from "elysia";
+import { Controller, Get, Post, Body, Param, Inject, Ctx } from "nestelia";
+
+@Controller("/users")
+class UserController {
+  constructor(@Inject(UserService) private readonly userService: UserService) {}
+
+  @Get("/")
+  getAll() {
+    return this.userService.findAll();
+  }
+
+  @Get("/:id")
+  getById(@Ctx() ctx: any) {
+    return this.userService.findById(Number(ctx.params.id));
+  }
+
+  @Post("/")
+  create(@Body(t.Object({ name: t.String() })) body: { name: string }) {
+    return this.userService.create(body);
+  }
+}
+```
+
+::: info
+`@Body`, `@Param`, and `@Query` accept a [TypeBox](https://github.com/sinclairzx81/typebox) schema for validation. To access individual route parameters without a schema, use `@Ctx()` to get the full Elysia context.
+:::
+
+## 3. Create the Module
+
+Modules group controllers and providers together. Every application has at least one root module.
+
+```typescript
+import { Module } from "nestelia";
+
+@Module({
+  controllers: [UserController],
+  providers: [UserService],
+})
+class AppModule {}
+```
+
+## 4. Bootstrap the Application
+
+```typescript
+import { createElysiaApplication } from "nestelia";
+
+const app = await createElysiaApplication(AppModule);
+app.listen(3000, () => {
+  console.log("Running on http://localhost:3000");
+});
+```
+
+## 5. Test It
+
+```bash
+# List users
+curl http://localhost:3000/users
+
+# Get user by ID
+curl http://localhost:3000/users/1
+
+# Create a user
+curl -X POST http://localhost:3000/users \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Jane"}'
+```
+
+## Full Example
+
+```typescript
+import { t } from "elysia";
+import {
+  createElysiaApplication,
+  Controller,
+  Get,
+  Post,
+  Module,
+  Body,
+  Ctx,
+  Inject,
+  Injectable,
+} from "nestelia";
+
+@Injectable()
+class UserService {
+  private users = [{ id: 1, name: "John" }];
+
+  findAll() {
+    return this.users;
+  }
+
+  findById(id: number) {
+    return this.users.find((u) => u.id === id);
+  }
+
+  create(user: { name: string }) {
+    const newUser = { id: this.users.length + 1, ...user };
+    this.users.push(newUser);
+    return newUser;
+  }
+}
+
+@Controller("/users")
+class UserController {
+  constructor(@Inject(UserService) private readonly userService: UserService) {}
+
+  @Get("/")
+  getAll() {
+    return this.userService.findAll();
+  }
+
+  @Get("/:id")
+  getById(@Ctx() ctx: any) {
+    return this.userService.findById(Number(ctx.params.id));
+  }
+
+  @Post("/")
+  create(@Body(t.Object({ name: t.String() })) body: { name: string }) {
+    return this.userService.create(body);
+  }
+}
+
+@Module({
+  controllers: [UserController],
+  providers: [UserService],
+})
+class AppModule {}
+
+const app = await createElysiaApplication(AppModule);
+app.listen(3000);
+```
+
+## Next Steps
+
+- [Modules](/core-concepts/modules) — Learn how to organize your app with modules.
+- [Dependency Injection](/features/dependency-injection) — Understand DI scopes and custom providers.
+
+---
+<!-- Source: core-concepts/modules.md -->
+
+Modules are the primary way to organize an nestelia application. Each module encapsulates a set of controllers, providers, and imports.
+
+## Defining a Module
+
+Use the `@Module()` decorator to declare a module:
+
+```typescript
+import { Module } from "nestelia";
+
+@Module({
+  controllers: [UserController],
+  providers: [UserService],
+})
+class UserModule {}
+```
+
+## Module Options
+
+```typescript
+interface ModuleOptions {
+  controllers?: Type[];        // Route handlers
+  providers?: Provider[];      // Injectable services
+  imports?: any[];             // Other modules to import
+  exports?: ProviderToken[];   // Providers available to importing modules
+  middlewares?: Middleware[];   // Class-based or functional middleware
+  children?: (() => Promise<any>)[]; // Child modules
+  prefix?: string;             // Route prefix for all controllers
+}
+```
+
+## Importing Modules
+
+Modules can import other modules to access their exported providers:
+
+```typescript
+@Module({
+  providers: [DatabaseService],
+  exports: [DatabaseService],
+})
+class DatabaseModule {}
+
+@Module({
+  imports: [DatabaseModule],
+  controllers: [UserController],
+  providers: [UserService],
+})
+class UserModule {}
+```
+
+`UserService` can now inject `DatabaseService` because `DatabaseModule` exports it.
+
+## Root Module
+
+Every application has a root module passed to `createElysiaApplication()`:
+
+```typescript
+@Module({
+  imports: [UserModule, AuthModule, DatabaseModule],
+})
+class AppModule {}
+
+const app = await createElysiaApplication(AppModule);
+```
+
+## Module Prefix
+
+Apply a route prefix to all controllers in a module:
+
+```typescript
+@Module({
+  controllers: [UserController], // routes become /api/v1/users/...
+  prefix: "/api/v1",
+})
+class ApiModule {}
+```
+
+## Global Modules
+
+Mark a module as global so its providers are available everywhere without importing:
+
+```typescript
+import { Global, Module } from "nestelia";
+
+@Global()
+@Module({
+  providers: [ConfigService],
+  exports: [ConfigService],
+})
+class ConfigModule {}
+```
+
+## Dynamic Modules
+
+Modules can expose static configuration methods like `forRoot()` and `forRootAsync()`:
+
+```typescript
+@Module({})
+class ConfigModule {
+  static forRoot(options: ConfigOptions): DynamicModule {
+    return {
+      module: ConfigModule,
+      providers: [
+        { provide: "CONFIG_OPTIONS", useValue: options },
+        ConfigService,
+      ],
+      exports: [ConfigService],
+    };
+  }
+}
+
+// Usage
+@Module({
+  imports: [ConfigModule.forRoot({ path: ".env" })],
+})
+class AppModule {}
+```
+
+## How It Works
+
+Under the hood, `@Module()` creates an Elysia plugin. When `createElysiaApplication()` is called:
+
+1. The DI container registers all providers from the module
+2. Controllers are instantiated with their dependencies resolved
+3. HTTP routes are registered on the Elysia instance
+4. Lifecycle hooks are invoked in order
+
+---
+<!-- Source: core-concepts/controllers.md -->
+
+Controllers handle incoming HTTP requests and return responses. They are decorated with `@Controller()` and use HTTP method decorators to define routes.
+
+## Defining a Controller
+
+```typescript
+import { Controller, Get } from "nestelia";
+
+@Controller("/cats")
+class CatController {
+  @Get("/")
+  findAll() {
+    return [{ name: "Tom" }, { name: "Garfield" }];
+  }
+}
+```
+
+The `@Controller("/cats")` decorator sets the route prefix. The `@Get("/")` decorator maps `GET /cats/` to `findAll()`.
+
+## Registering Controllers
+
+Controllers must be declared in a module:
+
+```typescript
+@Module({
+  controllers: [CatController],
+  providers: [CatService],
+})
+class CatModule {}
+```
+
+## Injecting Services
+
+Use `@Inject()` in the constructor to access services from the DI container:
+
+```typescript
+@Controller("/cats")
+class CatController {
+  constructor(@Inject(CatService) private readonly catService: CatService) {}
+
+  @Get("/")
+  findAll() {
+    return this.catService.findAll();
+  }
+}
+```
+
+## Route Methods
+
+nestelia provides decorators for all standard HTTP methods:
+
+```typescript
+@Controller("/items")
+class ItemController {
+  @Get("/")       findAll() { /* ... */ }
+  @Get("/:id")    findOne() { /* ... */ }
+  @Post("/")      create()  { /* ... */ }
+  @Put("/:id")    update()  { /* ... */ }
+  @Patch("/:id")  patch()   { /* ... */ }
+  @Delete("/:id") remove()  { /* ... */ }
+  @Options("/")   options() { /* ... */ }
+  @Head("/")      head()    { /* ... */ }
+  @All("/wild")   any()     { /* ... */ }
+}
+```
+
+## Returning Responses
+
+Controller methods can return:
+
+- **Plain objects / arrays** — serialized to JSON automatically
+- **Strings** — returned as plain text
+- **Promises** — awaited and then serialized
+
+```typescript
+@Get("/")
+async findAll() {
+  const users = await this.userService.findAll();
+  return users; // serialized to JSON
+}
+```
+
+## Accessing Request Data
+
+Use `@Ctx()` to get the full Elysia context, which provides access to all request data:
+
+```typescript
+@Get("/:id")
+findOne(@Ctx() ctx: any) {
+  const id = ctx.params.id;
+  const q = ctx.query.q;
+  return this.service.findById(id);
+}
+```
+
+For typed, validated access to body, params, and query, use the TypeBox-based decorators:
+
+```typescript
+import { t } from "elysia";
+
+@Post("/")
+create(@Body(t.Object({ name: t.String() })) body: { name: string }) {
+  return this.userService.create(body);
+}
+```
+
+See [Parameter Decorators](/features/parameter-decorators) for details.
+
+## Setting Status Codes
+
+Use `@HttpCode()` to set a custom status code for a route:
+
+```typescript
+@Post("/")
+@HttpCode(201)
+create(@Body(t.Object({ name: t.String() })) body: { name: string }) {
+  return this.userService.create(body);
+}
+```
+
+Or use the Elysia context for dynamic status codes:
+
+```typescript
+@Post("/")
+create(@Ctx() ctx: any, @Body(t.Object({ name: t.String() })) body: { name: string }) {
+  ctx.set.status = 201;
+  return this.userService.create(body);
+}
+```
+
+## Setting Response Headers
+
+Use `@Header()` to add static response headers:
+
+```typescript
+@Get("/")
+@Header("Cache-Control", "no-store")
+findAll() {
+  return this.service.findAll();
+}
+```
+
+---
+<!-- Source: core-concepts/bootstrap.md -->
+
+The `createElysiaApplication` function initializes the root module and returns an Elysia instance ready to listen for requests.
+
+## Basic Usage
+
+```typescript
+import { createElysiaApplication } from "nestelia";
+
+const app = await createElysiaApplication(AppModule);
+app.listen(3000);
+```
+
+## What createElysiaApplication Does
+
+1. **Resolves the module tree** — processes imports, providers, and controllers recursively
+2. **Registers providers** — adds all providers to the DI container
+3. **Instantiates controllers** — creates controller instances with dependencies injected
+4. **Registers routes** — maps decorated methods to Elysia routes
+5. **Runs lifecycle hooks** — calls `onModuleInit` and `onApplicationBootstrap` in order
+6. **Returns an ElysiaNestApplication** — ready to call `.listen()`
+
+## With Microservices
+
+When using the microservices package, `createElysiaApplication` returns an `ElysiaNestApplication` that supports hybrid HTTP + microservice mode:
+
+```typescript
+import { createElysiaApplication } from "nestelia";
+import { Transport } from "nestelia/microservices";
+
+const app = await createElysiaApplication(AppModule);
+
+app.connectMicroservice({
+  transport: Transport.REDIS,
+  options: { host: "localhost", port: 6379 },
+});
+
+await app.startAllMicroservices();
+app.listen(3000);
+```
+
+## Graceful Shutdown
+
+nestelia supports shutdown lifecycle hooks. When the process receives a termination signal:
+
+1. `BeforeApplicationShutdown` hooks run first
+2. `OnModuleDestroy` hooks run for cleanup
+3. `OnApplicationShutdown` hooks run last
+
+```typescript
+@Injectable()
+class DatabaseService implements OnModuleDestroy {
+  async onModuleDestroy() {
+    await this.connection.close();
+  }
+}
+```
+
+---
+<!-- Source: features/http-decorators.md -->
+
+HTTP decorators bind controller methods to specific HTTP methods and paths.
+
+## Available Decorators
+
+| Decorator | HTTP Method |
+|-----------|-------------|
+| `@Get(path?)` | GET |
+| `@Post(path?)` | POST |
+| `@Put(path?)` | PUT |
+| `@Patch(path?)` | PATCH |
+| `@Delete(path?)` | DELETE |
+| `@Options(path?)` | OPTIONS |
+| `@Head(path?)` | HEAD |
+| `@All(path?)` | All methods |
+
+## Usage
+
+```typescript
+import { t } from "elysia";
+import { Controller, Get, Post, Put, Delete, Body, Ctx } from "nestelia";
+
+@Controller("/posts")
+class PostController {
+  @Get("/")
+  findAll() {
+    return this.postService.findAll();
+  }
+
+  @Get("/:id")
+  findOne(@Ctx() ctx: any) {
+    return this.postService.findById(ctx.params.id);
+  }
+
+  @Post("/")
+  create(@Body(t.Object({ title: t.String(), content: t.String() })) body: { title: string; content: string }) {
+    return this.postService.create(body);
+  }
+
+  @Put("/:id")
+  update(@Ctx() ctx: any, @Body(t.Object({ title: t.Optional(t.String()) })) body: { title?: string }) {
+    return this.postService.update(ctx.params.id, body);
+  }
+
+  @Delete("/:id")
+  remove(@Ctx() ctx: any) {
+    return this.postService.remove(ctx.params.id);
+  }
+}
+```
+
+## Path Parameters
+
+Paths support Elysia's route parameters using `:param` syntax:
+
+```typescript
+@Get("/:category/:id")
+findByCategory(@Ctx() ctx: any) {
+  const { category, id } = ctx.params;
+  return this.service.find(category, id);
+}
+```
+
+For validated params, use the `@Param()` decorator with a TypeBox schema:
+
+```typescript
+import { t } from "elysia";
+
+@Get("/:id")
+findOne(@Param(t.Object({ id: t.Numeric() })) params: { id: number }) {
+  return this.service.findById(params.id);
+}
+```
+
+## Wildcard Routes
+
+Use `@All()` to match any HTTP method:
+
+```typescript
+@All("/health")
+health() {
+  return { status: "ok" };
+}
+```
+
+## No Path Argument
+
+When no path is provided, the method matches the controller's prefix:
+
+```typescript
+@Controller("/users")
+class UserController {
+  @Get()  // matches GET /users
+  findAll() { /* ... */ }
+}
+```
+
+## Response Status and Headers
+
+Use `@HttpCode()` and `@Header()` decorators on route methods:
+
+```typescript
+@Post("/")
+@HttpCode(201)
+@Header("Location", "/users/1")
+create(@Body(t.Object({ name: t.String() })) body: { name: string }) {
+  return this.userService.create(body);
+}
+```
+
+## Route Metadata
+
+Under the hood, each decorator stores metadata via `reflect-metadata`:
+
+- `ROUTE_METADATA` — the HTTP method and path
+- `PARAMS_METADATA` — parameter extraction instructions
+- `ROUTE_SCHEMA_METADATA` — TypeBox validation schemas
+
+This metadata is read at bootstrap time to register routes on the Elysia instance.
+
+---
+<!-- Source: features/parameter-decorators.md -->
+
+Parameter decorators allow you to extract specific parts of the incoming request directly into your handler method arguments.
+
+## Available Decorators
+
+| Decorator | Extracts |
+|-----------|----------|
+| `@Body(schema)` | Request body (JSON), validated against TypeBox schema |
+| `@Param(schema)` | All URL path parameters, validated against TypeBox schema |
+| `@Query(schema)` | All query string parameters, validated against TypeBox schema |
+| `@Headers(name?)` | Request header(s) |
+| `@Req()` / `@Request()` | Raw `Request` object |
+| `@Res()` / `@Response()` | Elysia response context (`set`) |
+| `@Ctx()` / `@ElysiaContext()` | Full Elysia context |
+| `@Ip()` | Client IP address |
+| `@Session()` | Session object |
+
+## TypeBox Schema Decorators
+
+`@Body`, `@Param`, and `@Query` use [TypeBox](https://github.com/sinclairzx81/typebox) for schema definition and validation. Import `t` from `elysia`:
+
+```typescript
+import { t } from "elysia";
+import { Controller, Post, Get, Body, Param, Query } from "nestelia";
+
+@Controller("/users")
+class UserController {
+  @Post("/")
+  create(@Body(t.Object({ name: t.String(), age: t.Number() })) body: { name: string; age: number }) {
+    return this.service.create(body);
+  }
+
+  @Get("/:id")
+  findOne(@Param(t.Object({ id: t.String() })) params: { id: string }) {
+    return this.service.findById(params.id);
+  }
+
+  @Get("/search")
+  search(@Query(t.Object({ q: t.String(), page: t.Optional(t.Number()) })) query: { q: string; page?: number }) {
+    return this.service.search(query.q, query.page);
+  }
+}
+```
+
+The schema is passed to Elysia's route for TypeBox validation. If validation fails, Elysia returns a 422 response automatically.
+
+## @Body()
+
+Extracts and validates the parsed JSON request body:
+
+```typescript
+import { t } from "elysia";
+
+@Post("/")
+create(@Body(t.Object({
+  name: t.String(),
+  email: t.String({ format: "email" }),
+})) body: { name: string; email: string }) {
+  return this.userService.create(body);
+}
+```
+
+## @Param()
+
+Extracts all URL path parameters as an object:
+
+```typescript
+@Get("/:category/:id")
+find(@Param(t.Object({
+  category: t.String(),
+  id: t.String(),
+})) params: { category: string; id: string }) {
+  return this.service.find(params.category, params.id);
+}
+```
+
+## @Query()
+
+Extracts all query string values as an object:
+
+```typescript
+@Get("/search")
+search(@Query(t.Object({
+  q: t.String(),
+  page: t.Optional(t.Number()),
+})) query: { q: string; page?: number }) {
+  // GET /search?q=hello&page=2
+}
+```
+
+## @Headers()
+
+Access request headers. Pass a name to get a specific header, or omit it to get the full `Headers` object:
+
+```typescript
+@Get("/")
+check(
+  @Headers("authorization") auth: string,
+  @Headers() allHeaders: Headers
+) {
+  // ...
+}
+```
+
+## @Ctx() / @ElysiaContext()
+
+Access the full Elysia request context for low-level control. This is also the simplest way to access individual path params or query values without schema validation:
+
+```typescript
+@Get("/:id")
+findOne(@Ctx() ctx: any) {
+  const id = ctx.params.id;       // path param
+  const q = ctx.query.search;     // query string
+  const body = ctx.body;          // request body
+  ctx.set.status = 200;           // set response status
+  ctx.set.headers["x-custom"] = "value"; // set response header
+  return this.service.findById(id);
+}
+```
+
+## @Req() / @Request()
+
+Access the raw Web `Request` object:
+
+```typescript
+@Get("/")
+handle(@Req() request: Request) {
+  const userAgent = request.headers.get("user-agent");
+  return { userAgent };
+}
+```
+
+## @Ip()
+
+Get the client's IP address:
+
+```typescript
+@Get("/")
+handle(@Ip() ip: string) {
+  return { ip };
+}
+```
+
+## Custom Param Decorators
+
+Create reusable param decorators with `createParamDecorator`:
+
+```typescript
+import { createParamDecorator, ExecutionContext } from "nestelia";
+
+const User = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
+  const request = ctx.switchToHttp().getRequest<any>();
+  return request.user;
+});
+
+@Get("/profile")
+getProfile(@User() user: any) {
+  return user;
+}
+```
+
+## Using @Schema() for Full Route Validation
+
+The `@Schema()` decorator lets you define the complete Elysia route schema (body, params, query, headers, response) in one place:
+
+```typescript
+import { t } from "elysia";
+import { Schema } from "nestelia";
+
+@Post("/")
+@Schema({
+  body: t.Object({ name: t.String() }),
+  response: t.Object({ id: t.Number(), name: t.String() }),
+})
+create(@Ctx() ctx: any) {
+  return this.service.create(ctx.body);
+}
+```
+
+---
+<!-- Source: features/dependency-injection.md -->
+
+nestelia provides a full dependency injection system. Services are registered in modules and automatically injected into controllers and other services.
+
+## @Injectable()
+
+Mark a class as injectable so the DI container can manage it:
+
+```typescript
+import { Injectable } from "nestelia";
+
+@Injectable()
+class UserService {
+  findAll() {
+    return [{ id: 1, name: "John" }];
+  }
+}
+```
+
+## @Inject()
+
+Explicitly specify a dependency token in the constructor:
+
+```typescript
+@Controller("/users")
+class UserController {
+  constructor(@Inject(UserService) private readonly userService: UserService) {}
+}
+```
+
+## @Optional()
+
+Mark a dependency as optional — returns `undefined` if not available:
+
+```typescript
+constructor(
+  @Inject("ANALYTICS") @Optional() private analytics?: AnalyticsService
+) {}
+```
+
+## Scopes
+
+Control the lifecycle of your services with scopes:
+
+```typescript
+import { Injectable, Scope } from "nestelia";
+
+// Default — one instance shared everywhere
+@Injectable()
+class SingletonService {}
+
+// New instance for every injection
+@Injectable({ scope: Scope.TRANSIENT })
+class TransientService {}
+
+// New instance for every HTTP request (via AsyncLocalStorage)
+@Injectable({ scope: Scope.REQUEST })
+class RequestScopedService {}
+```
+
+| Scope | Behavior |
+|-------|----------|
+| `SINGLETON` | Single instance for the entire application (default) |
+| `TRANSIENT` | New instance every time it is injected |
+| `REQUEST` | New instance per HTTP request |
+
+## Registering Providers
+
+Providers are registered in the `providers` array of a module:
+
+```typescript
+@Module({
+  controllers: [UserController],
+  providers: [UserService, DatabaseService],
+})
+class UserModule {}
+```
+
+## Exporting Providers
+
+To make a provider available to other modules, add it to `exports`:
+
+```typescript
+@Module({
+  providers: [DatabaseService],
+  exports: [DatabaseService],
+})
+class DatabaseModule {}
+
+@Module({
+  imports: [DatabaseModule],
+  controllers: [UserController],
+  providers: [UserService], // can inject DatabaseService
+})
+class UserModule {}
+```
+
+## Custom Providers
+
+See the [Custom Providers](/advanced/custom-providers) page for value, class, factory, and alias providers.
+
+## Circular Dependencies
+
+See the [Forward References](/advanced/forward-ref) page for resolving circular dependencies with `forwardRef()`.
+
+---
+<!-- Source: features/lifecycle-hooks.md -->
+
+nestelia provides lifecycle hooks that let you run logic at specific points during the application startup and shutdown process.
+
+## Module Lifecycle Hooks
+
+Implement these interfaces on your `@Injectable()` services or controllers:
+
+### OnModuleInit
+
+Called once the module's providers have been instantiated:
+
+```typescript
+import { Injectable, OnModuleInit } from "nestelia";
+
+@Injectable()
+class DatabaseService implements OnModuleInit {
+  async onModuleInit() {
+    await this.connect();
+    console.log("Database connected");
+  }
+}
+```
+
+### OnApplicationBootstrap
+
+Called after all modules have been initialized:
+
+```typescript
+@Injectable()
+class AppService implements OnApplicationBootstrap {
+  async onApplicationBootstrap() {
+    console.log("Application is ready");
+  }
+}
+```
+
+### OnModuleDestroy
+
+Called when the module is being destroyed (during shutdown):
+
+```typescript
+@Injectable()
+class CacheService implements OnModuleDestroy {
+  async onModuleDestroy() {
+    await this.cache.flush();
+  }
+}
+```
+
+### BeforeApplicationShutdown
+
+Called before the application starts shutting down. Receives the signal that triggered shutdown:
+
+```typescript
+@Injectable()
+class GracefulService implements BeforeApplicationShutdown {
+  async beforeApplicationShutdown(signal?: string) {
+    console.log(`Shutting down due to: ${signal}`);
+    await this.drainRequests();
+  }
+}
+```
+
+### OnApplicationShutdown
+
+Called after all modules have been destroyed:
+
+```typescript
+@Injectable()
+class CleanupService implements OnApplicationShutdown {
+  async onApplicationShutdown(signal?: string) {
+    await this.releaseResources();
+  }
+}
+```
+
+## Execution Order
+
+During startup:
+1. `OnModuleInit` — per module, in import order
+2. `OnApplicationBootstrap` — after all modules initialized
+
+During shutdown:
+1. `BeforeApplicationShutdown`
+2. `OnModuleDestroy`
+3. `OnApplicationShutdown`
+
+## Elysia Lifecycle Decorators
+
+nestelia also exposes Elysia's request lifecycle hooks as method decorators on controllers:
+
+```typescript
+import {
+  OnRequest,
+  OnBeforeHandle,
+  OnAfterHandle,
+  OnAfterResponse,
+  OnError,
+} from "nestelia";
+
+@Controller("/")
+class AppController {
+  @OnRequest()
+  logRequest(ctx: any) {
+    console.log(`${ctx.request.method} ${ctx.request.url}`);
+  }
+
+  @OnBeforeHandle()
+  checkAuth(ctx: any) {
+    // runs before route handler
+  }
+
+  @OnAfterHandle()
+  addHeaders(ctx: any) {
+    ctx.set.headers["x-powered-by"] = "nestelia";
+  }
+
+  @OnError()
+  handleError(ctx: any) {
+    console.error("Error:", ctx.error);
+  }
+
+  @OnAfterResponse()
+  logResponse(ctx: any) {
+    console.log("Response sent");
+  }
+}
+```
+
+Available Elysia lifecycle decorators:
+
+| Decorator | Hook |
+|-----------|------|
+| `@OnRequest()` | Before routing |
+| `@OnParse()` | Body parsing |
+| `@OnTransform()` | Transform request |
+| `@OnBeforeHandle()` | Before handler |
+| `@OnAfterHandle()` | After handler |
+| `@OnMapResponse()` | Map response |
+| `@OnAfterResponse()` | After response sent |
+| `@OnError()` | Error handler |
+
+---
+<!-- Source: features/middleware.md -->
+
+Middleware runs before the route handler and can modify the request, response, or short-circuit the pipeline.
+
+## Class-Based Middleware
+
+Create a class that implements `ElysiaNestMiddleware`:
+
+```typescript
+import { Injectable, ElysiaNestMiddleware } from "nestelia";
+
+@Injectable()
+class LoggerMiddleware implements ElysiaNestMiddleware {
+  async use(context: any, next: () => Promise<any>) {
+    const start = Date.now();
+    console.log(`→ ${context.request.method} ${context.request.url}`);
+
+    await next();
+
+    console.log(`← ${Date.now() - start}ms`);
+  }
+}
+```
+
+Register it in the module's `providers` and `middlewares` arrays:
+
+```typescript
+@Module({
+  controllers: [AppController],
+  providers: [LoggerMiddleware],
+  middlewares: [LoggerMiddleware],
+})
+class AppModule {}
+```
+
+Class-based middleware is resolved from the DI container, so it can inject other services:
+
+```typescript
+@Injectable()
+class AuthMiddleware implements ElysiaNestMiddleware {
+  constructor(@Inject(AuthService) private auth: AuthService) {}
+
+  async use(context: any, next: () => Promise<any>) {
+    const token = context.request.headers.get("authorization");
+    if (!this.auth.verify(token)) {
+      context.set.status = 401;
+      return { error: "Unauthorized" };
+    }
+    await next();
+  }
+}
+```
+
+## Functional Middleware
+
+For simpler cases, use Elysia plugin functions directly:
+
+```typescript
+import cors from "@elysiajs/cors";
+import jwt from "@elysiajs/jwt";
+
+@Module({
+  middlewares: [
+    (app) => app.use(cors()),
+    (app) => app.use(jwt({ secret: "my-secret" })),
+  ],
+})
+class AppModule {}
+```
+
+## Execution Order
+
+Middleware runs in the order it is listed in the `middlewares` array, before any route handlers execute. Class-based middleware from imported modules runs before the current module's middleware.
+
+---
+<!-- Source: features/exception-handling.md -->
+
+nestelia provides built-in exception classes that automatically produce structured error responses.
+
+## Built-In Exceptions
+
+```typescript
+import {
+  HttpException,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+  ForbiddenException,
+} from "nestelia";
+```
+
+## Usage
+
+Throw exceptions from controller methods or services:
+
+```typescript
+@Get("/:id")
+async findOne(@Ctx() ctx: any) {
+  const user = await this.userService.findById(ctx.params.id);
+  if (!user) {
+    throw new NotFoundException(`User ${ctx.params.id} not found`);
+  }
+  return user;
+}
+```
+
+The framework catches the exception and returns:
+
+```json
+{
+  "statusCode": 404,
+  "message": "User 123 not found"
+}
+```
+
+## HttpException
+
+The base class for all HTTP exceptions:
+
+```typescript
+throw new HttpException("Something went wrong", 500);
+
+// Or with a response object
+throw new HttpException({ message: "Validation failed", errors: [] }, 422);
+```
+
+## Convenience Exceptions
+
+| Exception | Status Code |
+|-----------|-------------|
+| `BadRequestException` | 400 |
+| `UnauthorizedException` | 401 |
+| `ForbiddenException` | 403 |
+| `NotFoundException` | 404 |
+
+## Custom Exceptions
+
+Extend `HttpException` to create your own:
+
+```typescript
+class ValidationException extends HttpException {
+  constructor(errors: string[]) {
+    super({ message: "Validation failed", errors }, 422);
+  }
+}
+
+class PaymentRequiredException extends HttpException {
+  constructor() {
+    super("Payment required", 402);
+  }
+}
+```
+
+## Exception Filters
+
+Exception filters let you intercept and transform thrown exceptions globally.
+
+### Defining a Filter
+
+Implement the `ExceptionFilter` interface and use `@Catch()` to specify which exception types to handle:
+
+```typescript
+import { Catch, ExceptionFilter, ExceptionContext, HttpException } from "nestelia";
+
+@Catch(HttpException)
+class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: HttpException, context: ExceptionContext) {
+    return {
+      statusCode: exception.getStatus(),
+      message: exception.message,
+      timestamp: new Date().toISOString(),
+      path: context.path,
+    };
+  }
+}
+```
+
+Use `@Catch()` with no arguments to catch all errors:
+
+```typescript
+@Catch()
+class GlobalExceptionFilter implements ExceptionFilter {
+  catch(exception: Error, context: ExceptionContext) {
+    const status = exception instanceof HttpException
+      ? exception.getStatus()
+      : 500;
+
+    return {
+      statusCode: status,
+      message: exception.message,
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
+```
+
+### Registering Filters
+
+Register a global exception filter using the `APP_FILTER` token in the root module's `providers`:
+
+```typescript
+import { Module, APP_FILTER } from "nestelia";
+
+@Module({
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: HttpExceptionFilter,
+    },
+  ],
+})
+class AppModule {}
+```
+
+### ExceptionContext
+
+The context object passed to `catch()` contains:
+
+```typescript
+interface ExceptionContext {
+  request: Request;
+  response: any;
+  set: { status: number; headers: Record<string, string> };
+  path: string;
+  method: string;
+}
+```
+
+---
+<!-- Source: features/guards.md -->
+
+Guards determine whether a request should proceed to the route handler. They implement the `CanActivate` interface and are automatically executed before the handler is called.
+
+## CanActivate Interface
+
+```typescript
+interface CanActivate {
+  canActivate(context: ExecutionContext): Promise<boolean> | boolean;
+}
+```
+
+If `canActivate` returns `false`, the request is rejected with **403 Forbidden**. If it returns `true`, the request proceeds normally.
+
+## Creating a Guard
+
+```typescript
+import { Injectable, CanActivate, ExecutionContext } from "nestelia";
+
+@Injectable()
+class AuthGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest<Request>();
+    return request.headers.get("authorization") !== null;
+  }
+}
+```
+
+Guards can also be async:
+
+```typescript
+@Injectable()
+class RolesGuard implements CanActivate {
+  constructor(private readonly userService: UserService) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest<Request>();
+    const token = request.headers.get("authorization");
+    const user = await this.userService.verifyToken(token);
+    return user?.role === "admin";
+  }
+}
+```
+
+## @UseGuards() Decorator
+
+Apply guards at the **method level** (single route) or **class level** (all routes in a controller). When both are present, class-level guards run first.
+
+```typescript
+import { Controller, Get, UseGuards } from "nestelia";
+
+@Controller("/admin")
+@UseGuards(AuthGuard)       // runs for every route in this controller
+class AdminController {
+
+  @Get("/dashboard")
+  dashboard() {
+    return { data: "admin-only content" };
+  }
+
+  @Get("/stats")
+  @UseGuards(RolesGuard)    // AuthGuard → RolesGuard → handler
+  stats() {
+    return { data: "stats" };
+  }
+}
+```
+
+Multiple guards can be chained — they run **in order**, and the first `false` stops the chain:
+
+```typescript
+@UseGuards(AuthGuard, RolesGuard, IpWhitelistGuard)
+```
+
+## DI-Aware Guards
+
+If a guard is registered as a provider in a module, it will be resolved from the DI container (allowing constructor injection). Otherwise it is instantiated directly.
+
+```typescript
+@Module({
+  controllers: [AdminController],
+  providers: [AuthGuard, UserService],   // AuthGuard gets DI
+})
+class AdminModule {}
+```
+
+## ExecutionContext
+
+The `ExecutionContext` passed to `canActivate` provides access to the current request and handler metadata:
+
+```typescript
+interface ExecutionContext {
+  /** Controller class */
+  getClass<T = any>(): T;
+  /** Route handler function */
+  getHandler(): (...args: unknown[]) => unknown;
+  /** All handler arguments */
+  getArgs<T extends any[] = any[]>(): T;
+  /** Single argument by index */
+  getArgByIndex<T = any>(index: number): T;
+  /** Context type — "http" for HTTP routes */
+  getType<T extends string = string>(): T;
+  /** Switch to HTTP context */
+  switchToHttp(): HttpArgumentsHost;
+}
+
+interface HttpArgumentsHost {
+  /** Web API Request object */
+  getRequest<T = any>(): T;
+  /** Elysia context (contains set.status, set.headers, etc.) */
+  getResponse<T = any>(): T;
+}
+```
+
+### Accessing the raw request
+
+```typescript
+canActivate(context: ExecutionContext): boolean {
+  const req = context.switchToHttp().getRequest<Request>();
+  const token = req.headers.get("authorization");
+  // ...
+}
+```
+
+### Accessing the Elysia context (status, headers, cookies)
+
+```typescript
+canActivate(context: ExecutionContext): boolean {
+  const ctx = context.switchToHttp().getResponse<ElysiaContext>();
+  const cookie = ctx.cookie["session"]?.value;
+  // ...
+}
+```
+
+## Request Pipeline
+
+Guards run **after** the controller and handler are resolved, **before** interceptors and the handler itself:
+
+```
+Request → Controller resolved → Guards → Interceptors → Handler → Response
+```
+
+---
+<!-- Source: features/interceptors.md -->
+
+Interceptors run before route handler execution. They can check the request, short-circuit execution, or add side effects such as logging.
+
+## Interceptor Interface
+
+nestelia provides a simple interceptor interface:
+
+```typescript
+interface Interceptor {
+  intercept(context: any): Promise<boolean | void> | boolean | void;
+}
+```
+
+The `context` argument is the raw Elysia context (same as `@Ctx()`).
+
+Returning `false` prevents the route handler from executing.
+
+## Creating an Interceptor
+
+### Auth Interceptor
+
+```typescript
+import { Injectable } from "nestelia";
+
+@Injectable()
+class AuthInterceptor implements Interceptor {
+  intercept(ctx: any): boolean {
+    const token = ctx.request.headers.get("authorization");
+    if (!token) {
+      ctx.set.status = 401;
+      return false; // blocks the handler
+    }
+    return true; // allows the handler to proceed
+  }
+}
+```
+
+### Logging Interceptor
+
+```typescript
+@Injectable()
+class LoggingInterceptor implements Interceptor {
+  intercept(ctx: any): void {
+    const start = Date.now();
+    console.log(`→ ${ctx.request.method} ${ctx.request.url}`);
+    // After this, the handler runs
+    // Note: post-handler logic requires ResponseInterceptor
+  }
+}
+```
+
+## Using Interceptors
+
+Apply interceptors with `@UseInterceptors()` at the controller or method level:
+
+```typescript
+import { UseInterceptors } from "nestelia";
+
+@Controller("/users")
+@UseInterceptors(LoggingInterceptor)
+class UserController {
+  @Get("/")
+  findAll() {
+    return this.userService.findAll();
+  }
+
+  @Get("/secure")
+  @UseInterceptors(AuthInterceptor)
+  secure() {
+    return { secret: "data" };
+  }
+}
+```
+
+## ResponseInterceptor
+
+To add logic that runs after the handler, implement `ResponseInterceptor`:
+
+```typescript
+interface ResponseInterceptor {
+  interceptAfter(context: any): Promise<any> | any;
+}
+```
+
+```typescript
+@Injectable()
+class TimingInterceptor implements ResponseInterceptor {
+  interceptAfter(ctx: any) {
+    ctx.set.headers["x-response-time"] = String(Date.now());
+  }
+}
+```
+
+## NestInterceptor Interface
+
+The `NestInterceptor` interface is exported but is **not yet executed** by the route handler. Use `Interceptor` or `ResponseInterceptor` for actual behavior:
+
+```typescript
+// Available for import but not auto-invoked
+export interface NestInterceptor<T = any, R = any> {
+  intercept(context: ExecutionContext, next: CallHandler<T>): Observable<R> | Promise<Observable<R>>;
+}
+```
+
+## Multiple Interceptors
+
+When multiple interceptors are applied, they execute in the order listed. If any interceptor returns `false`, subsequent interceptors and the route handler are skipped:
+
+```typescript
+@Get("/admin")
+@UseInterceptors(AuthInterceptor, LoggingInterceptor)
+adminRoute() { /* ... */ }
+```
+
+---
+<!-- Source: features/pipes.md -->
+
+Pipes define a `PipeTransform` interface for transforming or validating data. They are a pattern for creating reusable transformation logic.
+
+::: info
+Automatic pipe execution via `@UsePipes()` is not yet available. Pipes can be used manually within handler methods or services.
+:::
+
+## PipeTransform Interface
+
+```typescript
+interface PipeTransform {
+  transform(value: any, metadata?: PipeMetadata): Promise<any> | any;
+}
+
+interface PipeMetadata {
+  type: string;
+  data?: any;
+}
+```
+
+## Creating a Pipe
+
+### Validation Pipe
+
+```typescript
+import { Injectable, PipeTransform, BadRequestException } from "nestelia";
+
+@Injectable()
+class ValidationPipe implements PipeTransform {
+  transform(value: any) {
+    if (!value) {
+      throw new BadRequestException("Value is required");
+    }
+    return value;
+  }
+}
+```
+
+### ParseInt Pipe
+
+```typescript
+@Injectable()
+class ParseIntPipe implements PipeTransform {
+  transform(value: string): number {
+    const parsed = parseInt(value, 10);
+    if (isNaN(parsed)) {
+      throw new BadRequestException(`"${value}" is not a valid integer`);
+    }
+    return parsed;
+  }
+}
+```
+
+### Trim Pipe
+
+```typescript
+@Injectable()
+class TrimPipe implements PipeTransform {
+  transform(value: any) {
+    if (typeof value === "string") {
+      return value.trim();
+    }
+    if (typeof value === "object" && value !== null) {
+      for (const key of Object.keys(value)) {
+        if (typeof value[key] === "string") {
+          value[key] = value[key].trim();
+        }
+      }
+    }
+    return value;
+  }
+}
+```
+
+## Using Pipes Manually
+
+Until `@UsePipes()` is available, inject a pipe and apply it explicitly:
+
+```typescript
+@Controller("/users")
+class UserController {
+  constructor(
+    @Inject(UserService) private userService: UserService,
+    @Inject(ParseIntPipe) private parseIntPipe: ParseIntPipe,
+    @Inject(TrimPipe) private trimPipe: TrimPipe,
+  ) {}
+
+  @Post("/")
+  create(@Ctx() ctx: any) {
+    const body = this.trimPipe.transform(ctx.body);
+    return this.userService.create(body);
+  }
+
+  @Get("/:id")
+  findOne(@Ctx() ctx: any) {
+    const id = this.parseIntPipe.transform(ctx.params.id);
+    return this.userService.findById(id);
+  }
+}
+```
+
+## Schema-Based Validation
+
+For input validation, prefer TypeBox schemas with the `@Body`, `@Param`, and `@Query` parameter decorators — they integrate directly with Elysia's runtime validation:
+
+```typescript
+import { t } from "elysia";
+
+@Post("/")
+create(@Body(t.Object({
+  name: t.String({ minLength: 1 }),
+  email: t.String({ format: "email" }),
+})) body: { name: string; email: string }) {
+  return this.userService.create(body);
+}
+```
+
+---
+<!-- Source: packages/overview.md -->
+
+nestelia ships a set of optional packages that extend the core framework. Install only what you need.
+
+## Available Packages
+
+| Package | Description | Peer Dependencies |
+|---------|-------------|-------------------|
+| `nestelia/scheduler` | Cron jobs, intervals, timeouts | — |
+| `nestelia/microservices` | Multi-transport microservices | `ioredis` (optional), `amqplib` (optional) |
+| `nestelia/apollo` | Apollo GraphQL code-first | `@apollo/server`, `graphql` |
+| `nestelia/passport` | Passport.js strategies | `passport` |
+| `nestelia/testing` | Isolated test modules | — |
+| `nestelia/cache` | Response caching with decorators | `cache-manager` |
+| `nestelia/rabbitmq` | Advanced RabbitMQ messaging | `amqplib` |
+| `nestelia/graphql-pubsub` | Redis PubSub for GraphQL subscriptions | `ioredis` |
+| `nestelia/drizzle` | Type-safe SQL ORM via drizzle-orm | `drizzle-orm` |
+| `nestelia/event-emitter` | Typed async event emitter with wildcard support | — |
+
+## Installation
+
+All subpaths are part of the single `nestelia` package. Install it once, then add only the peer dependencies you need:
+
+```bash
+# Core (required)
+bun add nestelia elysia
+
+# Apollo GraphQL
+bun add @apollo/server graphql graphql-ws
+
+# Passport authentication
+bun add passport
+
+# Cache manager
+bun add cache-manager
+
+# RabbitMQ / microservices (RabbitMQ transport)
+bun add amqplib
+
+# Microservices (Redis transport) / GraphQL PubSub
+bun add ioredis
+```
+
+## Import Paths
+
+All subpaths are available directly from `nestelia`:
+
+```typescript
+import { ScheduleModule } from "nestelia/scheduler";
+import { Transport } from "nestelia/microservices";
+import { Resolver, Query } from "nestelia/apollo";
+import { AuthGuard } from "nestelia/passport";
+import { Test } from "nestelia/testing";
+import { CacheModule } from "nestelia/cache";
+import { RabbitMQModule } from "nestelia/rabbitmq";
+import { GraphQLPubSubModule } from "nestelia/graphql-pubsub";
+import { DrizzleModule } from "nestelia/drizzle";
+import { EventEmitterModule } from "nestelia/event-emitter";
+```
+
+---
+<!-- Source: packages/scheduler.md -->
+
+The scheduler package provides decorators for running tasks on a schedule.
+
+## Setup
+
+Import `ScheduleModule` in your root module:
+
+```typescript
+import { Module } from "nestelia";
+import { ScheduleModule } from "nestelia/scheduler";
+
+@Module({
+  imports: [ScheduleModule.forRoot()],
+})
+class AppModule {}
+```
+
+## Decorators
+
+### @Cron()
+
+Run a method on a cron schedule:
+
+```typescript
+import { Injectable } from "nestelia";
+import { Cron } from "nestelia/scheduler";
+
+@Injectable()
+class TasksService {
+  @Cron("0 */5 * * * *") // every 5 minutes
+  async cleanup() {
+    await this.db.cleanup();
+  }
+
+  @Cron("0 0 * * *") // daily at midnight
+  async dailyReport() {
+    await this.reportService.generate();
+  }
+}
+```
+
+### @Interval()
+
+Run a method at a fixed interval (in milliseconds):
+
+```typescript
+@Injectable()
+class HealthService {
+  @Interval(60000) // every 60 seconds
+  heartbeat() {
+    console.log("Alive");
+  }
+}
+```
+
+### @Timeout()
+
+Run a method once after a delay (in milliseconds):
+
+```typescript
+@Injectable()
+class StartupService {
+  @Timeout(5000) // 5 seconds after bootstrap
+  async delayedInit() {
+    console.log("Delayed initialization complete");
+  }
+}
+```
+
+### @ScheduleAt()
+
+Run a method at a specific date/time:
+
+```typescript
+@Injectable()
+class EventService {
+  @ScheduleAt(new Date("2025-12-31T23:59:00"))
+  async newYearCountdown() {
+    console.log("Happy New Year!");
+  }
+}
+```
+
+## Scheduler Options
+
+Pass options to `forRootWithOptions()`:
+
+```typescript
+ScheduleModule.forRootWithOptions({
+  maxTasks: 5000,   // max number of scheduled tasks (default: 10000)
+})
+```
+
+## SchedulerRegistry
+
+Inject `SchedulerRegistry` to manage scheduled tasks programmatically:
+
+```typescript
+import { Injectable, Inject } from "nestelia";
+import { SchedulerRegistry, Scheduler } from "nestelia/scheduler";
+
+@Injectable()
+class DynamicTaskService {
+  constructor(private registry: SchedulerRegistry) {}
+
+  addCronTask(name: string, cronExpression: string, callback: () => void) {
+    const scheduler = new Scheduler();
+    scheduler.scheduleCron(cronExpression, callback);
+    this.registry.addScheduler(name, scheduler);
+  }
+
+  removeTask(name: string) {
+    this.registry.removeScheduler(name);
+  }
+
+  listTasks(): string[] {
+    return this.registry.getSchedulerNames();
+  }
+}
+```
+
+### SchedulerRegistry API
+
+| Method | Description |
+|--------|-------------|
+| `addScheduler(name, scheduler)` | Register a scheduler under a name |
+| `getScheduler(name)` | Get a scheduler by name (returns `Scheduler \| undefined`) |
+| `removeScheduler(name)` | Stop and remove a scheduler |
+| `getSchedulerNames()` | List all registered scheduler names |
+| `clear()` | Stop and remove all schedulers |
+
+### Scheduler API
+
+| Method | Description |
+|--------|-------------|
+| `scheduleCron(expression, callback, options?)` | Schedule a cron task, returns `TaskHandle` |
+| `scheduleInterval(ms, callback, options?)` | Schedule an interval task |
+| `scheduleTimeout(ms, callback, options?)` | Schedule a one-time delayed task |
+| `cancelAllTasks()` | Cancel all tasks on this scheduler |
+
+---
+<!-- Source: packages/microservices.md -->
+
+The microservices package enables multi-transport communication between services, supporting Redis, RabbitMQ, TCP, and more.
+
+## Installation
+
+```bash
+bun add ioredis   # Redis transport
+bun add amqplib   # RabbitMQ transport
+```
+
+## Setup
+
+```typescript
+import { createElysiaApplication } from "nestelia";
+import { Transport } from "nestelia/microservices";
+
+const app = await createElysiaApplication(AppModule);
+
+app.connectMicroservice({
+  transport: Transport.REDIS,
+  options: { host: "localhost", port: 6379 },
+});
+
+await app.startAllMicroservices();
+app.listen(3000); // HTTP + microservices hybrid
+```
+
+## Transports
+
+```typescript
+enum Transport {
+  REDIS = "REDIS",
+  RABBITMQ = "RABBITMQ",
+  TCP = "TCP",
+  GRPC = "GRPC",
+  KAFKA = "KAFKA",
+  MQTT = "MQTT",
+  NATS = "NATS",
+}
+```
+
+## Message Patterns
+
+### Request/Response
+
+Use `@MessagePattern()` for request/response communication:
+
+```typescript
+import { Controller } from "nestelia";
+import { MessagePattern, Payload } from "nestelia/microservices";
+
+@Controller()
+class MathController {
+  @MessagePattern("sum")
+  sum(@Payload() data: { numbers: number[] }) {
+    return data.numbers.reduce((a, b) => a + b, 0);
+  }
+}
+```
+
+### Event-Based
+
+Use `@EventPattern()` for fire-and-forget events:
+
+```typescript
+import { EventPattern, Payload } from "nestelia/microservices";
+
+@Controller()
+class NotificationController {
+  @EventPattern("user.created")
+  handleUserCreated(@Payload() data: { userId: string }) {
+    console.log("New user:", data.userId);
+  }
+}
+```
+
+## Client Factory
+
+Send messages to other microservices:
+
+```typescript
+import { Injectable } from "nestelia";
+import { ClientFactory, Transport } from "nestelia/microservices";
+
+@Injectable()
+class OrderService {
+  private client = ClientFactory.create({
+    transport: Transport.REDIS,
+    options: { host: "localhost", port: 6379 },
+  });
+
+  async calculateTotal(items: any[]) {
+    return this.client.send("sum", { numbers: items.map((i) => i.price) });
+  }
+}
+```
+
+## Hybrid Application
+
+Run HTTP and microservice listeners in the same process:
+
+```typescript
+const app = await createElysiaApplication(AppModule);
+
+// HTTP routes work as normal
+// Plus microservice message handlers
+app.connectMicroservice({
+  transport: Transport.REDIS,
+  options: { host: "localhost", port: 6379 },
+});
+
+await app.startAllMicroservices();
+app.listen(3000);
+```
+
+---
+<!-- Source: packages/apollo.md -->
+
+The Apollo package provides a code-first approach to building GraphQL APIs with decorators for types, resolvers, queries, and mutations.
+
+## Installation
+
+```bash
+bun add @apollo/server graphql graphql-ws
+```
+
+## Setup
+
+Register the GraphQL module in your application:
+
+```typescript
+import { Module } from "nestelia";
+import { GraphQLModule } from "nestelia/apollo";
+
+@Module({
+  imports: [
+    GraphQLModule.forRoot({
+      playground: true,
+    }),
+    UserModule,
+  ],
+})
+class AppModule {}
+```
+
+## Type Definitions
+
+### Object Types
+
+```typescript
+import { ObjectType, Field } from "nestelia/apollo";
+
+@ObjectType()
+class User {
+  @Field()
+  id: string;
+
+  @Field()
+  name: string;
+
+  @Field({ nullable: true })
+  email?: string;
+}
+```
+
+### Input Types
+
+```typescript
+import { InputType, Field } from "nestelia/apollo";
+
+@InputType()
+class CreateUserInput {
+  @Field()
+  name: string;
+
+  @Field()
+  email: string;
+}
+```
+
+### Enums
+
+Register enums with `registerEnumType` and always pass an explicit type factory to `@Field()`.
+TypeScript emits `String` or `Number` as `design:type` for enum fields, so the schema builder
+cannot infer the enum type automatically.
+
+```typescript
+import { registerEnumType } from "nestelia/apollo";
+
+enum Role {
+  ADMIN = "ADMIN",
+  USER = "USER",
+}
+
+registerEnumType(Role, { name: "Role", description: "User role" });
+
+@ObjectType()
+class User {
+  @Field()
+  name: string;
+
+  // Explicit type factory required for enum fields
+  @Field(() => Role)
+  role: Role;
+}
+```
+
+### Union Types
+
+Use `createUnionType` for code-first union types. The `resolveType` function can return
+either a type name string or a class constructor.
+
+```typescript
+import { createUnionType } from "nestelia/apollo";
+
+@ObjectType()
+class Cat {
+  @Field()
+  meow: string;
+}
+
+@ObjectType()
+class Dog {
+  @Field()
+  bark: string;
+}
+
+const PetUnion = createUnionType({
+  name: "PetUnion",
+  types: () => [Cat, Dog] as const,
+  resolveType(value) {
+    return "meow" in value ? Cat : Dog;
+  },
+});
+
+@ObjectType()
+class Owner {
+  @Field(() => PetUnion)
+  pet: typeof PetUnion;
+}
+```
+
+### Built-in Scalars
+
+Six ready-to-use scalars are included — no extra packages needed:
+
+| Scalar | GraphQL type | JS type | Description |
+|--------|-------------|---------|-------------|
+| `GraphQLDateTime` | `DateTime` | `Date` | ISO 8601 string ↔ JS Date |
+| `GraphQLJSON` | `JSON` | `any` | Any JSON value |
+| `GraphQLURL` | `URL` | `string` | Validated URL string |
+| `GraphQLBigInt` | `BigInt` | `bigint` | 64-bit integer, serialized as string |
+| `GraphQLEmailAddress` | `EmailAddress` | `string` | Validated email address |
+| `GraphQLUUID` | `UUID` | `string` | UUID, normalized to lowercase |
+
+```typescript
+import { GraphQLDateTime, GraphQLEmailAddress, GraphQLJSON, GraphQLUUID } from "nestelia/apollo";
+
+@ObjectType()
+class User {
+  @Field(() => GraphQLUUID)
+  id!: string;
+
+  @Field(() => GraphQLEmailAddress)
+  email!: string;
+
+  @Field(() => GraphQLDateTime)
+  createdAt!: Date;
+
+  @Field(() => GraphQLJSON, { nullable: true })
+  metadata?: Record<string, unknown>;
+}
+```
+
+### Custom Scalars
+
+Implement your own scalar with `@Scalar()`:
+
+```typescript
+import { Scalar } from "nestelia/apollo";
+
+@Scalar("Currency")
+class CurrencyScalar {
+  description = "Monetary amount in cents (integer)";
+
+  serialize(value: number) { return Math.round(value); }
+  parseValue(value: unknown) {
+    if (typeof value !== "number") throw new Error("Currency must be a number");
+    return Math.round(value);
+  }
+}
+```
+
+## Args Types
+
+`@ArgsType()` marks a class whose `@Field()` properties are expanded as individual top-level
+arguments in the schema — no wrapper input object. Use it with `@Args()` (no name):
+
+```typescript
+import { ArgsType, Field, Int } from "nestelia/apollo";
+
+@ArgsType()
+class BooksArgs {
+  @Field(() => Int, { nullable: true, defaultValue: 0 })
+  offset!: number;
+
+  @Field(() => Int, { nullable: true, defaultValue: 20 })
+  limit!: number;
+}
+
+@Resolver(() => Book)
+class BooksResolver {
+  @Query(() => [Book])
+  books(@Args() args: BooksArgs): Book[] {
+    return this.store.slice(args.offset, args.offset + args.limit);
+  }
+}
+```
+
+## Pagination
+
+### Offset-based
+
+`Paginated(ItemType)` creates a paginated response type with `items`, `total`, `hasNextPage`, `hasPreviousPage`:
+
+```typescript
+import { Paginated } from "nestelia/apollo";
+
+@ObjectType()
+class BooksPage extends Paginated(Book) {}
+
+@Query(() => BooksPage)
+books(@Args() args: BooksArgs): BooksPage {
+  const items = this.store.slice(args.offset, args.offset + args.limit);
+  return {
+    items,
+    total: this.store.length,
+    hasNextPage: args.offset + args.limit < this.store.length,
+    hasPreviousPage: args.offset > 0,
+  };
+}
+```
+
+### Relay (cursor-based)
+
+`createEdgeType` and `createConnectionType` build standard Relay Connection types:
+
+```typescript
+import { createEdgeType, createConnectionType, PageInfo, Int } from "nestelia/apollo";
+
+@ObjectType()
+class BookEdge extends createEdgeType(Book) {}
+
+@ObjectType()
+class BookConnection extends createConnectionType(Book, BookEdge) {}
+
+@Query(() => BookConnection)
+booksConnection(@Args("first", { type: () => Int }) first: number): BookConnection {
+  const edges = this.store.slice(0, first).map((book, i) => ({
+    node: book,
+    cursor: Buffer.from(String(i)).toString("base64"),
+  }));
+  return {
+    edges,
+    pageInfo: {
+      hasNextPage: first < this.store.length,
+      hasPreviousPage: false,
+      startCursor: edges[0]?.cursor,
+      endCursor: edges.at(-1)?.cursor,
+    },
+    totalCount: this.store.length,
+  };
+}
+```
+
+`PageInfo` fields: `hasNextPage`, `hasPreviousPage`, `startCursor?`, `endCursor?`.
+
+## Resolver
+
+Define GraphQL resolvers with the `@Resolver()` decorator:
+
+```typescript
+import { Resolver, Query, Mutation, Args } from "nestelia/apollo";
+import { Injectable, Inject } from "nestelia";
+
+@Resolver(() => User)
+@Injectable()
+class UserResolver {
+  constructor(@Inject(UserService) private userService: UserService) {}
+
+  @Query(() => [User])
+  async users() {
+    return this.userService.findAll();
+  }
+
+  @Query(() => User)
+  async user(@Args("id") id: string) {
+    return this.userService.findById(id);
+  }
+
+  @Mutation(() => User)
+  async createUser(@Args("input") input: CreateUserInput) {
+    return this.userService.create(input);
+  }
+}
+```
+
+## Field Resolvers
+
+Use `@FieldResolver()` (or the `@ResolveField()` alias) to resolve nested fields:
+
+```typescript
+import { Resolver, FieldResolver, Parent } from "nestelia/apollo";
+
+@Resolver(() => Post)
+class PostResolver {
+  @FieldResolver()
+  async author(@Parent() post: Post) {
+    return this.userService.findById(post.authorId);
+  }
+}
+```
+
+## Subscriptions
+
+```typescript
+import { Resolver, Subscription } from "nestelia/apollo";
+
+@Resolver(() => User)
+class UserResolver {
+  @Subscription(() => User)
+  userCreated() {
+    return pubsub.asyncIterator("USER_CREATED");
+  }
+}
+```
+
+## Context and Info
+
+```typescript
+import { Context, Info } from "nestelia/apollo";
+
+@Query(() => User)
+async me(@Context("user") user: User, @Info() info: GraphQLResolveInfo) {
+  return user;
+}
+```
+
+## Guards on Resolvers
+
+```typescript
+import { UseGuards } from "nestelia";
+
+@Resolver(() => User)
+class AdminResolver {
+  @Query(() => [User])
+  @UseGuards(AdminGuard)
+  async allUsers() {
+    return this.userService.findAll();
+  }
+}
+```
+
+---
+<!-- Source: packages/passport.md -->
+
+The Passport package integrates Passport.js authentication strategies into nestelia's guard system.
+
+## Installation
+
+```bash
+bun add passport
+# Plus your chosen strategy
+bun add passport-jwt
+bun add passport-local
+```
+
+## PassportStrategy
+
+Create a strategy by extending the `PassportStrategy` mixin:
+
+```typescript
+import { Injectable } from "nestelia";
+import { PassportStrategy } from "nestelia/passport";
+import { Strategy, ExtractJwt } from "passport-jwt";
+
+@Injectable()
+class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
+  constructor() {
+    super({
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      secretOrKey: "my-secret",
+    });
+  }
+
+  async validate(payload: { sub: string; email: string }) {
+    return { userId: payload.sub, email: payload.email };
+  }
+}
+```
+
+The `validate()` method is called after the strategy verifies the credentials. Its return value is attached to the request as `request.user`.
+
+## AuthGuard
+
+Use `AuthGuard` to protect routes with a specific strategy:
+
+```typescript
+import { Controller, Get } from "nestelia";
+import { AuthGuard } from "nestelia/passport";
+
+@Controller("/profile")
+class ProfileController {
+  @Get("/")
+  @UseGuards(AuthGuard("jwt"))
+  getProfile(@Req() req: any) {
+    return req.user;
+  }
+}
+```
+
+## Local Strategy Example
+
+```typescript
+@Injectable()
+class LocalStrategy extends PassportStrategy(Strategy, "local") {
+  constructor(@Inject(AuthService) private authService: AuthService) {
+    super({ usernameField: "email" });
+  }
+
+  async validate(email: string, password: string) {
+    const user = await this.authService.validateUser(email, password);
+    if (!user) {
+      throw new UnauthorizedException("Invalid credentials");
+    }
+    return user;
+  }
+}
+
+@Controller("/auth")
+class AuthController {
+  @Post("/login")
+  @UseGuards(AuthGuard("local"))
+  login(@Req() req: any) {
+    return { token: this.authService.generateToken(req.user) };
+  }
+}
+```
+
+## Multiple Strategies
+
+`AuthGuard` accepts an array of strategy names. The request is authenticated if any strategy succeeds:
+
+```typescript
+@UseGuards(AuthGuard(["jwt", "api-key"]))
+```
+
+## Registering Strategies
+
+Include the strategy provider in your module:
+
+```typescript
+@Module({
+  providers: [JwtStrategy, LocalStrategy, AuthService],
+  controllers: [AuthController, ProfileController],
+})
+class AuthModule {}
+```
+
+---
+<!-- Source: packages/testing.md -->
+
+The testing package provides utilities for unit and integration testing of nestelia applications.
+
+## Quick Start
+
+```typescript
+import { describe, expect, it, beforeAll } from "bun:test";
+import { Injectable } from "nestelia";
+import { Test, TestingModule } from "nestelia/testing";
+
+@Injectable()
+class UserService {
+  getUsers() {
+    return [{ id: 1, name: "John" }];
+  }
+}
+
+describe("UserService", () => {
+  let module: TestingModule;
+  let userService: UserService;
+
+  beforeAll(async () => {
+    module = await Test.createTestingModule({
+      providers: [UserService],
+    }).compile();
+
+    userService = module.get(UserService);
+  });
+
+  it("should return users", () => {
+    expect(userService.getUsers()).toEqual([{ id: 1, name: "John" }]);
+  });
+});
+```
+
+## Mocking Dependencies
+
+### Override with Value
+
+```typescript
+const mockDb = {
+  query: () => [{ id: 1, name: "Mock User" }],
+};
+
+const module = await Test.createTestingModule({
+  providers: [UserService, DatabaseService],
+})
+  .overrideProvider(DatabaseService)
+  .useValue(mockDb)
+  .compile();
+```
+
+### Override with Class
+
+```typescript
+class MockDatabaseService {
+  query() {
+    return [{ id: 1, name: "Mock" }];
+  }
+}
+
+const module = await Test.createTestingModule({
+  providers: [UserService, DatabaseService],
+})
+  .overrideProvider(DatabaseService)
+  .useClass(MockDatabaseService)
+  .compile();
+```
+
+### Override with Factory
+
+```typescript
+const module = await Test.createTestingModule({
+  providers: [UserService, DatabaseService],
+})
+  .overrideProvider(DatabaseService)
+  .useFactory(() => ({
+    query: () => [{ id: 1, name: "Factory Mock" }],
+  }))
+  .compile();
+```
+
+## API Reference
+
+### Test.createTestingModule(metadata)
+
+Creates a `TestingModuleBuilder`.
+
+**Parameters:**
+- `metadata` — Module configuration (`providers`, `imports`, `controllers`)
+
+### TestingModuleBuilder
+
+| Method | Description |
+|--------|-------------|
+| `.overrideProvider(token)` | Start overriding a provider |
+| `.useValue(value)` | Replace with a static value |
+| `.useClass(metatype)` | Replace with a different class |
+| `.useFactory(factory, inject?)` | Replace with a factory function |
+| `.compile()` | Build and return a `Promise<TestingModule>` |
+
+### TestingModule
+
+| Method | Description |
+|--------|-------------|
+| `.get<T>(token)` | Get a provider instance (synchronous) |
+| `.resolve<T>(token)` | Resolve a provider (async, for request-scoped) |
+| `.has(token)` | Check if a provider is registered |
+
+---
+<!-- Source: packages/cache.md -->
+
+The cache manager package provides automatic HTTP response caching with decorator-based configuration.
+
+## Installation
+
+```bash
+bun add cache-manager
+```
+
+## Setup
+
+```typescript
+import { Module } from "nestelia";
+import { CacheModule } from "nestelia/cache";
+
+@Module({
+  imports: [
+    CacheModule.register({
+      ttl: 60000, // default TTL in milliseconds (60 seconds)
+    }),
+  ],
+})
+class AppModule {}
+```
+
+### Async Configuration
+
+```typescript
+import { CacheModule } from "nestelia/cache";
+
+CacheModule.registerAsync({
+  useFactory: async (config: ConfigService) => ({
+    ttl: config.get("CACHE_TTL"),      // in milliseconds
+    store: config.get("CACHE_STORE"),  // "memory" or a redis store
+  }),
+  inject: [ConfigService],
+})
+```
+
+## Decorators
+
+### @CacheKey()
+
+Set a custom cache key for a route:
+
+```typescript
+import { CacheKey } from "nestelia/cache";
+
+@Controller("/users")
+class UserController {
+  @Get("/")
+  @CacheKey("all-users")
+  findAll() {
+    return this.userService.findAll();
+  }
+}
+```
+
+Dynamic cache keys using a factory function:
+
+```typescript
+import { CacheKey } from "nestelia/cache";
+
+@Get("/:id")
+@CacheKey((context: ExecutionContext) => {
+  const ctx = context.switchToHttp().getRequest<any>();
+  return `user-${ctx.params.id}`;
+})
+findOne(@Ctx() ctx: any) {
+  return this.userService.findById(ctx.params.id);
+}
+```
+
+### @CacheTTL()
+
+Override the default TTL for a specific route. The value is in **milliseconds**:
+
+```typescript
+import { CacheTTL } from "nestelia/cache";
+
+@Get("/stats")
+@CacheTTL(300000) // cache for 5 minutes (300,000 ms)
+getStats() {
+  return this.statsService.compute();
+}
+```
+
+Dynamic TTL:
+
+```typescript
+@Get("/data")
+@CacheTTL((context: ExecutionContext) => {
+  const ctx = context.switchToHttp().getRequest<any>();
+  // shorter cache for authenticated users
+  return ctx.user ? 30000 : 300000;
+})
+getData() {
+  return this.dataService.fetch();
+}
+```
+
+## CacheInterceptor
+
+Apply the `CacheInterceptor` to automatically cache responses:
+
+```typescript
+import { CacheInterceptor } from "nestelia/cache";
+
+@Controller("/products")
+@UseInterceptors(CacheInterceptor)
+class ProductController {
+  @Get("/")
+  @CacheTTL(120000) // 2 minutes
+  findAll() {
+    return this.productService.findAll();
+  }
+}
+```
+
+## Injecting the Cache Manager
+
+Inject the cache instance directly for manual cache operations:
+
+```typescript
+import { Injectable, Inject } from "nestelia";
+import { CACHE_MANAGER, Cache } from "nestelia/cache";
+
+@Injectable()
+class UserService {
+  constructor(@Inject(CACHE_MANAGER) private cache: Cache) {}
+
+  async findAll() {
+    const cached = await this.cache.get("all-users");
+    if (cached) return cached;
+
+    const users = await this.db.users.findMany();
+    await this.cache.set("all-users", users, 60000); // 60 seconds
+    return users;
+  }
+}
+```
+
+## Cache Stores
+
+- **In-memory** — default, no additional dependencies
+- **Redis** — for distributed caching across multiple instances
+
+```typescript
+import { redisStore } from "cache-manager-redis-yet";
+
+CacheModule.register({
+  store: redisStore,
+  host: "localhost",
+  port: 6379,
+  ttl: 60000,
+})
+```
+
+---
+<!-- Source: packages/rabbitmq.md -->
+
+The RabbitMQ package provides a decorator-driven approach to RabbitMQ messaging with support for subscriptions, RPC, retries, dead letter queues, and batch processing.
+
+## Installation
+
+```bash
+bun add amqplib
+```
+
+## Setup
+
+```typescript
+import { Module } from "nestelia";
+import { RabbitMQModule } from "nestelia/rabbitmq";
+
+@Module({
+  imports: [
+    RabbitMQModule.forRoot({
+      urls: ["amqp://localhost:5672"],
+      queuePrefix: "myapp",
+      exchangePrefix: "myapp",
+      prefetchCount: 10,
+    }),
+  ],
+})
+class AppModule {}
+```
+
+### Async Configuration
+
+```typescript
+import { RabbitMQModule } from "nestelia/rabbitmq";
+
+RabbitMQModule.forRootAsync({
+  useFactory: async (config: ConfigService) => ({
+    urls: [config.get("RABBITMQ_URL")],
+    queuePrefix: config.get("RABBITMQ_QUEUE_PREFIX"),
+    prefetchCount: config.get("RABBITMQ_PREFETCH", 10),
+  }),
+  inject: [ConfigService],
+})
+```
+
+## Subscribe to Messages
+
+```typescript
+import { Injectable } from "nestelia";
+import { RabbitSubscribe, RabbitMQMessage } from "nestelia/rabbitmq";
+
+@Injectable()
+class OrdersHandler {
+  @RabbitSubscribe({
+    exchange: "orders",
+    routingKey: "order.created",
+    queue: "orders-created-queue",
+  })
+  async handleOrderCreated(message: RabbitMQMessage<Order>) {
+    console.log("Order created:", message.content);
+    message.ack();
+  }
+}
+```
+
+## RPC Pattern
+
+```typescript
+import { RabbitRPC } from "nestelia/rabbitmq";
+
+@RabbitRPC({
+  exchange: "rpc",
+  routingKey: "orders.calculate-total",
+  queue: "orders-rpc-queue",
+})
+async calculateTotal(data: { items: { price: number; qty: number }[] }) {
+  const total = data.items.reduce((sum, item) => sum + item.price * item.qty, 0);
+  return { total }; // returned to the caller
+}
+```
+
+## Publishing Messages
+
+```typescript
+import { Injectable } from "nestelia";
+import { RabbitMQService } from "nestelia/rabbitmq";
+
+@Injectable()
+class OrdersService {
+  constructor(private readonly rabbitMQ: RabbitMQService) {}
+
+  async createOrder(orderData: CreateOrderDto) {
+    const order = await this.repository.save(orderData);
+
+    await this.rabbitMQ.publish("orders", "order.created", {
+      id: order.id,
+      amount: order.total,
+      status: "pending",
+    });
+
+    return order;
+  }
+}
+```
+
+## Advanced Features
+
+### Retry
+
+```typescript
+import { RabbitSubscribe, RabbitRetry } from "nestelia/rabbitmq";
+
+@RabbitSubscribe({
+  exchange: "orders",
+  routingKey: "order.process",
+  queue: "orders-process-queue",
+})
+@RabbitRetry(5, 10000) // 5 attempts, 10s delay
+async processOrder(message: RabbitMQMessage<Order>) {
+  // retries on failure
+}
+```
+
+### Dead Letter Queue
+
+```typescript
+@RabbitSubscribe({
+  exchange: "orders",
+  routingKey: "order.critical",
+  queue: "orders-critical-queue",
+})
+@RabbitDLQ("dlx.exchange", "failed.orders")
+async criticalOperation(message: RabbitMQMessage<Order>) {
+  // failed messages go to DLQ
+}
+```
+
+### Batch Processing
+
+```typescript
+@RabbitSubscribe({
+  exchange: "logs",
+  routingKey: "log.entry",
+  queue: "logs-queue",
+})
+@RabbitBatch(100, 5000) // 100 messages or 5s timeout
+async processLogs(messages: RabbitMQMessage<LogEntry>[]) {
+  await this.logRepository.insertMany(messages.map((m) => m.content));
+  messages.forEach((m) => m.ack());
+}
+```
+
+### Delayed Messages
+
+Requires the [rabbitmq-delayed-message-exchange](https://github.com/rabbitmq/rabbitmq-delayed-message-exchange) plugin.
+
+Declare an `x-delayed-message` exchange and pass `x-delay` (milliseconds) in the message headers:
+
+```typescript
+RabbitMQModule.forRoot({
+  urls: ["amqp://localhost:5672"],
+  exchanges: [
+    {
+      name: "delayed",
+      type: "x-delayed-message",
+      options: {
+        durable: true,
+        arguments: { "x-delayed-type": "direct" },
+      },
+      createIfNotExists: true,
+    },
+  ],
+})
+```
+
+```typescript
+await this.rabbitMQ.publish(
+  "delayed",
+  "order.reminder",
+  { orderId: 42 },
+  { headers: { "x-delay": 30_000 } }, // deliver after 30 s
+);
+```
+
+### Multiple Connections
+
+```typescript
+@RabbitConnection("analytics")
+@Injectable()
+class AnalyticsHandler {
+  @RabbitSubscribe({
+    exchange: "events",
+    routingKey: "user.action",
+    queue: "analytics-queue",
+  })
+  async handleEvent(message: RabbitMQMessage<Event>) {
+    // uses the "analytics" connection
+  }
+}
+```
+
+## Decorators
+
+| Decorator | Description |
+|-----------|-------------|
+| `@RabbitSubscribe()` | Subscribe to queue messages |
+| `@RabbitRPC()` | RPC handler |
+| `@RabbitRetry(attempts, delay)` | Retry on failure |
+| `@RabbitDLQ(exchange, routingKey)` | Dead letter queue |
+| `@RabbitBatch(size, timeout)` | Batch processing |
+| `@RabbitConnection(name)` | Use a specific connection |
+| `@RabbitPriority(level)` | Message priority |
+| `@RabbitTTL(ms)` | Time-to-live |
+
+## RabbitMQService API
+
+```typescript
+class RabbitMQService {
+  connect(): Promise<void>
+  disconnect(): Promise<void>
+  isConnectionReady(): boolean
+
+  assertExchange(config): Promise<void>
+  assertQueue(config): Promise<void>
+
+  publish<T>(exchange, routingKey, message, options?): Promise<boolean>
+  sendToQueue<T>(queue, message, options?): Promise<boolean>
+  subscribe<T>(queue, handler): Promise<void>
+
+  getChannel(): Channel | null
+  getConnection(): Connection | null
+}
+```
+
+---
+<!-- Source: packages/graphql-pubsub.md -->
+
+The GraphQL PubSub package provides a Redis-backed publish/subscribe system for GraphQL subscriptions with async iterator support.
+
+## Installation
+
+```bash
+bun add ioredis
+```
+
+## Basic Usage
+
+```typescript
+import { RedisPubSub } from "nestelia/graphql-pubsub";
+
+const pubsub = new RedisPubSub({
+  connection: {
+    host: "localhost",
+    port: 6379,
+  },
+  keyPrefix: "myapp:",
+});
+
+// Publish an event
+await pubsub.publish("user-created", { id: 1, name: "John" });
+
+// Subscribe to events
+const subId = await pubsub.subscribe("user-created", (message) => {
+  console.log("New user:", message);
+});
+
+// Unsubscribe
+pubsub.unsubscribe(subId);
+
+// Close connections
+await pubsub.close();
+```
+
+## Module Registration
+
+### Static Configuration
+
+```typescript
+import { Module } from "nestelia";
+import { GraphQLPubSubModule } from "nestelia/graphql-pubsub";
+
+@Module({
+  imports: [
+    GraphQLPubSubModule.forRoot({
+      useValue: {
+        connection: {
+          host: "localhost",
+          port: 6379,
+        },
+        keyPrefix: "myapp:",
+      },
+    }),
+  ],
+})
+class AppModule {}
+```
+
+### With Existing Redis Clients
+
+```typescript
+import Redis from "ioredis";
+
+const publisher = new Redis({ host: "localhost", port: 6379 });
+const subscriber = new Redis({ host: "localhost", port: 6379 });
+
+GraphQLPubSubModule.forRoot({
+  useExisting: {
+    publisher,
+    subscriber,
+    keyPrefix: "myapp:",
+  },
+})
+```
+
+### Async Configuration
+
+```typescript
+import { GraphQLPubSubModule } from "nestelia/graphql-pubsub";
+
+GraphQLPubSubModule.forRootAsync({
+  useFactory: async (config: ConfigService) => ({
+    connection: {
+      host: config.get("REDIS_HOST"),
+      port: config.get("REDIS_PORT"),
+      password: config.get("REDIS_PASSWORD"),
+    },
+    keyPrefix: config.get("REDIS_PREFIX"),
+  }),
+  inject: [ConfigService],
+})
+```
+
+## Using with GraphQL Resolvers
+
+```typescript
+import { Resolver, Query, Mutation, Subscription } from "nestelia/apollo";
+import { InjectPubSub, RedisPubSub } from "nestelia/graphql-pubsub";
+
+@Resolver("User")
+class UserResolver {
+  constructor(
+    @InjectPubSub() private pubsub: RedisPubSub,
+    @Inject(UserService) private userService: UserService
+  ) {}
+
+  @Mutation(() => User)
+  async createUser(@Args("input") input: CreateUserInput) {
+    const user = await this.userService.create(input);
+    await this.pubsub.publish("user-created", user);
+    return user;
+  }
+
+  @Subscription(() => User)
+  userCreated() {
+    return this.pubsub.asyncIterator("user-created");
+  }
+}
+```
+
+## Pattern Subscriptions
+
+Subscribe using glob-style patterns:
+
+```typescript
+const subId = await pubsub.subscribe(
+  "user.*",
+  (message) => {
+    console.log("User event:", message);
+  },
+  { pattern: true } // uses Redis psubscribe
+);
+```
+
+## Custom Serialization
+
+```typescript
+const pubsub = new RedisPubSub({
+  connection: { host: "localhost", port: 6379 },
+  serializer: (payload) => JSON.stringify(payload),
+  deserializer: (payload) => JSON.parse(payload),
+});
+```
+
+## API Reference
+
+### RedisPubSub
+
+| Method | Description |
+|--------|-------------|
+| `publish(trigger, payload)` | Publish a message to a channel |
+| `subscribe(trigger, handler, options?)` | Subscribe to a channel. Returns numeric subscription ID |
+| `unsubscribe(subId)` | Cancel a subscription |
+| `asyncIterator(triggers)` | Create an async iterator for GraphQL subscriptions |
+| `getPublisher()` | Get the Redis publisher client |
+| `getSubscriber()` | Get the Redis subscriber client |
+| `close()` | Close all connections |
+
+### RedisPubSubOptions
+
+```typescript
+interface RedisPubSubOptions {
+  keyPrefix?: string;
+  publisher?: Redis;
+  subscriber?: Redis;
+  connection?: Redis.ConnectionOptions;
+  triggerTransform?: TriggerTransform;
+  serializer?: (payload: unknown) => string;
+  deserializer?: (payload: string) => unknown;
+  reviver?: (key: string, value: unknown) => unknown;
+}
+```
+
+---
+<!-- Source: packages/drizzle.md -->
+
+The Drizzle module integrates [drizzle-orm](https://orm.drizzle.team) with nestelia's dependency injection system. It is dialect-agnostic — any drizzle-supported database (PostgreSQL, MySQL, SQLite) works out of the box.
+
+## Installation
+
+```bash
+bun add drizzle-orm
+```
+
+Add the driver for your database:
+
+```bash
+# PostgreSQL
+bun add postgres        # postgres.js (recommended)
+bun add pg              # node-postgres
+
+# MySQL
+bun add mysql2
+
+# SQLite (no extra install needed in Bun)
+# bun:sqlite is built into Bun
+
+# LibSQL / Turso
+bun add @libsql/client
+```
+
+## Setup
+
+Create your drizzle instance and pass it to `DrizzleModule.forRoot()`:
+
+```typescript
+import { Database } from "bun:sqlite";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import { Module } from "nestelia";
+import { DrizzleModule } from "nestelia/drizzle";
+import * as schema from "./schema";
+
+const sqlite = new Database("app.db");
+const db = drizzle(sqlite, { schema });
+
+@Module({
+  imports: [
+    DrizzleModule.forRoot({ db, isGlobal: true }),
+  ],
+})
+export class AppModule {}
+```
+
+### PostgreSQL example
+
+```typescript
+import postgres from "postgres";
+import { drizzle } from "drizzle-orm/postgres-js";
+import * as schema from "./schema";
+
+const client = postgres(process.env.DATABASE_URL!);
+const db = drizzle(client, { schema });
+
+DrizzleModule.forRoot({ db, isGlobal: true })
+```
+
+### Async configuration
+
+Use `forRootAsync` when the connection string comes from a config service or environment:
+
+```typescript
+import { DrizzleModule } from "nestelia/drizzle";
+import { ConfigService } from "./config.service";
+import * as schema from "./schema";
+
+DrizzleModule.forRootAsync({
+  isGlobal: true,
+  inject: [ConfigService],
+  useFactory: (config: ConfigService) => {
+    const client = postgres(config.get("DATABASE_URL"));
+    return { db: drizzle(client, { schema }) };
+  },
+})
+```
+
+#### useClass / useExisting
+
+```typescript
+import { DrizzleOptionsFactory, DrizzleModuleOptions } from "nestelia/drizzle";
+import { Injectable } from "nestelia";
+
+@Injectable()
+class DatabaseConfig implements DrizzleOptionsFactory {
+  constructor(private readonly config: ConfigService) {}
+
+  createDrizzleOptions(): DrizzleModuleOptions {
+    const client = postgres(this.config.get("DATABASE_URL"));
+    return { db: drizzle(client, { schema }) };
+  }
+}
+
+DrizzleModule.forRootAsync({ useClass: DatabaseConfig })
+```
+
+## Defining a schema
+
+```typescript
+// src/schema.ts
+import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+});
+
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+```
+
+## Injecting the database
+
+### @InjectDrizzle()
+
+Use the `@InjectDrizzle()` decorator as a shorthand for `@Inject(DRIZZLE_INSTANCE)`:
+
+```typescript
+import { Injectable } from "nestelia";
+import { InjectDrizzle } from "nestelia/drizzle";
+import { eq } from "drizzle-orm";
+import { drizzle } from "drizzle-orm/bun-sqlite";
+import * as schema from "./schema";
+
+type DB = ReturnType<typeof drizzle<typeof schema>>;
+
+@Injectable()
+export class UsersService {
+  constructor(@InjectDrizzle() private readonly db: DB) {}
+
+  findAll() {
+    return this.db.select().from(schema.users).all();
+  }
+
+  findOne(id: number) {
+    return this.db
+      .select()
+      .from(schema.users)
+      .where(eq(schema.users.id, id))
+      .get();
+  }
+
+  create(data: schema.NewUser) {
+    return this.db
+      .insert(schema.users)
+      .values(data)
+      .returning()
+      .get();
+  }
+}
+```
+
+### Using the injection token directly
+
+```typescript
+import { Injectable, Inject } from "nestelia";
+import { DRIZZLE_INSTANCE } from "nestelia/drizzle";
+
+@Injectable()
+export class UsersService {
+  constructor(@Inject(DRIZZLE_INSTANCE) private readonly db: DB) {}
+}
+```
+
+## Multiple databases
+
+Register each database with a unique `tag` and inject it using the same tag:
+
+```typescript
+// app.module.ts
+@Module({
+  imports: [
+    DrizzleModule.forRoot({ db: primaryDb }),
+    DrizzleModule.forRoot({ db: analyticsDb, tag: "analytics" }),
+  ],
+})
+export class AppModule {}
+```
+
+```typescript
+// report.service.ts
+@Injectable()
+export class ReportService {
+  constructor(
+    @InjectDrizzle() private readonly primary: PrimaryDB,
+    @InjectDrizzle("analytics") private readonly analytics: AnalyticsDB,
+  ) {}
+}
+```
+
+## Options reference
+
+### DrizzleModuleOptions
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `db` | `unknown` | — | Pre-configured drizzle-orm database instance **(required)** |
+| `tag` | `string \| symbol` | `DRIZZLE_INSTANCE` | Custom injection token |
+| `isGlobal` | `boolean` | `false` | Register as a global module |
+
+### DrizzleModuleAsyncOptions
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `tag` | `string \| symbol` | Custom injection token |
+| `isGlobal` | `boolean` | Register as a global module |
+| `imports` | `any[]` | Modules to import into this module's scope |
+| `useFactory` | `(...args) => DrizzleModuleOptions` | Factory function |
+| `inject` | `any[]` | Dependencies for the factory |
+| `useClass` | `Type<DrizzleOptionsFactory>` | Class implementing `DrizzleOptionsFactory` |
+| `useExisting` | `Type<DrizzleOptionsFactory>` | Existing provider implementing `DrizzleOptionsFactory` |
+| `extraProviders` | `Provider[]` | Additional providers within this module's scope |
+
+## Exports
+
+| Export | Description |
+|--------|-------------|
+| `DrizzleModule` | The module class |
+| `InjectDrizzle(tag?)` | Shorthand parameter decorator |
+| `DRIZZLE_INSTANCE` | Default injection token |
+| `DRIZZLE_MODULE_OPTIONS` | Token for raw options |
+| `DrizzleModuleOptions` | Sync options interface |
+| `DrizzleModuleAsyncOptions` | Async options interface |
+| `DrizzleOptionsFactory` | Factory interface for `useClass` / `useExisting` |
+
+---
+<!-- Source: packages/event-emitter.md -->
+
+The Event Emitter module provides a type-safe, async-capable event system with optional wildcard pattern matching. Methods decorated with `@OnEvent()` are automatically discovered and wired during bootstrap — no manual registration required.
+
+## Installation
+
+No extra dependencies needed — the module is included in `nestelia`.
+
+## Setup
+
+```typescript
+import { Module } from "nestelia";
+import { EventEmitterModule } from "nestelia/event-emitter";
+
+@Module({
+  imports: [
+    EventEmitterModule.forRoot({
+      wildcard: true,  // enable "order.*" and "**" patterns
+      global: true,    // make EventEmitterService available everywhere
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+## Emitting events
+
+Inject `EventEmitterService` and call `emitAsync` (awaits all handlers) or `emit` (fire-and-forget):
+
+```typescript
+import { Injectable } from "nestelia";
+import { EventEmitterService } from "nestelia/event-emitter";
+import type { Order } from "./order.schema";
+
+@Injectable()
+export class OrdersService {
+  constructor(private readonly events: EventEmitterService) {}
+
+  async placeOrder(order: Order) {
+    // ... persist order ...
+    await this.events.emitAsync("order.created", order);
+    return order;
+  }
+}
+```
+
+### @InjectEventEmitter()
+
+Shorthand for `@Inject(EVENT_EMITTER_TOKEN)`:
+
+```typescript
+import { Injectable } from "nestelia";
+import { InjectEventEmitter, EventEmitterService } from "nestelia/event-emitter";
+
+@Injectable()
+export class NotificationService {
+  constructor(
+    @InjectEventEmitter() private readonly events: EventEmitterService,
+  ) {}
+}
+```
+
+## Listening to events
+
+Decorate any method in any `@Injectable()` provider with `@OnEvent()`. The module scans all providers during `onApplicationBootstrap` and registers the handlers automatically.
+
+```typescript
+import { Injectable } from "nestelia";
+import { OnEvent } from "nestelia/event-emitter";
+import type { Order } from "./order.schema";
+
+@Injectable()
+export class NotificationListener {
+  @OnEvent("order.created")
+  handleOrderCreated(order: Order) {
+    console.log("New order:", order.id);
+  }
+
+  @OnEvent("order.shipped")
+  handleOrderShipped(order: Order) {
+    console.log("Order shipped:", order.id);
+  }
+}
+```
+
+> Register your listener class as a `provider` in the relevant module:
+> ```typescript
+> @Module({ providers: [NotificationListener] })
+> export class OrdersModule {}
+> ```
+
+### Once handlers
+
+```typescript
+@OnEvent("app.initialized", { once: true })
+onAppReady(payload: unknown) {
+  console.log("Application is ready");
+}
+```
+
+## Wildcard patterns
+
+Enable `wildcard: true` in `forRoot` to use glob-style patterns:
+
+| Pattern | Matches |
+|---------|---------|
+| `order.*` | `order.created`, `order.shipped`, … |
+| `**.created` | `order.created`, `user.created`, … |
+| `**` | every event |
+
+```typescript
+@Injectable()
+export class AuditListener {
+  @OnEvent("order.*")
+  logOrderEvent(order: Order) {
+    console.log("Audit:", order.id);
+  }
+
+  @OnEvent("**")
+  logAll(payload: unknown) {
+    console.log("Event fired:", payload);
+  }
+}
+```
+
+## Configuration
+
+### EventEmitterModuleOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `wildcard` | `boolean` | `false` | Enable `*` / `**` wildcard matching |
+| `delimiter` | `string` | `"."` | Namespace delimiter |
+| `maxListeners` | `number` | `10` | Max listeners per event before a warning |
+| `global` | `boolean` | `false` | Register as a global module |
+
+## EventEmitterService API
+
+| Method | Signature | Description |
+|--------|-----------|-------------|
+| `emit` | `(event, payload?) → boolean` | Fire event, don't await handlers |
+| `emitAsync` | `(event, payload?) → Promise<unknown[]>` | Fire event and await all handlers |
+| `on` | `(event, handler) → this` | Register persistent handler |
+| `once` | `(event, handler) → this` | Register one-time handler |
+| `off` | `(event, handler?) → this` | Remove handler (or all for event) |
+| `removeAllListeners` | `(event?) → this` | Remove all listeners |
+| `listenerCount` | `(event) → number` | Number of registered handlers |
+
+## Exports
+
+| Export | Description |
+|--------|-------------|
+| `EventEmitterModule` | Module class |
+| `EventEmitterService` | Injectable event emitter service |
+| `OnEvent(event, opts?)` | Method decorator for event handlers |
+| `InjectEventEmitter()` | Parameter decorator shorthand |
+| `EVENT_EMITTER_TOKEN` | Injection token |
+| `EventEmitterModuleOptions` | Options interface |
+
+---
+<!-- Source: advanced/custom-providers.md -->
+
+Beyond simple class providers, nestelia supports several custom provider types for advanced dependency injection scenarios.
+
+## Class Providers
+
+The simplest form — the DI container instantiates the class:
+
+```typescript
+@Module({
+  providers: [UserService], // shorthand for { provide: UserService, useClass: UserService }
+})
+class AppModule {}
+```
+
+You can also substitute one class for another:
+
+```typescript
+@Module({
+  providers: [
+    { provide: DatabaseService, useClass: PostgresService },
+  ],
+})
+class AppModule {}
+```
+
+## Value Providers
+
+Provide a static value (object, string, number, etc.):
+
+```typescript
+@Module({
+  providers: [
+    { provide: "CONFIG", useValue: { port: 3000, debug: true } },
+    { provide: "API_KEY", useValue: "sk-abc123" },
+  ],
+})
+class AppModule {}
+```
+
+Inject with a string token:
+
+```typescript
+@Injectable()
+class ApiService {
+  constructor(@Inject("API_KEY") private apiKey: string) {}
+}
+```
+
+## Factory Providers
+
+Use a function to create the provider instance. The function can inject other dependencies:
+
+```typescript
+@Module({
+  providers: [
+    ConfigService,
+    {
+      provide: "DATABASE",
+      useFactory: (config: ConfigService) => {
+        return createDatabaseConnection(config.get("DATABASE_URL"));
+      },
+      inject: [ConfigService],
+    },
+  ],
+})
+class AppModule {}
+```
+
+Async factories are supported:
+
+```typescript
+{
+  provide: "DATABASE",
+  useFactory: async (config: ConfigService) => {
+    const connection = await createConnection(config.get("DATABASE_URL"));
+    await connection.migrate();
+    return connection;
+  },
+  inject: [ConfigService],
+}
+```
+
+## Alias Providers (useExisting)
+
+Create an alias that points to an existing provider:
+
+```typescript
+@Module({
+  providers: [
+    PostgresService,
+    { provide: "DATABASE", useExisting: PostgresService },
+  ],
+})
+class AppModule {}
+```
+
+Both `PostgresService` and `"DATABASE"` resolve to the same singleton instance.
+
+## Combining Provider Types
+
+```typescript
+@Module({
+  providers: [
+    // Class
+    UserService,
+    AuthService,
+
+    // Value
+    { provide: "CONFIG", useValue: { port: 3000 } },
+
+    // Factory
+    {
+      provide: "LOGGER",
+      useFactory: (config: any) => new Logger(config.level),
+      inject: ["CONFIG"],
+    },
+
+    // Class substitution
+    { provide: DatabaseService, useClass: PostgresService },
+
+    // Alias
+    { provide: "DB", useExisting: DatabaseService },
+  ],
+})
+class AppModule {}
+```
+
+## Exporting Custom Providers
+
+To make custom providers available to other modules:
+
+```typescript
+@Module({
+  providers: [
+    { provide: "CONFIG", useValue: { port: 3000 } },
+    ConfigService,
+  ],
+  exports: ["CONFIG", ConfigService],
+})
+class SharedModule {}
+```
+
+---
+<!-- Source: advanced/forward-ref.md -->
+
+Circular dependencies occur when two services depend on each other. nestelia provides `forwardRef()` to handle these cases.
+
+## The Problem
+
+```typescript
+// This creates a circular dependency:
+@Injectable()
+class ServiceA {
+  constructor(@Inject(ServiceB) private b: ServiceB) {}
+}
+
+@Injectable()
+class ServiceB {
+  constructor(@Inject(ServiceA) private a: ServiceA) {}
+}
+```
+
+At resolve time, `ServiceA` needs `ServiceB` which needs `ServiceA` — a deadlock.
+
+## The Solution
+
+Use `forwardRef()` on at least one side of the circular reference:
+
+```typescript
+import { Injectable, Inject, forwardRef } from "nestelia";
+
+@Injectable()
+class ServiceA {
+  constructor(
+    @Inject(forwardRef(() => ServiceB)) private b: ServiceB
+  ) {}
+}
+
+@Injectable()
+class ServiceB {
+  constructor(@Inject(ServiceA) private a: ServiceA) {}
+}
+```
+
+`forwardRef(() => ServiceB)` defers the resolution of `ServiceB` until all providers have been registered, breaking the circular chain.
+
+## When to Use forwardRef
+
+- Two services that reference each other
+- A service that references a controller and vice versa
+- Cross-module circular imports
+
+## Best Practices
+
+Circular dependencies often indicate a design issue. Before reaching for `forwardRef()`, consider:
+
+1. **Extract shared logic** into a third service that both depend on
+2. **Use events** — one service publishes, the other subscribes
+3. **Restructure modules** — move shared providers to a common module
+
+Use `forwardRef()` only when refactoring isn't practical.
+
+---
+<!-- Source: advanced/container-api.md -->
+
+The `DIContainer` singleton provides low-level access to the dependency injection system. Most applications won't need this directly, but it is useful for testing, dynamic providers, and framework extensions.
+
+## Getting an Instance
+
+```typescript
+import { DIContainer } from "nestelia";
+
+const service = await DIContainer.get(UserService, UserModule);
+```
+
+## Registering Providers
+
+```typescript
+DIContainer.register([
+  UserService,
+  { provide: "CONFIG", useValue: { port: 3000 } },
+], MyModuleClass);
+```
+
+## Registering Controllers
+
+```typescript
+DIContainer.registerControllers([UserController, AdminController], MyModuleClass);
+```
+
+## Clearing the Container
+
+Useful for test isolation — removes all registered modules and providers:
+
+```typescript
+import { beforeEach } from "bun:test";
+import { DIContainer } from "nestelia";
+
+beforeEach(() => {
+  DIContainer.clear();
+});
+```
+
+## Module Management
+
+```typescript
+// Add a module
+const moduleRef = DIContainer.addModule(MyModule, "MyModule");
+
+// Get a module by key
+const moduleRef = DIContainer.getModuleByKey("MyModule");
+
+// Get all modules
+const modules = DIContainer.getModules();
+```
+
+## Request Scope
+
+The container uses `AsyncLocalStorage` to manage request-scoped providers. When a request arrives:
+
+1. `Container.runInRequestContext()` creates a new context
+2. `REQUEST`-scoped providers get a fresh instance for that context
+3. The context is cleaned up after the response
+
+```typescript
+@Injectable({ scope: Scope.REQUEST })
+class RequestLogger {
+  private requestId = crypto.randomUUID();
+
+  log(message: string) {
+    console.log(`[${this.requestId}] ${message}`);
+  }
+}
+```
+
+## Module Key Resolution
+
+Providers are scoped to modules. When calling `DIContainer.get()`, pass the module class to look up providers within a specific module:
+
+```typescript
+const service = await DIContainer.get(UserService, UserModule);
+```
+
+If omitted, the container searches all modules.
+
+## Global Modules
+
+```typescript
+// Mark a module as global so its providers are accessible everywhere
+const moduleRef = DIContainer.addModule(ConfigModule, "ConfigModule");
+DIContainer.addGlobalModule(moduleRef);
+DIContainer.bindGlobalScope();
+```
+
+---
+<!-- Source: advanced/swagger.md -->
+
+nestelia uses [TypeBox](https://github.com/sinclairzx81/typebox) schemas — the same schemas Elysia uses natively — for request validation. Because Elysia already has first-class Swagger/OpenAPI support through the `@elysiajs/swagger` plugin, you can add full API documentation with minimal configuration.
+
+## Setup
+
+Install the Elysia Swagger plugin:
+
+```bash
+bun add @elysiajs/swagger
+```
+
+Register it as functional middleware in your root module:
+
+```typescript
+import { Module } from "nestelia";
+import swagger from "@elysiajs/swagger";
+
+@Module({
+  middlewares: [
+    (app) => app.use(swagger()),
+  ],
+})
+class AppModule {}
+```
+
+Swagger UI is then available at `/swagger`.
+
+## Schema Decorators
+
+Use `@Body`, `@Param`, and `@Query` with TypeBox schemas — these are automatically picked up by Elysia's schema system and appear in the generated OpenAPI spec:
+
+```typescript
+import { t } from "elysia";
+import { Controller, Post, Get, Body, Param, Query } from "nestelia";
+
+@Controller("/users")
+class UserController {
+  @Post("/")
+  create(@Body(t.Object({
+    name: t.String({ description: "User display name" }),
+    email: t.String({ format: "email" }),
+  })) body: { name: string; email: string }) {
+    return this.userService.create(body);
+  }
+
+  @Get("/:id")
+  findOne(@Param(t.Object({ id: t.String() })) params: { id: string }) {
+    return this.userService.findById(params.id);
+  }
+}
+```
+
+## @Schema() Decorator
+
+The `@Schema()` decorator lets you define the complete route schema including response types:
+
+```typescript
+import { t } from "elysia";
+import { Schema } from "nestelia";
+
+@Get("/users")
+@Schema({
+  query: t.Object({ page: t.Optional(t.Number()) }),
+  response: {
+    200: t.Array(t.Object({ id: t.String(), name: t.String() })),
+  },
+})
+findAll(@Ctx() ctx: any) {
+  return this.userService.findAll(ctx.query.page);
+}
+```
+
+## Customizing Swagger
+
+Configure the Swagger plugin options for title, version, tags, and more:
+
+```typescript
+import swagger from "@elysiajs/swagger";
+
+@Module({
+  middlewares: [
+    (app) => app.use(swagger({
+      documentation: {
+        info: {
+          title: "My API",
+          version: "1.0.0",
+          description: "API documentation",
+        },
+        tags: [
+          { name: "users", description: "User operations" },
+        ],
+      },
+    })),
+  ],
+})
+class AppModule {}
+```
+
+See the [Elysia Swagger documentation](https://elysiajs.com/plugins/swagger.html) for the full list of options.

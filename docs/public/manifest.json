@@ -1,0 +1,16 @@
+{
+  "name": "Nestelia",
+  "short_name": "Nestelia",
+  "description": "A modular, decorator-driven framework built on top of Elysia and Bun",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#7c3aed",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

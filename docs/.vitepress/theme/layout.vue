@@ -41,11 +41,19 @@ const onNewPage = () => {
     }
 }
 
-onMounted(onNewPage)
+const addMainRole = () => {
+    document.getElementById('VPContent')?.setAttribute('role', 'main')
+}
+
+onMounted(() => {
+    onNewPage()
+    addMainRole()
+})
 
 const router = useRouter()
 router.onAfterRouteChange = () => {
     onNewPage()
+    addMainRole()
 }
 </script>
 

@@ -15,7 +15,12 @@ export default defineConfig({
   base: "/",
   ignoreDeadLinks: true,
 
-  sitemap: { hostname: SITE_URL },
+  sitemap: {
+    hostname: SITE_URL,
+    transformItems(items) {
+      return items.map(item => ({ ...item, lastmod: new Date().toISOString() }));
+    },
+  },
 
   head: [
     // Favicon
@@ -23,7 +28,12 @@ export default defineConfig({
 
     // Fonts
     ["link", { rel: "preconnect", href: "https://fonts.googleapis.com" }],
+    ["link", { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: "" }],
     ["link", { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" }],
+    ["link", { rel: "preload", href: "/assets/GeistMono-Regular.woff2", as: "font", type: "font/woff2", crossorigin: "" }],
+
+    // PWA manifest
+    ["link", { rel: "manifest", href: "/manifest.json" }],
 
     // Open Graph
     ["meta", { property: "og:type",        content: "website" }],
@@ -100,6 +110,33 @@ export default defineConfig({
     // x-default points to the English version
     const defaultHref = `${SITE_URL}/${basePath}`.replace(/\/$/, "") || SITE_URL;
     pageData.frontmatter.head.push(["link", { rel: "alternate", hreflang: "x-default", href: defaultHref }]);
+
+    // BreadcrumbList JSON-LD for non-home, non-api-reference pages
+    const sectionLabels: Record<string, string> = {
+      "getting-started": "Getting Started",
+      "core-concepts":   "Core Concepts",
+      "features":        "Features",
+      "packages":        "Packages",
+      "advanced":        "Advanced",
+    };
+    const pathParts = basePath.split("/").filter(Boolean);
+    if (pathParts.length >= 1 && pathParts[0] !== "api-reference" && basePath !== "") {
+      const items: object[] = [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+      ];
+      if (pathParts.length >= 2) {
+        const section = sectionLabels[pathParts[0]] ?? pathParts[0];
+        items.push({ "@type": "ListItem", position: 2, name: section, item: `${SITE_URL}/${pathParts[0]}` });
+        items.push({ "@type": "ListItem", position: 3, name: pageData.title || pathParts[1], item: canonical });
+      } else {
+        items.push({ "@type": "ListItem", position: 2, name: pageData.title || pathParts[0], item: canonical });
+      }
+      pageData.frontmatter.head.push(["script", { type: "application/ld+json" }, JSON.stringify({
+        "@context": "https://schema.org",
+        "@type":    "BreadcrumbList",
+        itemListElement: items,
+      })]);
+    }
   },
 
   locales: {
@@ -116,6 +153,7 @@ export default defineConfig({
     logo: {
       light: "/logo/light.svg",
       dark:  "/logo/dark.svg",
+      alt:   "Nestelia",
     },
     siteTitle: false,
     socialLinks: [{ icon: "github", link: "https://github.com/kiyasov/nestelia" }],

@@ -68,6 +68,7 @@ body {
 
 @font-face {
     font-family: 'Geist Mono';
+    font-display: swap;
     src:
         url('/assets/GeistMono-Regular.woff2') format('woff2'),
         url('/assets/GeistMono-Regular.woff') format('woff');
