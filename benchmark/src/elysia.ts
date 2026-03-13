@@ -12,7 +12,7 @@ new Elysia()
   .get("/json", () => ({ message: "Hello World", timestamp: Date.now() }))
   .get("/user/:id", ({ params }) => {
     return users.find((u) => u.id === Number(params.id)) ?? { error: "Not found" };
-  })
+  }, { params: t.Object({ id: t.String() }) })
   .post(
     "/user",
     ({ body }) => {

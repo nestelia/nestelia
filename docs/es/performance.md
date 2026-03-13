@@ -22,12 +22,12 @@ Nestelia agrega una capa delgada de decoradores e inyección de dependencias sob
 
 | Escenario | Nestelia | Elysia | Fastify | Express | NestJS |
 |---|---:|---:|---:|---:|---:|
-| **Plain Text** GET / | 75,868 | 77,912 | 47,946 | 40,605 | 39,098 |
-| **JSON** GET /json | 75,232 | 78,548 | 45,279 | 38,472 | 36,752 |
-| **Path Params** GET /user/:id | 58,854 | 76,953 | 45,867 | 38,658 | 28,003 |
-| **POST JSON** POST /user | 51,266 | 64,383 | 30,567 | 34,119 | 24,707 |
-| **DI + Service** GET /users | 73,983 | 77,585 | 44,757 | 38,126 | 25,550 |
-| **Promedio** | **67,041** | **75,076** | **42,883** | **37,996** | **30,822** |
+| **Plain Text** GET / | 74,914 | 79,287 | 47,600 | 40,385 | 38,413 |
+| **JSON** GET /json | 73,438 | 76,925 | 45,010 | 38,807 | 36,527 |
+| **Path Params** GET /user/:id | 74,289 | 75,077 | 45,747 | 38,250 | 27,598 |
+| **POST JSON** POST /user | 62,399 | 63,487 | 29,793 | 34,038 | 24,833 |
+| **DI + Service** GET /users | 73,476 | 77,197 | 45,051 | 37,647 | 25,539 |
+| **Promedio** | **71,703** | **74,395** | **42,640** | **37,825** | **30,582** |
 
 ## Cómo reproducir
 
