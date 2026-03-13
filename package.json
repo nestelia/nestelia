@@ -91,6 +91,7 @@
     "docs:dev": "cd docs && bun run dev",
     "docs:build": "bun run docs:og && cd docs && bun run build",
     "docs:preview": "cd docs && bun run preview",
+    "bench": "bun benchmark/run.ts",
     "docs:api": "bunx typedoc",
     "prepare": "husky"
   },

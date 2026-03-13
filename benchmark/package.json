@@ -1,0 +1,14 @@
+{
+  "name": "nestelia-benchmark",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "express": "^5.1.0",
+    "fastify": "^5.3.3",
+    "@nestjs/core": "^11.0.20",
+    "@nestjs/common": "^11.0.20",
+    "@nestjs/platform-express": "^11.0.20",
+    "reflect-metadata": "^0.2.2",
+    "tsx": "^4.19.0"
+  }
+}

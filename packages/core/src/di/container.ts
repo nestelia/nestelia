@@ -9,7 +9,7 @@ import type { Provider, ProviderToken, Type } from "./provider.interface";
 
 // Request context for backward compatibility
 export interface RequestContext {
-  id: string | symbol;
+  id: string | number | symbol;
   container?: Map<ProviderToken, unknown>;
 }
 

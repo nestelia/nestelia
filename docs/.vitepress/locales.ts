@@ -163,9 +163,10 @@ export const apiSidebar = [
 
 const enDocs = [
   docSection("Getting Started", [
-    ["Introduction", "introduction"],
-    ["Installation", "getting-started/installation"],
-    ["Quick Start",  "getting-started/quick-start"],
+    ["Introduction",  "introduction"],
+    ["Installation",  "getting-started/installation"],
+    ["Quick Start",   "getting-started/quick-start"],
+    ["Performance",   "performance"],
   ]),
   docSection("Core Concepts", [
     ["Modules",      "core-concepts/modules"],
@@ -226,9 +227,10 @@ export const enLocale = {
 
 const ruDocs = [
   docSection("Начало работы", [
-    ["Введение",      "introduction"],
-    ["Установка",     "getting-started/installation"],
-    ["Быстрый старт", "getting-started/quick-start"],
+    ["Введение",            "introduction"],
+    ["Установка",           "getting-started/installation"],
+    ["Быстрый старт",      "getting-started/quick-start"],
+    ["Производительность",  "performance"],
   ], "/ru"),
   docSection("Основные концепции", [
     ["Модули",      "core-concepts/modules"],
@@ -274,6 +276,7 @@ const zhDocs = [
     ["介绍",      "introduction"],
     ["安装",      "getting-started/installation"],
     ["快速开始",  "getting-started/quick-start"],
+    ["性能",      "performance"],
   ], "/zh"),
   docSection("核心概念", [
     ["模块",      "core-concepts/modules"],
@@ -335,9 +338,10 @@ export const zhLocale = {
 
 const jaDocs = [
   docSection("はじめに", [
-    ["紹介",          "introduction"],
-    ["インストール",   "getting-started/installation"],
-    ["クイックスタート","getting-started/quick-start"],
+    ["紹介",            "introduction"],
+    ["インストール",     "getting-started/installation"],
+    ["クイックスタート", "getting-started/quick-start"],
+    ["パフォーマンス",   "performance"],
   ], "/ja"),
   docSection("コアコンセプト", [
     ["モジュール",     "core-concepts/modules"],
@@ -402,6 +406,7 @@ const ptDocs = [
     ["Introdução",    "introduction"],
     ["Instalação",    "getting-started/installation"],
     ["Início Rápido", "getting-started/quick-start"],
+    ["Performance",   "performance"],
   ], "/pt"),
   docSection("Conceitos Principais", [
     ["Módulos",      "core-concepts/modules"],
@@ -466,6 +471,7 @@ const koDocs = [
     ["소개",      "introduction"],
     ["설치",      "getting-started/installation"],
     ["빠른 시작", "getting-started/quick-start"],
+    ["성능",      "performance"],
   ], "/ko"),
   docSection("핵심 개념", [
     ["모듈",      "core-concepts/modules"],
@@ -530,6 +536,7 @@ const esDocs = [
     ["Introducción",   "introduction"],
     ["Instalación",    "getting-started/installation"],
     ["Inicio Rápido",  "getting-started/quick-start"],
+    ["Rendimiento",    "performance"],
   ], "/es"),
   docSection("Conceptos Principales", [
     ["Módulos",       "core-concepts/modules"],
