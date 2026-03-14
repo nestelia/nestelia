@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 /**
  * Type definitions for decorator functions

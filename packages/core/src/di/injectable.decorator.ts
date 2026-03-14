@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { INJECTABLE_METADATA } from "../decorators/constants";
 import type { Type } from "./provider.interface";

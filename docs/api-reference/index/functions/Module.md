@@ -4,7 +4,7 @@
 function Module(options): any;
 ```
 
-Defined in: [packages/core/src/core/module.decorator.ts:30](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/module.decorator.ts#L30)
+Defined in: [packages/core/src/core/module.decorator.ts:29](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/module.decorator.ts#L29)
 
 Module decorator that creates an Elysia plugin from the module configuration.
 

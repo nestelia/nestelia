@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { ELYSIA_HOOKS_METADATA } from "./constants";
 

@@ -4,7 +4,7 @@
 const Put: (path) => MethodDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/http.decorators.ts:30](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/http.decorators.ts#L30)
+Defined in: [packages/core/src/decorators/http.decorators.ts:29](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/http.decorators.ts#L29)
 
 ## Parameters
 

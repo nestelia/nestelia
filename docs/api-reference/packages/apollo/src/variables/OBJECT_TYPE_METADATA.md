@@ -4,7 +4,7 @@
 const OBJECT_TYPE_METADATA: "graphql:objectType" = "graphql:objectType";
 ```
 
-Defined in: [packages/apollo/src/decorators/constants.ts:13](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L13)
+Defined in: [packages/apollo/src/decorators/constants.ts:12](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L12)
 
 Metadata key for
 

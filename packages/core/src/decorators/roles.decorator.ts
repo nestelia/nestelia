@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 // Metadata key
 export const ROLES_KEY = "custom:roles";

@@ -4,7 +4,7 @@
 const OnError: (options?) => MethodDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:208](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L208)
+Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:207](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L207)
 
 Hook called when error occurs
 

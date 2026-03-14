@@ -4,7 +4,7 @@
 const ARGS_METADATA: "graphql:args" = "graphql:args";
 ```
 
-Defined in: [packages/apollo/src/decorators/constants.ts:45](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L45)
+Defined in: [packages/apollo/src/decorators/constants.ts:44](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L44)
 
 Metadata key for
 

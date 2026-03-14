@@ -4,7 +4,7 @@
 function Catch(...exceptions): ClassDecorator;
 ```
 
-Defined in: [packages/core/src/exceptions/catch.decorator.ts:33](https://github.com/nestelia/nestelia/blob/main/packages/core/src/exceptions/catch.decorator.ts#L33)
+Defined in: [packages/core/src/exceptions/catch.decorator.ts:32](https://github.com/nestelia/nestelia/blob/main/packages/core/src/exceptions/catch.decorator.ts#L32)
 
 Decorator that marks a class as an exception filter.
 The decorated class must implement the `ExceptionFilter` interface.

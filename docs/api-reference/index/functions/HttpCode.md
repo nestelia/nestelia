@@ -4,7 +4,7 @@
 function HttpCode(statusCode): MethodDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/http-code.decorator.ts:26](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/http-code.decorator.ts#L26)
+Defined in: [packages/core/src/decorators/http-code.decorator.ts:25](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/http-code.decorator.ts#L25)
 
 Decorator that sets the HTTP status code for the response.
 

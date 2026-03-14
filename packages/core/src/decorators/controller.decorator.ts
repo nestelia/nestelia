@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { ROUTE_PREFIX_METADATA } from "../decorators/constants";
 

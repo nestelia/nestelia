@@ -4,7 +4,7 @@
 const FIELD_METADATA: "graphql:field" = "graphql:field";
 ```
 
-Defined in: [packages/apollo/src/decorators/constants.ts:39](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L39)
+Defined in: [packages/apollo/src/decorators/constants.ts:38](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L38)
 
 Metadata key for
 

@@ -4,7 +4,7 @@
 function UseInterceptors(...interceptors): MethodDecorator & ClassDecorator;
 ```
 
-Defined in: [packages/core/src/interceptors/use-interceptors.decorator.ts:13](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interceptors/use-interceptors.decorator.ts#L13)
+Defined in: [packages/core/src/interceptors/use-interceptors.decorator.ts:12](https://github.com/nestelia/nestelia/blob/main/packages/core/src/interceptors/use-interceptors.decorator.ts#L12)
 
 Decorator that binds interceptors to the scope of the controller or method,
 depending on its context.

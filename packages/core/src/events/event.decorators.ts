@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { getEventEmitter } from "./event-emitter.container";
 

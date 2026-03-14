@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import "reflect-metadata";
 
 import { Elysia } from "elysia";
 

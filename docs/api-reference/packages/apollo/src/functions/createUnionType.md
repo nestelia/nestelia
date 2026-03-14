@@ -4,7 +4,7 @@
 function createUnionType<T>(options): (...args) => InstanceType<T[number]>;
 ```
 
-Defined in: [packages/apollo/src/helpers/create-union-type.ts:29](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/helpers/create-union-type.ts#L29)
+Defined in: [packages/apollo/src/helpers/create-union-type.ts:28](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/helpers/create-union-type.ts#L28)
 
 Creates a GraphQL Union type from the given options.
 The returned class can be used as a `@Field(() => UnionType)` type.

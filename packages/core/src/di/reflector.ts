@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 /**
  * Type for constructor functions (classes)

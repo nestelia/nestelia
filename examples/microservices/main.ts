@@ -1,6 +1,6 @@
 import "reflect-metadata";
 
-import { Transport, createElysiaNestApplication } from "../../packages/microservices";
+import { Transport, createElysiaNestApplication } from "../../packages/microservices/src";
 
 import { AppModule } from "./src/app.module";
 

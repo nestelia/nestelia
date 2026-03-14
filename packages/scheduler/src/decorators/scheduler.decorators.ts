@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import type { CronExpression } from "../interfaces/cron.interface";
 import type {

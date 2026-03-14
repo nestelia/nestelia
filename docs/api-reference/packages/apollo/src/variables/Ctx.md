@@ -4,7 +4,7 @@
 const Ctx: (property?) => ParameterDecorator = Context;
 ```
 
-Defined in: [packages/apollo/src/decorators/ctx.decorator.ts:61](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/ctx.decorator.ts#L61)
+Defined in: [packages/apollo/src/decorators/ctx.decorator.ts:60](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/ctx.decorator.ts#L60)
 
 Alias for
 

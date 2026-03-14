@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { getMetadataStorage } from "class-validator";
 import { ValidationMetadata } from "class-validator/types/metadata/ValidationMetadata";

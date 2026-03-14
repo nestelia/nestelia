@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { CONTEXT_METADATA } from "./constants";
 

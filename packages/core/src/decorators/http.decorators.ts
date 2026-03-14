@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import type { ExecutionContext } from "../interfaces/execution-context.interface";
 import { PARAMS_METADATA, ROUTE_METADATA } from "./constants";

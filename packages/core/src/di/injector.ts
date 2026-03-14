@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { type ContextId, STATIC_CONTEXT } from "./constants";
 import type { Container } from "./container";

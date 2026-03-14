@@ -17,7 +17,7 @@ Creates an Elysia-Nest application with microservices support.
 
 ## Returns
 
-`Promise`\<[`ElysiaNestApplication`](../../packages/microservices/classes/ElysiaNestApplication.md)\>
+`Promise`\<[`ElysiaNestApplication`](../../packages/microservices/src/classes/ElysiaNestApplication.md)\>
 
 ElysiaNestApplication instance
 

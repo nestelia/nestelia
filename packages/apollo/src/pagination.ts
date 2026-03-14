@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { Field, ObjectType } from "./decorators/type.decorator";
 import { Int } from "./decorators/type.decorator";

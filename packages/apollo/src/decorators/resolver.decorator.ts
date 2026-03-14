@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { RESOLVER_METADATA } from "./constants";
 import type { Constructor } from "./types";

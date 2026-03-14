@@ -5,10 +5,10 @@ import {
   EVENT_PATTERN_METADATA,
   MESSAGE_DATA_METADATA,
   MESSAGE_PATTERN_METADATA,
-} from "../constants";
-import { EventPattern } from "../decorators/event-pattern.decorator";
-import { MessagePattern } from "../decorators/message-pattern.decorator";
-import { Payload } from "../decorators/payload.decorator";
+} from "../src/constants";
+import { EventPattern } from "../src/decorators/event-pattern.decorator";
+import { MessagePattern } from "../src/decorators/message-pattern.decorator";
+import { Payload } from "../src/decorators/payload.decorator";
 
 describe("@MessagePattern", () => {
   it("stores string pattern metadata on the method", () => {

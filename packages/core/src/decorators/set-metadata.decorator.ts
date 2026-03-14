@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 /**
  * Decorator that assigns metadata to the class using the specified key.

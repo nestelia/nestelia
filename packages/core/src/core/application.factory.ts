@@ -1,4 +1,4 @@
-import { ElysiaNestApplication } from "../../../../packages/microservices/elysia-nest-application";
+import { ElysiaNestApplication } from "../../../../packages/microservices/src/elysia-nest-application";
 import { APP_FILTERS_METADATA, MODULE_METADATA } from "../decorators/constants";
 import type { ModuleOptions } from "../decorators/types";
 import { Container, type Type } from "../di";

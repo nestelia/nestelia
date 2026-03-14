@@ -4,7 +4,7 @@
 function RabbitSubscribe(options): MethodDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:32](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L32)
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:31](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L31)
 
 Decorator to subscribe to RabbitMQ messages
 

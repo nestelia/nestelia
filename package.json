@@ -27,9 +27,9 @@
       "types": "./dist/types/packages/scheduler/src/index.d.ts"
     },
     "./microservices": {
-      "import": "./dist/esm/packages/microservices/index.js",
-      "require": "./dist/cjs/packages/microservices/index.js",
-      "types": "./dist/types/packages/microservices/index.d.ts"
+      "import": "./dist/esm/packages/microservices/src/index.js",
+      "require": "./dist/cjs/packages/microservices/src/index.js",
+      "types": "./dist/types/packages/microservices/src/index.d.ts"
     },
     "./apollo": {
       "import": "./dist/esm/packages/apollo/src/index.js",

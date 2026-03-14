@@ -10,7 +10,7 @@
 | [packages/drizzle/src](packages/drizzle/src/README.md) | Nestelia Drizzle ORM Module |
 | [packages/event-emitter/src](packages/event-emitter/src/README.md) | Nestelia EventEmitter Module |
 | [packages/graphql-pubsub/src](packages/graphql-pubsub/src/README.md) | - |
-| [packages/microservices](packages/microservices/README.md) | - |
+| [packages/microservices/src](packages/microservices/src/README.md) | - |
 | [packages/passport/src](packages/passport/src/README.md) | - |
 | [packages/rabbitmq/src](packages/rabbitmq/src/README.md) | - |
 | [packages/scheduler/src](packages/scheduler/src/README.md) | - |

@@ -4,7 +4,7 @@
 function getElysiaHooksMetadata(target): ElysiaHookMetadata[];
 ```
 
-Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:213](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L213)
+Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:212](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L212)
 
 Get all Elysia lifecycle hooks metadata for a controller
 

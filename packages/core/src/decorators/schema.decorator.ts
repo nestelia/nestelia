@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { ROUTE_SCHEMA_METADATA } from "./constants";
 

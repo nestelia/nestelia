@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 export const HTTP_CODE_METADATA = "__httpCode__";
 

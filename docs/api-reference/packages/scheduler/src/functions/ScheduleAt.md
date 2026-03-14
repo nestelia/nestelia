@@ -4,7 +4,7 @@
 function ScheduleAt(date, options?): MethodDecorator;
 ```
 
-Defined in: [packages/scheduler/src/decorators/scheduler.decorators.ts:135](https://github.com/nestelia/nestelia/blob/main/packages/scheduler/src/decorators/scheduler.decorators.ts#L135)
+Defined in: [packages/scheduler/src/decorators/scheduler.decorators.ts:134](https://github.com/nestelia/nestelia/blob/main/packages/scheduler/src/decorators/scheduler.decorators.ts#L134)
 
 Decorator for scheduled jobs at a specific date
 

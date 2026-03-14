@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 /**
  * Metadata keys for GraphQL decorators.

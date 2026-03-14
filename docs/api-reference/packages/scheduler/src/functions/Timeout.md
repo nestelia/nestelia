@@ -4,7 +4,7 @@
 function Timeout(milliseconds, options?): MethodDecorator;
 ```
 
-Defined in: [packages/scheduler/src/decorators/scheduler.decorators.ts:107](https://github.com/nestelia/nestelia/blob/main/packages/scheduler/src/decorators/scheduler.decorators.ts#L107)
+Defined in: [packages/scheduler/src/decorators/scheduler.decorators.ts:106](https://github.com/nestelia/nestelia/blob/main/packages/scheduler/src/decorators/scheduler.decorators.ts#L106)
 
 Decorator for timeout jobs
 

@@ -4,7 +4,7 @@
 const UNION_METADATA: "graphql:union" = "graphql:union";
 ```
 
-Defined in: [packages/apollo/src/decorators/constants.ts:25](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L25)
+Defined in: [packages/apollo/src/decorators/constants.ts:24](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L24)
 
 Metadata key for
 

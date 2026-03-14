@@ -4,7 +4,7 @@
 const PARENT_METADATA: "graphql:parent" = "graphql:parent";
 ```
 
-Defined in: [packages/apollo/src/decorators/constants.ts:49](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L49)
+Defined in: [packages/apollo/src/decorators/constants.ts:48](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/constants.ts#L48)
 
 Metadata key for
 

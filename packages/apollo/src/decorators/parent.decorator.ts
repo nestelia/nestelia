@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { PARENT_METADATA } from "./constants";
 

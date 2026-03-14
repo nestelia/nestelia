@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 export const HEADERS_METADATA = "__headers__";
 

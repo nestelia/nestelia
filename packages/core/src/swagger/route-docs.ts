@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import type { RouteMetadata } from "../decorators";
 import { ROUTE_METADATA, ROUTE_PREFIX_METADATA } from "../decorators";

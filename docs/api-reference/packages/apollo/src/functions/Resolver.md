@@ -4,7 +4,7 @@
 function Resolver(options?): ClassDecorator;
 ```
 
-Defined in: [packages/apollo/src/decorators/resolver.decorator.ts:47](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/resolver.decorator.ts#L47)
+Defined in: [packages/apollo/src/decorators/resolver.decorator.ts:46](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/resolver.decorator.ts#L46)
 
 Decorator for a GraphQL resolver class.
 

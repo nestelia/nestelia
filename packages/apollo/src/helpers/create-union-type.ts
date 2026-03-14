@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { UNION_TYPE_METADATA } from "../decorators/constants";
 

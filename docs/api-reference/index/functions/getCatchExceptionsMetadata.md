@@ -4,7 +4,7 @@
 function getCatchExceptionsMetadata(target): (...args) => Error[] | undefined;
 ```
 
-Defined in: [packages/core/src/exceptions/catch.decorator.ts:46](https://github.com/nestelia/nestelia/blob/main/packages/core/src/exceptions/catch.decorator.ts#L46)
+Defined in: [packages/core/src/exceptions/catch.decorator.ts:45](https://github.com/nestelia/nestelia/blob/main/packages/core/src/exceptions/catch.decorator.ts#L45)
 
 Get the exception types that a filter catches
 

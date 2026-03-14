@@ -31,6 +31,12 @@ docs/
 # Claude Code
 .claude/
 
+# Benchmark
+benchmark/
+
+# Husky
+.husky/
+
 # Misc
 *.log
 *.tgz

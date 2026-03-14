@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { ARGS_TYPE_METADATA } from "../decorators/constants";
 

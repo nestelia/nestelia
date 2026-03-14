@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { INTERCEPTORS_METADATA } from "../decorators/constants";
 

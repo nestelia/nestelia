@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 export const API_DOCS_METADATA = "api:docs";
 

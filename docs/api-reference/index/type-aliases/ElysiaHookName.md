@@ -12,6 +12,6 @@ type ElysiaHookName =
   | "onError";
 ```
 
-Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:8](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L8)
+Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:7](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L7)
 
 Type for Elysia lifecycle hook names

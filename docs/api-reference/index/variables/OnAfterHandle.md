@@ -4,7 +4,7 @@
 const OnAfterHandle: (options?) => MethodDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:153](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L153)
+Defined in: [packages/core/src/decorators/lifecycle.decorators.ts:152](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/lifecycle.decorators.ts#L152)
 
 Hook called after request handler
 

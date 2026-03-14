@@ -4,7 +4,7 @@
 function RabbitTTL(ttl): MethodDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:264](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L264)
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:263](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L263)
 
 Decorator to set message TTL
 

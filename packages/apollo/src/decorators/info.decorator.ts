@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { INFO_METADATA } from "./constants";
 

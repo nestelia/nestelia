@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { ON_EVENT_METADATA } from "../event-emitter.constants";
 import type { OnEventMetadata } from "../interfaces";

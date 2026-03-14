@@ -3,7 +3,7 @@ import {
   EventPattern,
   MessagePattern,
   Payload,
-} from "../../../packages/microservices";
+} from "../../../packages/microservices/src";
 
 @Injectable()
 export class MathService {

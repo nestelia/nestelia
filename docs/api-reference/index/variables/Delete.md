@@ -4,7 +4,7 @@
 const Delete: (path) => MethodDecorator;
 ```
 
-Defined in: [packages/core/src/decorators/http.decorators.ts:31](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/http.decorators.ts#L31)
+Defined in: [packages/core/src/decorators/http.decorators.ts:30](https://github.com/nestelia/nestelia/blob/main/packages/core/src/decorators/http.decorators.ts#L30)
 
 ## Parameters
 

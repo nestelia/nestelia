@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { typeMetadataStorage } from "../storages/type-metadata.storage";
 import { getOperationArgsDefinitions } from "./args.decorator";

@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 /**
  * Metadata key for storing caught exception types

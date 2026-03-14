@@ -4,7 +4,7 @@
 function InjectRabbitMQChannel(): ParameterDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:117](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L117)
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:116](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L116)
 
 Inject RabbitMQ channel
 

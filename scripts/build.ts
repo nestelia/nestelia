@@ -20,7 +20,7 @@ const ROOT = import.meta.dir + "/..";
 const ENTRYPOINTS = [
   "./index.ts",
   "./packages/scheduler/src/index.ts",
-  "./packages/microservices/index.ts",
+  "./packages/microservices/src/index.ts",
   "./packages/apollo/src/index.ts",
   "./packages/passport/src/index.ts",
   "./packages/testing/src/index.ts",

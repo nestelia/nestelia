@@ -4,7 +4,7 @@
 function UseGuards(...guards): MethodDecorator & ClassDecorator;
 ```
 
-Defined in: [packages/core/src/guards/use-guards.decorator.ts:13](https://github.com/nestelia/nestelia/blob/main/packages/core/src/guards/use-guards.decorator.ts#L13)
+Defined in: [packages/core/src/guards/use-guards.decorator.ts:12](https://github.com/nestelia/nestelia/blob/main/packages/core/src/guards/use-guards.decorator.ts#L12)
 
 Decorator that binds guards to the scope of the controller or method,
 depending on its context.

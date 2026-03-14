@@ -1,4 +1,3 @@
-import "reflect-metadata";
 
 import { ENUM_METADATA } from "../decorators/constants";
 import { typeMetadataStorage } from "../storages/type-metadata.storage";
