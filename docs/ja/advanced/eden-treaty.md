@@ -1,7 +1,7 @@
 ---
 title: Eden Treaty
 icon: link
-description: @elysiajs/eden を使った nestelia の型安全 HTTP クライアント
+description: "@elysiajs/eden を使った nestelia の型安全 HTTP クライアント"
 ---
 
 [Eden Treaty](https://elysiajs.com/eden/treaty/overview) は Elysia 公式のクライアントライブラリで、Elysia アプリケーションの型から型安全な API クライアントを直接生成します。nestelia は HTTP レイヤーに Elysia を使用しているため、Eden Treaty はそのまま動作します。

@@ -1,7 +1,7 @@
 ---
 title: Eden Treaty
 icon: link
-description: @elysiajs/eden을 사용한 nestelia의 타입 안전 HTTP 클라이언트
+description: "@elysiajs/eden을 사용한 nestelia의 타입 안전 HTTP 클라이언트"
 ---
 
 [Eden Treaty](https://elysiajs.com/eden/treaty/overview)는 Elysia 공식 클라이언트 라이브러리로, Elysia 애플리케이션 타입에서 직접 타입 안전 API 클라이언트를 생성합니다. nestelia는 HTTP 레이어로 Elysia를 사용하므로 Eden Treaty는 즉시 작동합니다.
