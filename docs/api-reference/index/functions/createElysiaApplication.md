@@ -1,10 +1,60 @@
 # Function: createElysiaApplication()
 
 ```ts
-function createElysiaApplication(rootModule, options?): Promise<ElysiaNestApplication>;
+function createElysiaApplication(rootModule, options?): Promise<ElysiaNestApplication<Elysia<"", {
+  decorator: {
+  };
+  derive: {
+  };
+  resolve: {
+  };
+  store: {
+  };
+}, {
+  error: {
+  };
+  typebox: {
+  };
+}, {
+  macro: {
+  };
+  macroFn: {
+  };
+  parser: {
+  };
+  response: {
+  };
+  schema: {
+  };
+  standaloneSchema: {
+  };
+}, {
+}, {
+  derive: {
+  };
+  resolve: {
+  };
+  response: {
+  };
+  schema: {
+  };
+  standaloneSchema: {
+  };
+}, {
+  derive: {
+  };
+  resolve: {
+  };
+  response: {
+  };
+  schema: {
+  };
+  standaloneSchema: {
+  };
+}>>>;
 ```
 
-Defined in: [packages/core/src/core/application.factory.ts:38](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/application.factory.ts#L38)
+Defined in: [packages/core/src/core/application.factory.ts:39](https://github.com/nestelia/nestelia/blob/main/packages/core/src/core/application.factory.ts#L39)
 
 Creates an Elysia-Nest application with microservices support.
 
@@ -17,7 +67,57 @@ Creates an Elysia-Nest application with microservices support.
 
 ## Returns
 
-`Promise`\<[`ElysiaNestApplication`](../../packages/microservices/src/classes/ElysiaNestApplication.md)\>
+`Promise`\<[`ElysiaNestApplication`](../../packages/microservices/src/classes/ElysiaNestApplication.md)\<`Elysia`\<`""`, \{
+  `decorator`: \{
+  \};
+  `derive`: \{
+  \};
+  `resolve`: \{
+  \};
+  `store`: \{
+  \};
+\}, \{
+  `error`: \{
+  \};
+  `typebox`: \{
+  \};
+\}, \{
+  `macro`: \{
+  \};
+  `macroFn`: \{
+  \};
+  `parser`: \{
+  \};
+  `response`: \{
+  \};
+  `schema`: \{
+  \};
+  `standaloneSchema`: \{
+  \};
+\}, \{
+\}, \{
+  `derive`: \{
+  \};
+  `resolve`: \{
+  \};
+  `response`: \{
+  \};
+  `schema`: \{
+  \};
+  `standaloneSchema`: \{
+  \};
+\}, \{
+  `derive`: \{
+  \};
+  `resolve`: \{
+  \};
+  `response`: \{
+  \};
+  `schema`: \{
+  \};
+  `standaloneSchema`: \{
+  \};
+\}\>\>\>
 
 ElysiaNestApplication instance
 

@@ -1,13 +1,32 @@
-# Class: ElysiaNestApplication
+# Class: ElysiaNestApplication\<TApp\>
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:67](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L67)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:86](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L86)
 
 Top-level application class that ties together an Elysia HTTP server and
 one or more microservice transport servers.
 
+The generic parameter `TApp` represents the underlying Elysia instance type.
+When you need to export the application type for Eden Treaty, use:
+
+```typescript
+const app = await createElysiaApplication(AppModule);
+await app.listen(3000);
+
+// Export the Elysia instance type for use with @elysiajs/eden treaty()
+export type App = typeof app extends ElysiaNestApplication<infer T> ? T : never;
+// or simply:
+export type App = ReturnType<typeof app.getHttpServer>;
+```
+
+Note: route types from `@Get()` / `@Post()` decorators are registered at
+runtime and cannot be inferred into the Elysia generic by TypeScript.
+The returned instance has all routes registered at runtime and works with
+`treaty<App>()` for HTTP calls.  For fully-typed route generics, declare a
+parallel Elysia schema and use it as the `TApp` type parameter.
+
 Typical usage:
 ```typescript
-const app = createElysiaNestApplication(new Elysia());
+const app = await createElysiaApplication(AppModule);
 app
   .connectMicroservice({ transport: Transport.REDIS, options: { host: 'localhost' } })
   .useGlobalFilters(new HttpExceptionFilter());
@@ -16,25 +35,31 @@ await app.startAllMicroservices();
 await app.listen(3000);
 ```
 
+## Type Parameters
+
+| Type Parameter | Default type |
+| ------ | ------ |
+| `TApp` *extends* `AnyElysia` | `Elysia` |
+
 ## Constructors
 
 ### Constructor
 
 ```ts
-new ElysiaNestApplication(httpServer?): ElysiaNestApplication;
+new ElysiaNestApplication<TApp>(httpServer?): ElysiaNestApplication<TApp>;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:80](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L80)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:99](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L99)
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `httpServer?` | `Elysia`\<`""`, \{ `decorator`: \{ \}; `derive`: \{ \}; `resolve`: \{ \}; `store`: \{ \}; \}, \{ `error`: \{ \}; `typebox`: \{ \}; \}, \{ `macro`: \{ \}; `macroFn`: \{ \}; `parser`: \{ \}; `response`: \{ \}; `schema`: \{ \}; `standaloneSchema`: \{ \}; \}, \{ \}, \{ `derive`: \{ \}; `resolve`: \{ \}; `response`: \{ \}; `schema`: \{ \}; `standaloneSchema`: \{ \}; \}, \{ `derive`: \{ \}; `resolve`: \{ \}; `response`: \{ \}; `schema`: \{ \}; `standaloneSchema`: \{ \}; \}\> |
+| `httpServer?` | `TApp` |
 
 #### Returns
 
-`ElysiaNestApplication`
+`ElysiaNestApplication`\<`TApp`\>
 
 ## Methods
 
@@ -44,7 +69,7 @@ Defined in: [packages/microservices/src/elysia-nest-application.ts:80](https://g
 close(): Promise<void>;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:535](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L535)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:605](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L605)
 
 Gracefully shuts down all microservice transports and the HTTP server,
 triggering the corresponding lifecycle hooks.
@@ -61,7 +86,7 @@ triggering the corresponding lifecycle hooks.
 connectMicroservice(options): this;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:101](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L101)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:120](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L120)
 
 Registers a new microservice transport.  Supports both built-in transports
 (Redis, RabbitMQ, TCP) and custom transport strategies.
@@ -92,16 +117,23 @@ app.connectMicroservice({
 ### getHttpServer()
 
 ```ts
-getHttpServer(): Elysia;
+getHttpServer(): TApp;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:507](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L507)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:540](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L540)
 
 Returns the underlying Elysia HTTP server instance.
 
+Use this to export the type for Eden Treaty:
+```typescript
+export type App = ReturnType<typeof app.getHttpServer>;
+// client:
+const client = treaty<App>('http://localhost:3000');
+```
+
 #### Returns
 
-`Elysia`
+`TApp`
 
 ***
 
@@ -111,7 +143,7 @@ Returns the underlying Elysia HTTP server instance.
 getMicroservices(): MicroserviceServerInfo[];
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:515](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L515)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:585](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L585)
 
 Returns all registered microservice descriptors.
 
@@ -127,7 +159,7 @@ Returns all registered microservice descriptors.
 getUrl(): string;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:523](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L523)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:593](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L593)
 
 Returns the base URL of the HTTP server.
 Only meaningful after [listen](#listen) has been called.
@@ -144,7 +176,7 @@ Only meaningful after [listen](#listen) has been called.
 initGlobalFilters(): this;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:453](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L453)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:477](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L477)
 
 Ensures HTTP error hooks are registered.
 Called internally by [useGlobalFilters](#useglobalfilters) and externally by the core
@@ -166,7 +198,7 @@ application factory after all filters have been set up.
 listen(port, callback?): Promise<void>;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:466](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L466)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:490](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L490)
 
 Starts the Elysia HTTP server.
 
@@ -190,7 +222,7 @@ listen(
 callback?): Promise<void>;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:472](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L472)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:496](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L496)
 
 ##### Parameters
 
@@ -212,7 +244,7 @@ Defined in: [packages/microservices/src/elysia-nest-application.ts:472](https://
 setControllers(controllers): void;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:327](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L327)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:346](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L346)
 
 Registers controllers whose methods will be scanned for `@MessagePattern`
 and `@EventPattern` decorators.
@@ -235,7 +267,7 @@ and `@EventPattern` decorators.
 setHttpServer(server): void;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:316](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L316)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:335](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L335)
 
 Sets (or replaces) the Elysia HTTP server instance.
 Applies any already-registered global filters to the new server.
@@ -244,7 +276,7 @@ Applies any already-registered global filters to the new server.
 
 | Parameter | Type |
 | ------ | ------ |
-| `server` | `Elysia` |
+| `server` | `TApp` |
 
 #### Returns
 
@@ -258,7 +290,7 @@ Applies any already-registered global filters to the new server.
 startAllMicroservices(): Promise<void>;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:115](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L115)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:134](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L134)
 
 Starts all registered microservice transports and registers their pattern
 handlers.
@@ -275,7 +307,7 @@ handlers.
 useGlobalFilters(...filters): this;
 ```
 
-Defined in: [packages/microservices/src/elysia-nest-application.ts:346](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L346)
+Defined in: [packages/microservices/src/elysia-nest-application.ts:365](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L365)
 
 Registers one or more global exception filters.
 
@@ -300,3 +332,57 @@ Filters are applied to:
 ```typescript
 app.useGlobalFilters(new HttpExceptionFilter(), ValidationFilter);
 ```
+
+***
+
+### withSchema()
+
+```ts
+withSchema<TSchema>(schema): TSchema;
+```
+
+Defined in: [packages/microservices/src/elysia-nest-application.ts:576](https://github.com/nestelia/nestelia/blob/main/packages/microservices/src/elysia-nest-application.ts#L576)
+
+Returns the underlying Elysia HTTP server typed as `TSchema`.
+
+Route types from `@Get()` / `@Post()` decorators cannot be inferred by
+TypeScript because they are registered at runtime.  Pass a typed Elysia
+schema built with the native builder pattern and this method will cast the
+live server to that type so `treaty<App>()` clients get full
+autocomplete for paths, request bodies, and response shapes.
+
+At runtime the **actual live server** (with all Nestelia routes) is
+returned — the schema is only used for its TypeScript type.
+
+```typescript
+import { t } from "elysia";
+
+const typedServer = app.withSchema(
+  new Elysia()
+    .get("/todos", (): Todo[] => [])
+    .post("/todos", (): Todo => ({} as Todo), {
+      body: t.Object({ title: t.String() }),
+    }),
+);
+
+export type App = typeof typedServer;
+// client:
+const client = treaty<App>("http://localhost:3000");
+const { data } = await client.todos.get(); // data: Todo[]
+```
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `TSchema` *extends* `AnyElysia` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `schema` | `TSchema` |
+
+#### Returns
+
+`TSchema`

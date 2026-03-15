@@ -1,3 +1,4 @@
+import type { Elysia } from "elysia";
 import { ElysiaNestApplication } from "../../../../packages/microservices/src/elysia-nest-application";
 import { APP_FILTERS_METADATA, MODULE_METADATA } from "../decorators/constants";
 import type { ModuleOptions } from "../decorators/types";
@@ -38,7 +39,7 @@ export interface ApplicationOptions {
 export async function createElysiaApplication(
   rootModule: ModuleFactory,
   options?: ApplicationOptions,
-): Promise<ElysiaNestApplication> {
+): Promise<ElysiaNestApplication<Elysia>> {
   if (options?.logger !== undefined) {
     Logger.overrideLogger(options.logger);
   }

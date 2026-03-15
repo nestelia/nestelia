@@ -75,6 +75,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "bin": {
+    "nestelia-gen": "./bin/nestelia-gen.ts"
+  },
   "scripts": {
     "build": "bun run scripts/build.ts",
     "test": "bun test",
@@ -168,6 +171,7 @@
   },
   "devDependencies": {
     "@apollo/server": "^5.4.0",
+    "@elysiajs/eden": "^1.4.8",
     "@graphql-tools/schema": "^10.0.31",
     "@resvg/resvg-js": "^2.6.2",
     "@types/amqplib": "^0.10.8",
@@ -178,6 +182,7 @@
     "cacheable": "^2.3.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.15.1",
+    "drizzle-orm": "^0.43.1",
     "elysia": "^1.4.27",
     "graphql": "^16.13.1",
     "graphql-ws": "^6.0.7",
@@ -189,9 +194,9 @@
     "passport": "^0.7.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "ts-morph": "^27.0.2",
     "typedoc": "^0.28.17",
     "typedoc-plugin-markdown": "^4.10.0",
-    "drizzle-orm": "^0.43.1",
     "typescript": "^5.9.3"
   },
   "keywords": [

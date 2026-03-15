@@ -1,4 +1,4 @@
-import type { Elysia } from "elysia";
+import type { AnyElysia, Elysia } from "elysia";
 
 import { addGlobalExceptionFilter } from "../../core/src/core/elysia-plugin.factory";
 import { DIContainer, type Type } from "../../core/src/di";
@@ -53,9 +53,28 @@ export interface MicroserviceServerInfo {
  * Top-level application class that ties together an Elysia HTTP server and
  * one or more microservice transport servers.
  *
+ * The generic parameter `TApp` represents the underlying Elysia instance type.
+ * When you need to export the application type for Eden Treaty, use:
+ *
+ * ```typescript
+ * const app = await createElysiaApplication(AppModule);
+ * await app.listen(3000);
+ *
+ * // Export the Elysia instance type for use with @elysiajs/eden treaty()
+ * export type App = typeof app extends ElysiaNestApplication<infer T> ? T : never;
+ * // or simply:
+ * export type App = ReturnType<typeof app.getHttpServer>;
+ * ```
+ *
+ * Note: route types from `@Get()` / `@Post()` decorators are registered at
+ * runtime and cannot be inferred into the Elysia generic by TypeScript.
+ * The returned instance has all routes registered at runtime and works with
+ * `treaty<App>()` for HTTP calls.  For fully-typed route generics, declare a
+ * parallel Elysia schema and use it as the `TApp` type parameter.
+ *
  * Typical usage:
  * ```typescript
- * const app = createElysiaNestApplication(new Elysia());
+ * const app = await createElysiaApplication(AppModule);
  * app
  *   .connectMicroservice({ transport: Transport.REDIS, options: { host: 'localhost' } })
  *   .useGlobalFilters(new HttpExceptionFilter());
@@ -64,9 +83,9 @@ export interface MicroserviceServerInfo {
  * await app.listen(3000);
  * ```
  */
-export class ElysiaNestApplication {
+export class ElysiaNestApplication<TApp extends AnyElysia = Elysia> {
   private readonly microservices: MicroserviceServerInfo[] = [];
-  private httpServer?: Elysia;
+  private httpServer?: TApp;
   private controllers: Type[] = [];
   private isListening = false;
   private readonly globalFilters: Array<Type<ExceptionFilter> | ExceptionFilter> = [];
@@ -77,7 +96,7 @@ export class ElysiaNestApplication {
   private listenPort?: number;
   private listenHostname?: string;
 
-  constructor(httpServer?: Elysia) {
+  constructor(httpServer?: TApp) {
     this.httpServer = httpServer;
   }
 
@@ -313,7 +332,7 @@ export class ElysiaNestApplication {
    * Sets (or replaces) the Elysia HTTP server instance.
    * Applies any already-registered global filters to the new server.
    */
-  public setHttpServer(server: Elysia): void {
+  public setHttpServer(server: TApp): void {
     this.httpServer = server;
     if (this.globalFilters.length > 0) {
       this.applyHttpErrorHooks();
@@ -368,7 +387,12 @@ export class ElysiaNestApplication {
   private applyHttpErrorHooks(): void {
     if (!this.httpServer || this.errorHooksRegistered) return;
 
-    this.httpServer.onError(async (rawCtx) => {
+    // Cast to the concrete Elysia type so the hook callback signatures are
+    // known and the intermediate `rawCtx as ElysiaErrorCtx / ElysiaAfterHandleCtx`
+    // casts remain valid regardless of the TApp generic parameter.
+    const server = this.httpServer as Elysia;
+
+    server.onError(async (rawCtx) => {
       const ctx = rawCtx as ElysiaErrorCtx;
       if (!ctx.error) return;
       const exception = ctx.error instanceof Error ? ctx.error : new Error(String(ctx.error));
@@ -387,7 +411,7 @@ export class ElysiaNestApplication {
       return { statusCode: 500, message: "Internal server error" };
     });
 
-    this.httpServer.onAfterHandle(async (rawCtx) => {
+    server.onAfterHandle(async (rawCtx) => {
       const ctx = rawCtx as ElysiaAfterHandleCtx;
       if (ctx.response !== "NOT_FOUND") return;
 
@@ -503,12 +527,58 @@ export class ElysiaNestApplication {
 
   // ─── Accessors ────────────────────────────────────────────────────────────
 
-  /** Returns the underlying Elysia HTTP server instance. */
-  public getHttpServer(): Elysia {
+  /**
+   * Returns the underlying Elysia HTTP server instance.
+   *
+   * Use this to export the type for Eden Treaty:
+   * ```typescript
+   * export type App = ReturnType<typeof app.getHttpServer>;
+   * // client:
+   * const client = treaty<App>('http://localhost:3000');
+   * ```
+   */
+  public getHttpServer(): TApp {
     if (!this.httpServer) {
       throw new Error("HTTP server is not set");
     }
     return this.httpServer;
+  }
+
+  /**
+   * Returns the underlying Elysia HTTP server typed as `TSchema`.
+   *
+   * Route types from `@Get()` / `@Post()` decorators cannot be inferred by
+   * TypeScript because they are registered at runtime.  Pass a typed Elysia
+   * schema built with the native builder pattern and this method will cast the
+   * live server to that type so `treaty<App>()` clients get full
+   * autocomplete for paths, request bodies, and response shapes.
+   *
+   * At runtime the **actual live server** (with all Nestelia routes) is
+   * returned — the schema is only used for its TypeScript type.
+   *
+   * ```typescript
+   * import { t } from "elysia";
+   *
+   * const typedServer = app.withSchema(
+   *   new Elysia()
+   *     .get("/todos", (): Todo[] => [])
+   *     .post("/todos", (): Todo => ({} as Todo), {
+   *       body: t.Object({ title: t.String() }),
+   *     }),
+   * );
+   *
+   * export type App = typeof typedServer;
+   * // client:
+   * const client = treaty<App>("http://localhost:3000");
+   * const { data } = await client.todos.get(); // data: Todo[]
+   * ```
+   */
+  public withSchema<TSchema extends AnyElysia>(schema: TSchema): TSchema {
+    if (!this.httpServer) {
+      throw new Error("HTTP server is not set");
+    }
+    void schema; // schema is used only for its TypeScript type
+    return this.httpServer as unknown as TSchema;
   }
 
   /** Returns all registered microservice descriptors. */

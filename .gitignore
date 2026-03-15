@@ -39,3 +39,4 @@ benchmark/node_modules
 benchmark/results*.json
 !benchmark/src/express.js
 !benchmark/src/fastify.js
+app.schema.ts

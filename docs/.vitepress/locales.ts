@@ -202,6 +202,7 @@ const enDocs = [
     ["Forward References", "advanced/forward-ref"],
     ["Container API",      "advanced/container-api"],
     ["Swagger",            "advanced/swagger"],
+    ["Eden Treaty",        "advanced/eden-treaty"],
   ]),
 ];
 
@@ -266,6 +267,7 @@ const ruDocs = [
     ["Forward References",          "advanced/forward-ref"],
     ["Container API",               "advanced/container-api"],
     ["Swagger",                     "advanced/swagger"],
+    ["Eden Treaty",                 "advanced/eden-treaty"],
   ], "/ru"),
 ];
 
@@ -312,6 +314,7 @@ const zhDocs = [
     ["前向引用",      "advanced/forward-ref"],
     ["Container API", "advanced/container-api"],
     ["Swagger",       "advanced/swagger"],
+    ["Eden Treaty",   "advanced/eden-treaty"],
   ], "/zh"),
 ];
 
@@ -377,6 +380,7 @@ const jaDocs = [
     ["前方参照",            "advanced/forward-ref"],
     ["Container API",       "advanced/container-api"],
     ["Swagger",             "advanced/swagger"],
+    ["Eden Treaty",         "advanced/eden-treaty"],
   ], "/ja"),
 ];
 
@@ -442,6 +446,7 @@ const ptDocs = [
     ["Referências Circulares", "advanced/forward-ref"],
     ["Container API",          "advanced/container-api"],
     ["Swagger",                "advanced/swagger"],
+    ["Eden Treaty",            "advanced/eden-treaty"],
   ], "/pt"),
 ];
 
@@ -507,6 +512,7 @@ const koDocs = [
     ["순환 참조",        "advanced/forward-ref"],
     ["Container API",    "advanced/container-api"],
     ["Swagger",          "advanced/swagger"],
+    ["Eden Treaty",      "advanced/eden-treaty"],
   ], "/ko"),
 ];
 
@@ -572,6 +578,7 @@ const esDocs = [
     ["Referencias Circulares",    "advanced/forward-ref"],
     ["Container API",             "advanced/container-api"],
     ["Swagger",                   "advanced/swagger"],
+    ["Eden Treaty",               "advanced/eden-treaty"],
   ], "/es"),
 ];
 
