@@ -26,6 +26,7 @@ export interface ModuleOptions {
   middlewares?: MiddlewareType[]; // Use the new MiddlewareType
   exports?: any[];
   children?: any[];
+  gateways?: any[];
 }
 
 // Parameter decorator metadata

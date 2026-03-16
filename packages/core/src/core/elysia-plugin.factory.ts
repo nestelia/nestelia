@@ -15,6 +15,7 @@ import { type ElysiaNestMiddleware, isClassMiddleware } from "../interfaces/midd
 import { Logger } from "../logger/logger.service";
 import { validateModuleDependencies } from "./helpers";
 import { setupController } from "./controller-setup";
+import { setupGateways } from "./gateway-setup";
 import { addGlobalExceptionFilter, applyExceptionFilters } from "./exception-filter.registry";
 import {
   type DynamicModule,
@@ -252,6 +253,11 @@ export function createElysiaPlugin(
           setupController(app, controllerClass, moduleinstance, prefix, classMiddlewares),
         ),
       );
+    }
+
+    if (metadata?.gateways?.length) {
+      DIContainer.register(metadata.gateways, moduleinstance as Type<any>);
+      await setupGateways(app, metadata.gateways, moduleinstance);
     }
 
     moduleLogger.log(`${moduleName} dependencies initialized`);

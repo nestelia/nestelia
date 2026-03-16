@@ -33,3 +33,7 @@ export const ROUTE_SCHEMA_METADATA = "route:schema:metadata";
 
 // Global module metadata
 export const GLOBAL_MODULE_METADATA = "module:global";
+
+// WebSocket Gateway
+export const WS_GATEWAY_METADATA = "ws:gateway:metadata";
+export const WS_HANDLER_METADATA = "ws:handler:metadata";

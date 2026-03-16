@@ -16,3 +16,4 @@ export * from "./packages/core/src/interceptors";
 export * from "./packages/core/src/logger";
 export * from "./packages/core/src/pipes";
 export * from "./packages/core/src/utils/shared.utils";
+export * from "./packages/core/src/websocket";

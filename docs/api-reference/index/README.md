@@ -65,6 +65,9 @@
 | [isValueProvider](functions/isValueProvider.md) | - |
 | [Middleware](functions/Middleware.md) | Marks a class as middleware. Implies `@Injectable()`. |
 | [Module](functions/Module.md) | Module decorator that creates an Elysia plugin from the module configuration. |
+| [OnClose](functions/OnClose.md) | Marks a gateway method as the WebSocket `close` handler. Called when a client disconnects. |
+| [OnMessage](functions/OnMessage.md) | Marks a gateway method as the WebSocket `message` handler. Called when a message is received from a client. |
+| [OnOpen](functions/OnOpen.md) | Marks a gateway method as the WebSocket `open` handler. Called when a client establishes a connection. |
 | [Optional](functions/Optional.md) | - |
 | [parseValidationError](functions/parseValidationError.md) | - |
 | [processParameters](functions/processParameters.md) | Extract and validate parameters based on metadata |
@@ -72,6 +75,7 @@
 | [SetMetadata](functions/SetMetadata.md) | Decorator that assigns metadata to the class using the specified key. |
 | [UseGuards](functions/UseGuards.md) | Decorator that binds guards to the scope of the controller or method, depending on its context. |
 | [UseInterceptors](functions/UseInterceptors.md) | Decorator that binds interceptors to the scope of the controller or method, depending on its context. |
+| [WebSocketGateway](functions/WebSocketGateway.md) | Class decorator that marks a class as a WebSocket gateway. |
 
 ## Interfaces
 
@@ -131,6 +135,8 @@
 | [ValidationErrorDetails](interfaces/ValidationErrorDetails.md) | - |
 | [ValueProvider](interfaces/ValueProvider.md) | - |
 | [WsArgumentsHost](interfaces/WsArgumentsHost.md) | WebSocket context interface |
+| [WsGatewayMetadata](interfaces/WsGatewayMetadata.md) | - |
+| [WsHandlerMetadata](interfaces/WsHandlerMetadata.md) | - |
 
 ## Type Aliases
 
@@ -139,6 +145,7 @@
 | [ConfigurableModuleCls](type-aliases/ConfigurableModuleCls.md) | Class that represents a blueprint/prototype for a configurable Nest module. This class provides static methods for constructing dynamic modules. Their names can be controlled through the "MethodKey" type argument. |
 | [ConfigurableModuleOptionsFactory](type-aliases/ConfigurableModuleOptionsFactory.md) | Interface that must be implemented by the module options factory class. Method key varies depending on the "FactoryClassMethodKey" type argument. |
 | [ElysiaHookName](type-aliases/ElysiaHookName.md) | Type for Elysia lifecycle hook names |
+| [ElysiaWsContext](type-aliases/ElysiaWsContext.md) | The WebSocket context object passed to gateway handler methods. Wraps Elysia's ElysiaWS with an untyped data payload for general use. |
 | [FunctionalMiddleware](type-aliases/FunctionalMiddleware.md) | Functional middleware type. Directly an Elysia handler or a similar function. |
 | [~~GuardContext~~](type-aliases/GuardContext.md) | - |
 | [InjectionToken](type-aliases/InjectionToken.md) | - |
@@ -148,6 +155,7 @@
 | [Provider](type-aliases/Provider.md) | - |
 | [ProviderToken](type-aliases/ProviderToken.md) | - |
 | [TypeProvider](type-aliases/TypeProvider.md) | - |
+| [WsHandlerType](type-aliases/WsHandlerType.md) | - |
 
 ## Enumerations
 
@@ -218,3 +226,5 @@
 | [SCHEDULED\_JOB\_METADATA](variables/SCHEDULED_JOB_METADATA.md) | - |
 | [Session](variables/Session.md) | - |
 | [STATIC\_CONTEXT](variables/STATIC_CONTEXT.md) | - |
+| [WS\_GATEWAY\_METADATA](variables/WS_GATEWAY_METADATA.md) | - |
+| [WS\_HANDLER\_METADATA](variables/WS_HANDLER_METADATA.md) | - |
