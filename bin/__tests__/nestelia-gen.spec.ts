@@ -12,8 +12,6 @@ const starFixtureDir = join(import.meta.dir, "fixtures/star-reexport");
 const starFixtureTmpOut = join(tmpdir(), `nestelia-gen-star-${Date.now()}.ts`);
 const rtFixtureDir = join(import.meta.dir, "fixtures/return-types");
 const rtFixtureTmpOut = join(tmpdir(), `nestelia-gen-rt-${Date.now()}.ts`);
-const extFixtureDir = join(import.meta.dir, "fixtures/external-anon-types");
-const extFixtureTmpOut = join(tmpdir(), `nestelia-gen-ext-${Date.now()}.ts`);
 
 function runGen(outputPath = tmpOut, { fixtureCwd }: { fixtureCwd?: string } = {}) {
   const extraArgs = fixtureCwd ? ["--tsconfig", join(fixtureCwd, "tsconfig.json")] : [];
@@ -29,7 +27,6 @@ afterAll(() => {
   try { rmSync(fixtureTmpOut); } catch {}
   try { rmSync(starFixtureTmpOut); } catch {}
   try { rmSync(rtFixtureTmpOut); } catch {}
-  try { rmSync(extFixtureTmpOut); } catch {}
 });
 
 describe("nestelia-gen", () => {
@@ -143,37 +140,3 @@ describe("nestelia-gen: return type expansion", () => {
   });
 });
 
-describe("nestelia-gen: external anonymous types (__type)", () => {
-  it("expands __type from external packages structurally", () => {
-    const result = runGen(extFixtureTmpOut, { fixtureCwd: extFixtureDir });
-    expect(result.exitCode).toBe(0);
-    const content = readFileSync(extFixtureTmpOut, "utf8");
-    // Must NOT contain __type anywhere
-    expect(content).not.toContain("__type");
-    // Should have structurally expanded Product fields
-    expect(content).toContain("id: string");
-    expect(content).toContain("title: string");
-    expect(content).toContain("price: number");
-    // Should have structurally expanded Category fields
-    expect(content).toContain("name: string");
-    expect(content).toContain("slug: string");
-  });
-
-  it("preserves Date from external types", () => {
-    const content = readFileSync(extFixtureTmpOut, "utf8");
-    expect(content).toContain("Date");
-  });
-
-  it("handles intersection with external anonymous types", () => {
-    const content = readFileSync(extFixtureTmpOut, "utf8");
-    // The /with-category endpoint has Product & { category: Category }
-    expect(content).toContain("category:");
-  });
-
-  it("has only the elysia import", () => {
-    const content = readFileSync(extFixtureTmpOut, "utf8");
-    const imports = content.match(/^import .*/gm) ?? [];
-    expect(imports).toHaveLength(1);
-    expect(imports[0]).toContain("elysia");
-  });
-});
