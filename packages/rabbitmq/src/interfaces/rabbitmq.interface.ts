@@ -170,6 +170,8 @@ export interface RabbitSubscribeOptions {
   queue?: string;
   /** Queue options */
   queueOptions?: RabbitMQQueueConfig["options"];
+  /** Exchange type (default: "topic" for subscribe, "direct" for RPC) */
+  exchangeType?: RabbitMQExchangeType;
   /** Exchange options (if exchange doesn't exist) */
   exchangeOptions?: RabbitMQExchangeConfig["options"];
   /** Error handler */

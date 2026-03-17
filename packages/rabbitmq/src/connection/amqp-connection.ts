@@ -769,7 +769,7 @@ export class AmqpConnection {
     // Assert exchange
     await this.assertExchange({
       name: exchange,
-      type: "topic",
+      type: options.exchangeType ?? "topic",
       options: options.exchangeOptions,
     });
 
@@ -821,7 +821,7 @@ export class AmqpConnection {
     // Assert exchange
     await this.assertExchange({
       name: exchange,
-      type: "direct",
+      type: options.exchangeType ?? "direct",
       options: options.exchangeOptions,
     });
 

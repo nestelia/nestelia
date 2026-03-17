@@ -227,4 +227,100 @@ describe("RabbitMQ Integration", () => {
       expect(ordersHandler.processed.length).toBe(before + 3);
     });
   });
+
+  describe("exchangeType option", () => {
+    it("setupSubscribeHandler uses custom exchangeType instead of default topic", async () => {
+      // Clear cached exchanges so assertExchange actually fires
+      (connection as any).assertedExchanges.clear();
+      channel.assertExchange.mockClear();
+
+      // Invoke setupSubscribeHandler with exchangeType: "x-delayed-message"
+      await (connection as any).setupSubscribeHandler(
+        { handleDelayed: jest.fn() },
+        "TestHandler",
+        "handleDelayed",
+        {
+          exchange: "delayed-orders",
+          routingKey: "order.delayed",
+          queue: "delayed-queue",
+          exchangeType: "x-delayed-message",
+          exchangeOptions: { durable: true, arguments: { "x-delayed-type": "topic" } },
+        },
+      );
+
+      const call = (channel.assertExchange.mock.calls as any[]).find(
+        (c) => c[0] === "delayed-orders",
+      );
+      expect(call).toBeDefined();
+      expect(call[1]).toBe("x-delayed-message");
+    });
+
+    it("setupSubscribeHandler defaults to topic when exchangeType is not set", async () => {
+      (connection as any).assertedExchanges.clear();
+      channel.assertExchange.mockClear();
+
+      await (connection as any).setupSubscribeHandler(
+        { handleDefault: jest.fn() },
+        "TestHandler",
+        "handleDefault",
+        {
+          exchange: "default-exchange",
+          routingKey: "test.key",
+          queue: "default-queue",
+        },
+      );
+
+      const call = (channel.assertExchange.mock.calls as any[]).find(
+        (c) => c[0] === "default-exchange",
+      );
+      expect(call).toBeDefined();
+      expect(call[1]).toBe("topic");
+    });
+
+    it("setupRpcHandler uses custom exchangeType instead of default direct", async () => {
+      (connection as any).assertedExchanges.clear();
+      channel.assertExchange.mockClear();
+
+      await (connection as any).setupRpcHandler(
+        { handleRpc: jest.fn(async () => ({ ok: true })) },
+        "TestHandler",
+        "handleRpc",
+        {
+          exchange: "delayed-rpc",
+          routingKey: "rpc.delayed",
+          queue: "delayed-rpc-queue",
+          exchangeType: "x-delayed-message",
+          exchangeOptions: { durable: true, arguments: { "x-delayed-type": "direct" } },
+        },
+      );
+
+      const call = (channel.assertExchange.mock.calls as any[]).find(
+        (c) => c[0] === "delayed-rpc",
+      );
+      expect(call).toBeDefined();
+      expect(call[1]).toBe("x-delayed-message");
+    });
+
+    it("setupRpcHandler defaults to direct when exchangeType is not set", async () => {
+      (connection as any).assertedExchanges.clear();
+      channel.assertExchange.mockClear();
+
+      await (connection as any).setupRpcHandler(
+        { handleRpc: jest.fn(async () => ({ ok: true })) },
+        "TestHandler",
+        "handleRpc",
+        {
+          exchange: "default-rpc-exchange",
+          routingKey: "rpc.key",
+          queue: "default-rpc-queue",
+        },
+      );
+
+      const call = (channel.assertExchange.mock.calls as any[]).find(
+        (c) => c[0] === "default-rpc-exchange",
+      );
+      expect(call).toBeDefined();
+      expect(call[1]).toBe("direct");
+    });
+  });
 });
