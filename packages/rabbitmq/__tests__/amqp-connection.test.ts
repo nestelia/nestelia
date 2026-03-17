@@ -12,6 +12,7 @@ function createMockChannel() {
 
   const channel = {
     assertExchange: jest.fn(async () => ({ exchange: "" })),
+    checkExchange: jest.fn(async () => ({})),
     assertQueue: jest.fn(async (_q: string, _opts?: unknown) => ({
       queue: _q || `amq.gen-${++consumerTagCounter}`,
       messageCount: 0,
@@ -168,9 +169,22 @@ describe("AmqpConnection", () => {
   // ── Exchange assertion ──────────────────────────────────────────────
 
   describe("assertExchange", () => {
-    it("asserts exchange via channel", async () => {
+    it("asserts exchange via channel with explicit type", async () => {
       await conn.assertExchange({ name: "test-exchange", type: "topic" });
       expect(mockChannel.assertExchange).toHaveBeenCalledWith("test-exchange", "topic", undefined);
+    });
+
+    it("defaults to 'topic' when type is omitted", async () => {
+      await conn.assertExchange({ name: "default-type-ex" });
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("default-type-ex", "topic", undefined);
+    });
+
+    it("uses defaultExchangeType from config", async () => {
+      const c = createConnection({ defaultExchangeType: "fanout" });
+      await c.connect();
+      await c.assertExchange({ name: "fanout-ex" });
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("fanout-ex", "fanout", undefined);
+      await c.disconnect();
     });
 
     it("applies exchange prefix", async () => {
@@ -179,6 +193,16 @@ describe("AmqpConnection", () => {
       await c.assertExchange({ name: "events", type: "fanout" });
       expect(mockChannel.assertExchange).toHaveBeenCalledWith("myapp.events", "fanout", undefined);
       await c.disconnect();
+    });
+
+    it("uses checkExchange when createExchangeIfNotExists is false", async () => {
+      await conn.assertExchange({ name: "existing-ex", createExchangeIfNotExists: false });
+      expect(mockChannel.assertExchange).not.toHaveBeenCalledWith(
+        "existing-ex",
+        expect.anything(),
+        expect.anything(),
+      );
+      expect(mockChannel.checkExchange).toHaveBeenCalledWith("existing-ex");
     });
 
     it("skips duplicate assertion", async () => {
@@ -191,7 +215,7 @@ describe("AmqpConnection", () => {
     });
 
     it("throws for invalid exchange name", async () => {
-      await expect(conn.assertExchange({ name: "bad name!", type: "direct" })).rejects.toThrow(
+      await expect(conn.assertExchange({ name: "bad name!" })).rejects.toThrow(
         "Invalid exchange name",
       );
     });
@@ -393,7 +417,11 @@ describe("AmqpConnection", () => {
         ],
       });
       await c.connect();
-      expect(mockChannel.assertExchange).toHaveBeenCalledTimes(2);
+      // Filter to only ex1/ex2 calls (other tests may have asserted exchanges)
+      const exCalls = mockChannel.assertExchange.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string) === "ex1" || (c[0] as string) === "ex2",
+      );
+      expect(exCalls).toHaveLength(2);
       await c.disconnect();
     });
 
@@ -452,16 +480,17 @@ describe("AmqpConnection", () => {
   // ── registerHandlers ────────────────────────────────────────────────
 
   describe("registerHandlers", () => {
-    it("asserts exchange, queue, binds, and starts consuming for @RabbitSubscribe", async () => {
+    it("asserts queue, binds, and starts consuming for @RabbitSubscribe (no exchange assertion)", async () => {
       class TestHandler {
         @RabbitSubscribe({ exchange: "events", routingKey: "user.created", queue: "user-q" })
         handleUser() {}
       }
 
+      mockChannel.assertExchange.mockClear();
       await conn.registerHandlers(new TestHandler());
 
-      // Exchange asserted
-      expect(mockChannel.assertExchange).toHaveBeenCalledWith("events", "topic", undefined);
+      // Exchange NOT asserted by handler — must be pre-configured in module config
+      expect(mockChannel.assertExchange).not.toHaveBeenCalled();
       // Queue asserted
       const queueCalls = mockChannel.assertQueue.mock.calls.filter(
         (c: unknown[]) => c[0] === "user-q",
@@ -546,7 +575,7 @@ describe("AmqpConnection", () => {
       expect((bindCalls[1] as any)[2]).toBe("order.updated");
     });
 
-    it("registers @RabbitRPC handlers and replies", async () => {
+    it("registers @RabbitRPC handlers and replies (no exchange assertion)", async () => {
       class CalcHandler {
         @RabbitRPC({ exchange: "rpc", routingKey: "calc.add", queue: "calc-q" })
         add(data: { a: number; b: number }) {
@@ -554,10 +583,11 @@ describe("AmqpConnection", () => {
         }
       }
 
+      mockChannel.assertExchange.mockClear();
       await conn.registerHandlers(new CalcHandler());
 
-      // Exchange asserted
-      expect(mockChannel.assertExchange).toHaveBeenCalledWith("rpc", "direct", undefined);
+      // Exchange NOT asserted by handler
+      expect(mockChannel.assertExchange).not.toHaveBeenCalled();
       // Consumer started
       expect(mockChannel.consume).toHaveBeenCalled();
 

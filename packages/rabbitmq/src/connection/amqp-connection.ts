@@ -306,7 +306,8 @@ export class AmqpConnection {
   }
 
   /**
-   * Assert an exchange
+   * Assert an exchange.
+   * When createExchangeIfNotExists is false, uses checkExchange (passive declare).
    */
   async assertExchange(config: RabbitMQExchangeConfig): Promise<void> {
     if (!this.channel) {
@@ -320,7 +321,14 @@ export class AmqpConnection {
       return;
     }
 
-    await this.channel.assertExchange(exchangeName, config.type, config.options);
+    const shouldCreate = config.createExchangeIfNotExists !== false;
+
+    if (shouldCreate) {
+      const type = config.type || this.config.defaultExchangeType || "topic";
+      await this.channel.assertExchange(exchangeName, type, config.options);
+    } else {
+      await this.channel.checkExchange(exchangeName);
+    }
 
     this.assertedExchanges.add(exchangeName);
     this.logger.debug(`Exchange '${exchangeName}' asserted`);
@@ -748,7 +756,8 @@ export class AmqpConnection {
 
   /**
    * Set up a single @RabbitSubscribe handler:
-   * assert exchange, assert & bind queue, start consuming
+   * assert & bind queue, start consuming.
+   * Exchanges must be pre-configured via RabbitMQModule.forRoot({ exchanges }).
    */
   private async setupSubscribeHandler(
     instance: object,
@@ -765,13 +774,6 @@ export class AmqpConnection {
     this.logger.log(
       `${handlerName}.${String(methodName)} {subscribe} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
     );
-
-    // Assert exchange
-    await this.assertExchange({
-      name: exchange,
-      type: options.exchangeType ?? "topic",
-      options: options.exchangeOptions,
-    });
 
     // Assert and bind queue
     if (queue) {
@@ -800,7 +802,8 @@ export class AmqpConnection {
 
   /**
    * Set up a single @RabbitRPC handler:
-   * assert exchange, assert & bind queue, consume and reply
+   * assert & bind queue, consume and reply.
+   * Exchanges must be pre-configured via RabbitMQModule.forRoot({ exchanges }).
    */
   private async setupRpcHandler(
     instance: object,
@@ -817,13 +820,6 @@ export class AmqpConnection {
     this.logger.log(
       `${handlerName}.${String(methodName)} {rpc} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
     );
-
-    // Assert exchange
-    await this.assertExchange({
-      name: exchange,
-      type: options.exchangeType ?? "direct",
-      options: options.exchangeOptions,
-    });
 
     // Assert and bind queue
     if (queue) {

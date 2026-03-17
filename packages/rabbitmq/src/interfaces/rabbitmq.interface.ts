@@ -81,6 +81,8 @@ export interface RabbitMQConfig {
   registerHandlers?: boolean;
   /** Enable controller discovery */
   enableControllerDiscovery?: boolean;
+  /** Default exchange type for exchanges without an explicit type (default: "topic") */
+  defaultExchangeType?: RabbitMQExchangeType;
   /** Maximum message size in bytes (default: 10MB) */
   maxMessageSize?: number;
 }
@@ -101,8 +103,8 @@ export type RabbitMQExchangeType =
 export interface RabbitMQExchangeConfig {
   /** Exchange name */
   name: string;
-  /** Exchange type */
-  type: RabbitMQExchangeType;
+  /** Exchange type (defaults to config.defaultExchangeType or "topic") */
+  type?: RabbitMQExchangeType;
   /** Exchange options */
   options?: {
     durable?: boolean;
@@ -113,8 +115,11 @@ export interface RabbitMQExchangeConfig {
       "x-delayed-type"?: "direct" | "fanout" | "topic" | "headers";
     };
   };
-  /** Create exchange if it doesn't exist */
-  createIfNotExists?: boolean;
+  /**
+   * Create exchange if it doesn't exist (default: true).
+   * When false, uses checkExchange instead of assertExchange.
+   */
+  createExchangeIfNotExists?: boolean;
 }
 
 /**
@@ -162,7 +167,7 @@ export interface RabbitMQQueueConfig {
  * Message handler options for @RabbitSubscribe decorator
  */
 export interface RabbitSubscribeOptions {
-  /** Exchange name */
+  /** Exchange name (must be pre-configured in RabbitMQModule.forRoot({ exchanges })) */
   exchange: string;
   /** Routing key pattern */
   routingKey: string | string[];
@@ -170,10 +175,6 @@ export interface RabbitSubscribeOptions {
   queue?: string;
   /** Queue options */
   queueOptions?: RabbitMQQueueConfig["options"];
-  /** Exchange type (default: "topic" for subscribe, "direct" for RPC) */
-  exchangeType?: RabbitMQExchangeType;
-  /** Exchange options (if exchange doesn't exist) */
-  exchangeOptions?: RabbitMQExchangeConfig["options"];
   /** Error handler */
   errorHandler?: (error: Error, message: unknown) => void | Promise<void>;
   /** Enable message retry on failure */
