@@ -480,7 +480,7 @@ describe("AmqpConnection", () => {
   // ── registerHandlers ────────────────────────────────────────────────
 
   describe("registerHandlers", () => {
-    it("asserts queue, binds, and starts consuming for @RabbitSubscribe (no exchange assertion)", async () => {
+    it("asserts exchange, queue, binds, and starts consuming for @RabbitSubscribe", async () => {
       class TestHandler {
         @RabbitSubscribe({ exchange: "events", routingKey: "user.created", queue: "user-q" })
         handleUser() {}
@@ -489,8 +489,8 @@ describe("AmqpConnection", () => {
       mockChannel.assertExchange.mockClear();
       await conn.registerHandlers(new TestHandler());
 
-      // Exchange NOT asserted by handler — must be pre-configured in module config
-      expect(mockChannel.assertExchange).not.toHaveBeenCalled();
+      // Exchange asserted before binding queue
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("events", "topic", undefined);
       // Queue asserted
       const queueCalls = mockChannel.assertQueue.mock.calls.filter(
         (c: unknown[]) => c[0] === "user-q",
@@ -575,7 +575,7 @@ describe("AmqpConnection", () => {
       expect((bindCalls[1] as any)[2]).toBe("order.updated");
     });
 
-    it("registers @RabbitRPC handlers and replies (no exchange assertion)", async () => {
+    it("registers @RabbitRPC handlers, asserts exchange, and replies", async () => {
       class CalcHandler {
         @RabbitRPC({ exchange: "rpc", routingKey: "calc.add", queue: "calc-q" })
         add(data: { a: number; b: number }) {
@@ -586,8 +586,8 @@ describe("AmqpConnection", () => {
       mockChannel.assertExchange.mockClear();
       await conn.registerHandlers(new CalcHandler());
 
-      // Exchange NOT asserted by handler
-      expect(mockChannel.assertExchange).not.toHaveBeenCalled();
+      // Exchange asserted before binding queue
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("rpc", "topic", undefined);
       // Consumer started
       expect(mockChannel.consume).toHaveBeenCalled();
 

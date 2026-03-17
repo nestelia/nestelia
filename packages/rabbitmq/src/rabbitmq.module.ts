@@ -84,9 +84,21 @@ export class RabbitMQModule {
   private static async getOrCreateConnection(
     configFactory: () => Promise<RabbitMQConfig> | RabbitMQConfig,
   ): Promise<AmqpConnection> {
-    // Return existing instance if already created
+    // If connection already exists, assert any new exchanges/queues from this config
     if (RabbitMQModule.connectionInstance) {
-      return RabbitMQModule.connectionInstance;
+      const config = await configFactory();
+      const conn = RabbitMQModule.connectionInstance;
+      if (config.exchanges?.length) {
+        for (const exchange of config.exchanges) {
+          await conn.assertExchange(exchange);
+        }
+      }
+      if (config.queues?.length) {
+        for (const queue of config.queues) {
+          await conn.assertQueue(queue);
+        }
+      }
+      return conn;
     }
 
     // If initialization is in progress, wait for it

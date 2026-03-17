@@ -775,6 +775,11 @@ export class AmqpConnection {
       `${handlerName}.${String(methodName)} {subscribe} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
     );
 
+    // Ensure the exchange exists before binding queues to it
+    if (exchange) {
+      await this.assertExchange({ name: exchange });
+    }
+
     // Assert and bind queue
     if (queue) {
       await this.assertQueue({
@@ -820,6 +825,11 @@ export class AmqpConnection {
     this.logger.log(
       `${handlerName}.${String(methodName)} {rpc} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
     );
+
+    // Ensure the exchange exists before binding queues to it
+    if (exchange) {
+      await this.assertExchange({ name: exchange });
+    }
 
     // Assert and bind queue
     if (queue) {
