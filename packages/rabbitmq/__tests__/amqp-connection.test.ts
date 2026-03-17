@@ -288,7 +288,7 @@ describe("AmqpConnection", () => {
       const result = await conn.sendToQueue("my-queue", { data: 1 });
       expect(result).toBe(true);
       expect(mockChannel.sendToQueue).toHaveBeenCalled();
-      const [queue, content] = mockChannel.sendToQueue.mock.calls[0] as [string, Buffer];
+      const [queue, content] = (mockChannel.sendToQueue.mock.calls as any)[0] as [string, Buffer];
       expect(queue).toBe("my-queue");
       expect(JSON.parse(content.toString())).toEqual({ data: 1 });
     });
@@ -297,7 +297,7 @@ describe("AmqpConnection", () => {
       const c = createConnection({ queuePrefix: "app" });
       await c.connect();
       await c.sendToQueue("tasks", {});
-      const [queue] = mockChannel.sendToQueue.mock.calls[0] as [string];
+      const [queue] = (mockChannel.sendToQueue.mock.calls as any)[0] as [string];
       expect(queue).toBe("app.tasks");
       await c.disconnect();
     });
@@ -542,8 +542,8 @@ describe("AmqpConnection", () => {
         (c: unknown[]) => c[0] === "multi-rk-q",
       );
       expect(bindCalls).toHaveLength(2);
-      expect(bindCalls[0][2]).toBe("order.created");
-      expect(bindCalls[1][2]).toBe("order.updated");
+      expect((bindCalls[0] as any)[2]).toBe("order.created");
+      expect((bindCalls[1] as any)[2]).toBe("order.updated");
     });
 
     it("registers @RabbitRPC handlers and replies", async () => {
@@ -574,10 +574,10 @@ describe("AmqpConnection", () => {
         (c: unknown[]) => c[0] === "amq.gen-reply",
       );
       expect(replyCalls).toHaveLength(1);
-      const replyContent = JSON.parse((replyCalls[0][1] as Buffer).toString());
+      const replyContent = JSON.parse(((replyCalls[0] as any)[1] as Buffer).toString());
       expect(replyContent).toEqual({ result: 7 });
       // Should include correlationId in reply
-      expect((replyCalls[0][2] as Record<string, unknown>).correlationId).toBe("corr-123");
+      expect(((replyCalls[0] as any)[2] as Record<string, unknown>).correlationId).toBe("corr-123");
     });
 
     it("silently skips classes with no handlers", async () => {
