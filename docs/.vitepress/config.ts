@@ -29,8 +29,10 @@ export default defineConfig({
     // variables resolve correctly — no white flash on Cmd+R / hard reload.
     ["script", {}, `(function(){try{var p=localStorage.getItem("vitepress-theme-appearance")||"auto";var d=p==="dark"||(p==="auto"&&matchMedia("(prefers-color-scheme:dark)").matches);if(d){var e=document.documentElement;e.classList.add("dark");e.style.colorScheme="dark";e.style.setProperty("background-color","#121113","important")}}catch(e){}})();`],
 
-    // Favicon
+    // Favicon — ICO/PNG for search engines & legacy browsers, SVG for modern ones
+    ["link", { rel: "icon", href: "/favicon.ico", sizes: "32x32" }],
     ["link", { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" }],
+    ["link", { rel: "apple-touch-icon", href: "/apple-touch-icon.png" }],
 
     // Fonts — Inter is self-hosted via @fontsource-variable/inter (no external requests)
     ["link", { rel: "preload", href: "/assets/GeistMono-Regular.woff2", as: "font", type: "font/woff2", crossorigin: "" }],

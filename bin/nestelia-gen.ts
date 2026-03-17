@@ -330,14 +330,17 @@ function printType(
 
     if (isExternal) {
       const name = symbol.getName();
-      const typeArgs = (type as ts.TypeReference).typeArguments;
-      if (typeArgs && typeArgs.length > 0) {
-        const args = typeArgs.map((t) =>
-          printType(t, anchor, depth + 1, seen),
-        );
-        return `${name}<${args.join(", ")}>`;
+      // Skip internal/anonymous symbol names (e.g. "__type") — expand structurally instead
+      if (!name.startsWith("__")) {
+        const typeArgs = (type as ts.TypeReference).typeArguments;
+        if (typeArgs && typeArgs.length > 0) {
+          const args = typeArgs.map((t) =>
+            printType(t, anchor, depth + 1, seen),
+          );
+          return `${name}<${args.join(", ")}>`;
+        }
+        return name;
       }
-      return name;
     }
   }
 
