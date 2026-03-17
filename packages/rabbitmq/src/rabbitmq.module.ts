@@ -1,8 +1,49 @@
-import { Module } from "nestelia";
+import { Module, Injectable, Inject, Container } from "nestelia";
 import type { DynamicModule, Provider, ProviderToken } from "nestelia";
 import { Logger } from "nestelia";
 import { AmqpConnection, RABBITMQ_CONFIG } from "./connection";
+import { RABBIT_SUBSCRIBE_METADATA, RABBIT_RPC_METADATA } from "./decorators/rabbitmq.decorators";
 import type { RabbitMQConfig } from "./interfaces";
+
+/**
+ * Internal service that scans all providers for @RabbitSubscribe/@RabbitRPC
+ * decorators and registers them with the AmqpConnection on module init.
+ */
+@Injectable()
+class RabbitMQExplorer {
+  constructor(
+    @Inject(AmqpConnection) private readonly connection: AmqpConnection,
+  ) {}
+
+  async onModuleInit(): Promise<void> {
+    const container = Container.instance;
+    const processedTokens = new Set<unknown>();
+
+    for (const moduleRef of container.getModules().values()) {
+      for (const [token, wrapper] of moduleRef.getProviders()) {
+        if (processedTokens.has(token)) continue;
+        processedTokens.add(token);
+
+        // Only check class-based providers that could have decorators
+        if (!wrapper.metatype || typeof wrapper.metatype !== "function") continue;
+
+        const hasSubscribers = Reflect.getMetadata(RABBIT_SUBSCRIBE_METADATA, wrapper.metatype);
+        const hasRpc = Reflect.getMetadata(RABBIT_RPC_METADATA, wrapper.metatype);
+        if (!hasSubscribers && !hasRpc) continue;
+
+        // Resolve the instance and register its handlers
+        try {
+          const instance = await container.get(token);
+          if (instance) {
+            await this.connection.registerHandlers(instance as object);
+          }
+        } catch {
+          // Provider may not be resolvable — skip
+        }
+      }
+    }
+  }
+}
 
 export interface RabbitMQModuleOptions extends RabbitMQConfig {
   /**
@@ -120,7 +161,7 @@ export class RabbitMQModule {
     return {
       module: RabbitMQModule,
       global: isGlobal,
-      providers,
+      providers: [...providers, RabbitMQExplorer],
       exports: [AmqpConnection, RABBITMQ_CONFIG],
     };
   }

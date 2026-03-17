@@ -22,6 +22,12 @@ export const apiSidebar = [
     ["applyDecorators",      "index/functions/applyDecorators"],
     ["createParamDecorator", "index/functions/createParamDecorator"],
   ]),
+  arSection("WebSocket", [
+    ["WebSocketGateway", "index/functions/WebSocketGateway"],
+    ["OnOpen",           "index/functions/OnOpen"],
+    ["OnMessage",        "index/functions/OnMessage"],
+    ["OnClose",          "index/functions/OnClose"],
+  ]),
   arSection("HTTP Methods", [
     ["Get",     "index/variables/Get"],
     ["Post",    "index/variables/Post"],
@@ -183,6 +189,7 @@ const enDocs = [
     ["Guards",               "features/guards"],
     ["Interceptors",         "features/interceptors"],
     ["Pipes",                "features/pipes"],
+    ["WebSocket Gateways",   "features/websocket-gateways"],
   ]),
   docSection("Packages", [
     ["Overview",         "packages/overview"],
@@ -248,6 +255,7 @@ const ruDocs = [
     ["Guards",                 "features/guards"],
     ["Interceptors",           "features/interceptors"],
     ["Pipes",                  "features/pipes"],
+    ["WebSocket Gateways",     "features/websocket-gateways"],
   ], "/ru"),
   docSection("Пакеты", [
     ["Обзор",            "packages/overview"],
@@ -294,7 +302,8 @@ const zhDocs = [
     ["异常处理",     "features/exception-handling"],
     ["守卫",         "features/guards"],
     ["拦截器",       "features/interceptors"],
-    ["管道",         "features/pipes"],
+    ["管道",             "features/pipes"],
+    ["WebSocket 网关",   "features/websocket-gateways"],
   ], "/zh"),
   docSection("扩展包", [
     ["概览",           "packages/overview"],
@@ -360,7 +369,8 @@ const jaDocs = [
     ["例外処理",           "features/exception-handling"],
     ["ガード",             "features/guards"],
     ["インターセプター",   "features/interceptors"],
-    ["パイプ",             "features/pipes"],
+    ["パイプ",                 "features/pipes"],
+    ["WebSocket ゲートウェイ", "features/websocket-gateways"],
   ], "/ja"),
   docSection("パッケージ", [
     ["概要",           "packages/overview"],
@@ -427,6 +437,7 @@ const ptDocs = [
     ["Guards",                 "features/guards"],
     ["Interceptors",           "features/interceptors"],
     ["Pipes",                  "features/pipes"],
+    ["WebSocket Gateways",     "features/websocket-gateways"],
   ], "/pt"),
   docSection("Pacotes", [
     ["Visão Geral",    "packages/overview"],
@@ -492,7 +503,8 @@ const koDocs = [
     ["예외 처리",          "features/exception-handling"],
     ["가드",               "features/guards"],
     ["인터셉터",           "features/interceptors"],
-    ["파이프",             "features/pipes"],
+    ["파이프",               "features/pipes"],
+    ["WebSocket 게이트웨이", "features/websocket-gateways"],
   ], "/ko"),
   docSection("패키지", [
     ["개요",           "packages/overview"],
@@ -559,6 +571,7 @@ const esDocs = [
     ["Guards",                  "features/guards"],
     ["Interceptors",            "features/interceptors"],
     ["Pipes",                   "features/pipes"],
+    ["WebSocket Gateways",      "features/websocket-gateways"],
   ], "/es"),
   docSection("Paquetes", [
     ["Resumen",        "packages/overview"],

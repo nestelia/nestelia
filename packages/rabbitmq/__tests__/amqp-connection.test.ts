@@ -1,0 +1,617 @@
+import "reflect-metadata";
+
+import { afterEach, beforeEach, describe, expect, it, jest, mock } from "bun:test";
+
+// ── amqplib mock ────────────────────────────────────────────────────────
+// We build a realistic mock of amqplib so that AmqpConnection's dynamic
+// `import("amqplib")` resolves without a running broker.
+
+function createMockChannel() {
+  const consumers = new Map<string, (msg: unknown) => void>();
+  let consumerTagCounter = 0;
+
+  const channel = {
+    assertExchange: jest.fn(async () => ({ exchange: "" })),
+    assertQueue: jest.fn(async (_q: string, _opts?: unknown) => ({
+      queue: _q || `amq.gen-${++consumerTagCounter}`,
+      messageCount: 0,
+      consumerCount: 0,
+    })),
+    bindQueue: jest.fn(async () => ({})),
+    deleteQueue: jest.fn(async () => ({ messageCount: 0 })),
+    publish: jest.fn((_exchange: string, _rk: string, content: Buffer, opts?: Record<string, unknown>) => {
+      // For RPC: if there's a replyTo, simulate response delivery
+      if (opts?.replyTo) {
+        const replyConsumer = consumers.get(opts.replyTo as string);
+        if (replyConsumer) {
+          setTimeout(() => {
+            replyConsumer({
+              content: Buffer.from(JSON.stringify({ result: "ok" })),
+              fields: { deliveryTag: 1, redelivered: false, exchange: "", routingKey: "" },
+              properties: { correlationId: opts.correlationId },
+            });
+          }, 5);
+        }
+      }
+      return true;
+    }),
+    sendToQueue: jest.fn(() => true),
+    consume: jest.fn(async (queue: string, cb: (msg: unknown) => void, _opts?: unknown) => {
+      const tag = `ctag-${++consumerTagCounter}`;
+      consumers.set(queue, cb);
+      consumers.set(tag, cb);
+      return { consumerTag: tag };
+    }),
+    cancel: jest.fn(async () => ({})),
+    ack: jest.fn(),
+    nack: jest.fn(),
+    reject: jest.fn(),
+    prefetch: jest.fn(async () => {}),
+    close: jest.fn(async () => {}),
+    on: jest.fn(),
+    _simulateMessage(queue: string, content: unknown, properties: Record<string, unknown> = {}) {
+      const cb = consumers.get(queue);
+      if (cb) {
+        cb({
+          content: Buffer.from(JSON.stringify(content)),
+          fields: { deliveryTag: 1, redelivered: false, exchange: "", routingKey: "test" },
+          properties: { headers: {}, ...properties },
+        });
+      }
+    },
+    _consumers: consumers,
+  };
+  return channel;
+}
+
+function createMockConnection(channel: ReturnType<typeof createMockChannel>) {
+  return {
+    createChannel: jest.fn(async () => channel),
+    close: jest.fn(async () => {}),
+    on: jest.fn(),
+  };
+}
+
+let mockChannel: ReturnType<typeof createMockChannel>;
+let mockConn: ReturnType<typeof createMockConnection>;
+
+mock.module("amqplib", () => ({
+  connect: jest.fn(async () => {
+    mockChannel = createMockChannel();
+    mockConn = createMockConnection(mockChannel);
+    return mockConn;
+  }),
+}));
+
+// ── Import after mock registration ──────────────────────────────────────
+import { AmqpConnection } from "../src/connection/amqp-connection";
+import { RabbitSubscribe, RabbitRPC } from "../src/decorators/rabbitmq.decorators";
+import { Logger } from "nestelia";
+
+// ── Helpers ─────────────────────────────────────────────────────────────
+function createConnection(overrides: Record<string, unknown> = {}) {
+  const logger = new Logger("RabbitMQTest");
+  logger.log = () => {};
+  logger.warn = () => {};
+  logger.error = () => {};
+  logger.debug = () => {};
+  return new AmqpConnection(
+    { uri: "amqp://localhost:5672", reconnect: false, ...overrides } as never,
+    logger,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// Tests
+// ─────────────────────────────────────────────────────────────────────────
+
+describe("AmqpConnection", () => {
+  let conn: AmqpConnection;
+
+  beforeEach(async () => {
+    conn = createConnection();
+    await conn.connect();
+  });
+
+  afterEach(async () => {
+    try {
+      await conn.disconnect();
+    } catch {
+      // ignore
+    }
+  });
+
+  // ── Connection lifecycle ─────────────────────────────────────────────
+
+  describe("connect / disconnect", () => {
+    it("creates two channels (consumer + publisher)", () => {
+      expect(mockConn.createChannel).toHaveBeenCalledTimes(2);
+    });
+
+    it("sets prefetch on consumer channel", () => {
+      expect(mockChannel.prefetch).toHaveBeenCalledWith(10);
+    });
+
+    it("reports connection as ready", () => {
+      expect(conn.isConnectionReady()).toBe(true);
+    });
+
+    it("is not ready after disconnect", async () => {
+      await conn.disconnect();
+      expect(conn.isConnectionReady()).toBe(false);
+    });
+
+    it("skips double connect", async () => {
+      const callsBefore = mockConn.createChannel.mock.calls.length;
+      await conn.connect();
+      expect(mockConn.createChannel.mock.calls.length).toBe(callsBefore);
+    });
+
+    it("throws for missing URL", async () => {
+      const bad = createConnection({ uri: undefined, urls: undefined });
+      await expect(bad.connect()).rejects.toThrow("URL not provided");
+    });
+
+    it("throws for invalid URL", async () => {
+      const bad = createConnection({ uri: "http://invalid" });
+      await expect(bad.connect()).rejects.toThrow("Invalid RabbitMQ URL format");
+    });
+
+    it("accepts urls array fallback", async () => {
+      const c = createConnection({ uri: undefined, urls: ["amqp://localhost:5672"] });
+      await c.connect();
+      expect(c.isConnectionReady()).toBe(true);
+      await c.disconnect();
+    });
+  });
+
+  // ── Exchange assertion ──────────────────────────────────────────────
+
+  describe("assertExchange", () => {
+    it("asserts exchange via channel", async () => {
+      await conn.assertExchange({ name: "test-exchange", type: "topic" });
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("test-exchange", "topic", undefined);
+    });
+
+    it("applies exchange prefix", async () => {
+      const c = createConnection({ exchangePrefix: "myapp" });
+      await c.connect();
+      await c.assertExchange({ name: "events", type: "fanout" });
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("myapp.events", "fanout", undefined);
+      await c.disconnect();
+    });
+
+    it("skips duplicate assertion", async () => {
+      await conn.assertExchange({ name: "dup", type: "direct" });
+      await conn.assertExchange({ name: "dup", type: "direct" });
+      const calls = mockChannel.assertExchange.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string) === "dup",
+      );
+      expect(calls).toHaveLength(1);
+    });
+
+    it("throws for invalid exchange name", async () => {
+      await expect(conn.assertExchange({ name: "bad name!", type: "direct" })).rejects.toThrow(
+        "Invalid exchange name",
+      );
+    });
+  });
+
+  // ── Queue assertion ─────────────────────────────────────────────────
+
+  describe("assertQueue", () => {
+    it("asserts queue via channel", async () => {
+      await conn.assertQueue({ name: "test-queue" });
+      expect(mockChannel.assertQueue).toHaveBeenCalledWith("test-queue", undefined);
+    });
+
+    it("applies queue prefix", async () => {
+      const c = createConnection({ queuePrefix: "svc" });
+      await c.connect();
+      await c.assertQueue({ name: "jobs" });
+      expect(mockChannel.assertQueue).toHaveBeenCalledWith("svc.jobs", undefined);
+      await c.disconnect();
+    });
+
+    it("binds queue via bindings array", async () => {
+      await conn.assertQueue({
+        name: "bound-queue",
+        bindings: [{ exchange: "ex", routingKey: "rk" }],
+      });
+      expect(mockChannel.bindQueue).toHaveBeenCalledWith("bound-queue", "ex", "rk", undefined);
+    });
+
+    it("binds queue via shortcut exchange + routingKey", async () => {
+      await conn.assertQueue({
+        name: "shortcut-q",
+        exchange: "ex2",
+        routingKey: "key2",
+      });
+      expect(mockChannel.bindQueue).toHaveBeenCalledWith("shortcut-q", "ex2", "key2");
+    });
+
+    it("skips duplicate assertion", async () => {
+      await conn.assertQueue({ name: "dup-q" });
+      await conn.assertQueue({ name: "dup-q" });
+      const calls = mockChannel.assertQueue.mock.calls.filter(
+        (c: unknown[]) => (c[0] as string) === "dup-q",
+      );
+      expect(calls).toHaveLength(1);
+    });
+  });
+
+  // ── Publish ─────────────────────────────────────────────────────────
+
+  describe("publish", () => {
+    it("publishes JSON-serialized message to exchange", async () => {
+      const result = await conn.publish("ex", "rk", { hello: "world" });
+      expect(result).toBe(true);
+      expect(mockChannel.publish).toHaveBeenCalled();
+      const [exchange, routingKey, content] = mockChannel.publish.mock.calls[0] as [
+        string,
+        string,
+        Buffer,
+      ];
+      expect(exchange).toBe("ex");
+      expect(routingKey).toBe("rk");
+      expect(JSON.parse(content.toString())).toEqual({ hello: "world" });
+    });
+
+    it("passes options (headers, priority, etc.)", async () => {
+      await conn.publish("ex", "rk", {}, {
+        headers: { "x-custom": "val" },
+        priority: 5,
+        persistent: false,
+      });
+      const opts = mockChannel.publish.mock.calls[0]?.[3] as Record<string, unknown>;
+      expect(opts.headers).toEqual({ "x-custom": "val" });
+      expect(opts.priority).toBe(5);
+      expect(opts.persistent).toBe(false);
+    });
+
+    it("defaults persistent to true", async () => {
+      await conn.publish("ex", "rk", {});
+      const opts = mockChannel.publish.mock.calls[0]?.[3] as Record<string, unknown>;
+      expect(opts.persistent).toBe(true);
+    });
+
+    it("throws when publisher channel is not available", async () => {
+      await conn.disconnect();
+      await expect(conn.publish("ex", "rk", {})).rejects.toThrow("publisher channel not available");
+    });
+  });
+
+  // ── sendToQueue ─────────────────────────────────────────────────────
+
+  describe("sendToQueue", () => {
+    it("sends message directly to queue", async () => {
+      const result = await conn.sendToQueue("my-queue", { data: 1 });
+      expect(result).toBe(true);
+      expect(mockChannel.sendToQueue).toHaveBeenCalled();
+      const [queue, content] = mockChannel.sendToQueue.mock.calls[0] as [string, Buffer];
+      expect(queue).toBe("my-queue");
+      expect(JSON.parse(content.toString())).toEqual({ data: 1 });
+    });
+
+    it("applies queue prefix", async () => {
+      const c = createConnection({ queuePrefix: "app" });
+      await c.connect();
+      await c.sendToQueue("tasks", {});
+      const [queue] = mockChannel.sendToQueue.mock.calls[0] as [string];
+      expect(queue).toBe("app.tasks");
+      await c.disconnect();
+    });
+  });
+
+  // ── Subscribe ───────────────────────────────────────────────────────
+
+  describe("subscribe", () => {
+    it("returns a consumer tag", async () => {
+      const tag = await conn.subscribe("q", () => {});
+      expect(typeof tag).toBe("string");
+      expect(tag.startsWith("ctag-")).toBe(true);
+    });
+
+    it("calls handler with deserialized message on delivery", async () => {
+      let received: unknown = null;
+      await conn.subscribe("sub-q", (msg) => {
+        received = msg;
+      });
+
+      mockChannel._simulateMessage("sub-q", { payload: 42 });
+
+      expect(received).not.toBeNull();
+      expect((received as { content: { payload: number } }).content).toEqual({ payload: 42 });
+    });
+
+    it("provides ack/nack/reject on message", async () => {
+      let msg: { ack: () => void; nack: () => void; reject: () => void } | null = null;
+      await conn.subscribe("ack-q", (m) => {
+        msg = m as typeof msg;
+      });
+
+      mockChannel._simulateMessage("ack-q", {});
+      expect(msg).not.toBeNull();
+
+      msg!.ack();
+      expect(mockChannel.ack).toHaveBeenCalled();
+    });
+  });
+
+  // ── Unsubscribe ─────────────────────────────────────────────────────
+
+  describe("unsubscribe", () => {
+    it("cancels consumer by tag", async () => {
+      const tag = await conn.subscribe("unsub-q", () => {});
+      await conn.unsubscribe(tag);
+      expect(mockChannel.cancel).toHaveBeenCalledWith(tag);
+    });
+  });
+
+  // ── RPC request ─────────────────────────────────────────────────────
+
+  describe("request (RPC)", () => {
+    it("sends request and receives response", async () => {
+      const result = await conn.request({
+        exchange: "rpc-ex",
+        routingKey: "calc.add",
+        payload: { a: 1, b: 2 },
+        timeout: 5000,
+      });
+      expect(result).toEqual({ result: "ok" });
+    });
+
+    it("throws on timeout", async () => {
+      mockChannel.publish.mockImplementationOnce(() => true);
+
+      await expect(
+        conn.request({
+          exchange: "rpc-ex",
+          routingKey: "slow",
+          payload: {},
+          timeout: 50,
+        }),
+      ).rejects.toThrow("timeout");
+    });
+
+    it("throws when channel not available", async () => {
+      await conn.disconnect();
+      await expect(
+        conn.request({ exchange: "x", routingKey: "y", payload: {} }),
+      ).rejects.toThrow("channel not available");
+    });
+  });
+
+  // ── Config exchanges/queues on connect ──────────────────────────────
+
+  describe("auto-assertion on connect", () => {
+    it("asserts configured exchanges on connect", async () => {
+      const c = createConnection({
+        exchanges: [
+          { name: "ex1", type: "topic" },
+          { name: "ex2", type: "fanout" },
+        ],
+      });
+      await c.connect();
+      expect(mockChannel.assertExchange).toHaveBeenCalledTimes(2);
+      await c.disconnect();
+    });
+
+    it("asserts configured queues on connect", async () => {
+      const c = createConnection({
+        queues: [{ name: "q1" }, { name: "q2" }],
+      });
+      await c.connect();
+      const queueCalls = mockChannel.assertQueue.mock.calls.filter(
+        (c: unknown[]) => c[0] === "q1" || c[0] === "q2",
+      );
+      expect(queueCalls).toHaveLength(2);
+      await c.disconnect();
+    });
+  });
+
+  // ── Channel getters ─────────────────────────────────────────────────
+
+  describe("getters", () => {
+    it("getChannel returns consumer channel", () => {
+      expect(conn.getChannel()).not.toBeNull();
+    });
+
+    it("getPublisherChannel returns publisher channel", () => {
+      expect(conn.getPublisherChannel()).not.toBeNull();
+    });
+
+    it("getConnection returns underlying connection", () => {
+      expect(conn.getConnection()).not.toBeNull();
+    });
+
+    it("returns null after disconnect", async () => {
+      await conn.disconnect();
+      expect(conn.getChannel()).toBeNull();
+      expect(conn.getPublisherChannel()).toBeNull();
+      expect(conn.getConnection()).toBeNull();
+    });
+  });
+
+  // ── Disconnect cleanup ──────────────────────────────────────────────
+
+  describe("disconnect cleanup", () => {
+    it("cancels active consumers on disconnect", async () => {
+      await conn.subscribe("cleanup-q", () => {});
+      await conn.disconnect();
+      expect(mockChannel.cancel).toHaveBeenCalled();
+    });
+
+    it("closes both channels and connection", async () => {
+      await conn.disconnect();
+      expect(mockChannel.close).toHaveBeenCalled();
+      expect(mockConn.close).toHaveBeenCalled();
+    });
+  });
+
+  // ── registerHandlers ────────────────────────────────────────────────
+
+  describe("registerHandlers", () => {
+    it("asserts exchange, queue, binds, and starts consuming for @RabbitSubscribe", async () => {
+      class TestHandler {
+        @RabbitSubscribe({ exchange: "events", routingKey: "user.created", queue: "user-q" })
+        handleUser() {}
+      }
+
+      await conn.registerHandlers(new TestHandler());
+
+      // Exchange asserted
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("events", "topic", undefined);
+      // Queue asserted
+      const queueCalls = mockChannel.assertQueue.mock.calls.filter(
+        (c: unknown[]) => c[0] === "user-q",
+      );
+      expect(queueCalls).toHaveLength(1);
+      // Queue bound to exchange
+      expect(mockChannel.bindQueue).toHaveBeenCalledWith("user-q", "events", "user.created", undefined);
+      // Consumer started
+      expect(mockChannel.consume).toHaveBeenCalled();
+    });
+
+    it("actually calls the handler method with message content", async () => {
+      const received: unknown[] = [];
+
+      class TestHandler {
+        @RabbitSubscribe({ exchange: "events", routingKey: "order.created", queue: "order-q" })
+        handleOrder(data: unknown) {
+          received.push(data);
+        }
+      }
+
+      await conn.registerHandlers(new TestHandler());
+
+      // Simulate a message arriving on the queue
+      mockChannel._simulateMessage("order-q", { orderId: "123", amount: 99 });
+
+      // Wait for the async handler to complete
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(received).toHaveLength(1);
+      expect(received[0]).toEqual({ orderId: "123", amount: 99 });
+    });
+
+    it("acks message after successful handler execution", async () => {
+      class TestHandler {
+        @RabbitSubscribe({ exchange: "ex", routingKey: "rk", queue: "ack-test-q" })
+        handle() {}
+      }
+
+      await conn.registerHandlers(new TestHandler());
+      mockChannel._simulateMessage("ack-test-q", {});
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(mockChannel.ack).toHaveBeenCalled();
+    });
+
+    it("nacks message when handler throws", async () => {
+      class TestHandler {
+        @RabbitSubscribe({ exchange: "ex", routingKey: "rk", queue: "nack-test-q" })
+        handle() {
+          throw new Error("processing failed");
+        }
+      }
+
+      await conn.registerHandlers(new TestHandler());
+      mockChannel._simulateMessage("nack-test-q", {});
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(mockChannel.nack).toHaveBeenCalled();
+    });
+
+    it("handles multiple routing keys", async () => {
+      class TestHandler {
+        @RabbitSubscribe({
+          exchange: "events",
+          routingKey: ["order.created", "order.updated"],
+          queue: "multi-rk-q",
+        })
+        handle() {}
+      }
+
+      await conn.registerHandlers(new TestHandler());
+
+      // Should bind queue to both routing keys
+      const bindCalls = mockChannel.bindQueue.mock.calls.filter(
+        (c: unknown[]) => c[0] === "multi-rk-q",
+      );
+      expect(bindCalls).toHaveLength(2);
+      expect(bindCalls[0][2]).toBe("order.created");
+      expect(bindCalls[1][2]).toBe("order.updated");
+    });
+
+    it("registers @RabbitRPC handlers and replies", async () => {
+      class CalcHandler {
+        @RabbitRPC({ exchange: "rpc", routingKey: "calc.add", queue: "calc-q" })
+        add(data: { a: number; b: number }) {
+          return { result: data.a + data.b };
+        }
+      }
+
+      await conn.registerHandlers(new CalcHandler());
+
+      // Exchange asserted
+      expect(mockChannel.assertExchange).toHaveBeenCalledWith("rpc", "direct", undefined);
+      // Consumer started
+      expect(mockChannel.consume).toHaveBeenCalled();
+
+      // Simulate RPC request with replyTo
+      mockChannel._simulateMessage("calc-q", { a: 3, b: 4 }, {
+        replyTo: "amq.gen-reply",
+        correlationId: "corr-123",
+      });
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      // Should send response to replyTo queue
+      const replyCalls = mockChannel.sendToQueue.mock.calls.filter(
+        (c: unknown[]) => c[0] === "amq.gen-reply",
+      );
+      expect(replyCalls).toHaveLength(1);
+      const replyContent = JSON.parse((replyCalls[0][1] as Buffer).toString());
+      expect(replyContent).toEqual({ result: 7 });
+      // Should include correlationId in reply
+      expect((replyCalls[0][2] as Record<string, unknown>).correlationId).toBe("corr-123");
+    });
+
+    it("silently skips classes with no handlers", async () => {
+      class EmptyHandler {}
+      // Should not throw
+      await conn.registerHandlers(new EmptyHandler());
+    });
+  });
+
+  // ── Full pub/sub integration ────────────────────────────────────────
+
+  describe("publish → subscribe integration", () => {
+    it("published message is received by subscriber handler", async () => {
+      const received: unknown[] = [];
+
+      class OrderHandler {
+        @RabbitSubscribe({ exchange: "orders", routingKey: "order.created", queue: "orders-q" })
+        onOrderCreated(data: unknown) {
+          received.push(data);
+        }
+      }
+
+      // Register handler (asserts exchange, queue, binds, starts consuming)
+      await conn.registerHandlers(new OrderHandler());
+
+      // Simulate what would happen when broker delivers a message
+      // after publish("orders", "order.created", ...)
+      mockChannel._simulateMessage("orders-q", { orderId: "abc", amount: 42 });
+
+      await new Promise((r) => setTimeout(r, 10));
+
+      expect(received).toHaveLength(1);
+      expect(received[0]).toEqual({ orderId: "abc", amount: 42 });
+      expect(mockChannel.ack).toHaveBeenCalled();
+    });
+  });
+});

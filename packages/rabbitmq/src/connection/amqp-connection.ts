@@ -8,6 +8,8 @@ import type {
   RabbitMQMessage,
   RabbitMQPublishOptions,
   RabbitMQQueueConfig,
+  RabbitRPCOptions,
+  RabbitSubscribeOptions,
   RequestOptions,
 } from "../interfaces/rabbitmq.interface";
 import { RABBIT_RPC_METADATA, RABBIT_SUBSCRIBE_METADATA } from "../decorators/rabbitmq.decorators";
@@ -696,41 +698,38 @@ export class AmqpConnection {
   }
 
   /**
-   * Register RabbitMQ handlers from a service class
-   * Scans the class for @RabbitSubscribe and @RabbitRPC decorators and sets up consumers
+   * Register RabbitMQ handlers from a service instance
+   * Scans the instance's class for @RabbitSubscribe and @RabbitRPC decorators
+   * and sets up consumers that invoke the actual methods
    *
-   * @param handler The handler class containing @RabbitSubscribe/@RabbitRPC methods
-   * @param options Optional configuration for consumer registration
+   * @param instance The handler instance with @RabbitSubscribe/@RabbitRPC methods
    *
    * @example
    * ```typescript
-   * await amqpConnection.registerHandlers(UserBonusesService);
+   * await amqpConnection.registerHandlers(ordersHandlerInstance);
    * ```
    */
-  async registerHandlers(
-    handler: new (...args: unknown[]) => object,
-    options?: { consumerTag?: string },
-  ): Promise<void> {
-    const handlerName = handler.name;
+  async registerHandlers(instance: object): Promise<void> {
+    const constructor = instance.constructor as new (...args: unknown[]) => object;
+    const handlerName = constructor.name;
 
     // Get subscribe handlers metadata
     const subscribeHandlers =
-      (Reflect.getMetadata(RABBIT_SUBSCRIBE_METADATA, handler) as Array<{
+      (Reflect.getMetadata(RABBIT_SUBSCRIBE_METADATA, constructor) as Array<{
         methodName: string | symbol;
-        options: import("../interfaces/rabbitmq.interface").RabbitSubscribeOptions;
+        options: RabbitSubscribeOptions;
       }>) || [];
 
     // Get RPC handlers metadata
     const rpcHandlers =
-      (Reflect.getMetadata(RABBIT_RPC_METADATA, handler) as Array<{
+      (Reflect.getMetadata(RABBIT_RPC_METADATA, constructor) as Array<{
         methodName: string | symbol;
-        options: import("../interfaces/rabbitmq.interface").RabbitRPCOptions;
+        options: RabbitRPCOptions;
       }>) || [];
 
     const totalHandlers = subscribeHandlers.length + rpcHandlers.length;
 
     if (totalHandlers === 0) {
-      this.logger.warn(`No RabbitMQ handlers found in ${handlerName}`);
       return;
     }
 
@@ -738,55 +737,131 @@ export class AmqpConnection {
 
     // Register subscribe handlers
     for (const { methodName, options: subscribeOptions } of subscribeHandlers) {
-      const exchange = subscribeOptions.exchange;
-      const routingKey = Array.isArray(subscribeOptions.routingKey)
-        ? subscribeOptions.routingKey.join(", ")
-        : subscribeOptions.routingKey;
-      const queue = subscribeOptions.queue || "";
-
-      this.logger.log(
-        `${handlerName}.${String(methodName)} {subscribe} -> ${exchange}::${routingKey}::${queue}`,
-      );
-
-      // Setup the consumer if queue is specified
-      if (queue) {
-        await this.subscribe(queue, async (message) => {
-          // This would need the actual instance to call the method
-          // For now, just log that handler was called
-          this.logger.debug(`Handler ${handlerName}.${String(methodName)} called`);
-        });
-      }
+      await this.setupSubscribeHandler(instance, handlerName, methodName, subscribeOptions);
     }
 
     // Register RPC handlers
     for (const { methodName, options: rpcOptions } of rpcHandlers) {
-      const exchange = rpcOptions.exchange;
-      const routingKey = Array.isArray(rpcOptions.routingKey)
-        ? rpcOptions.routingKey.join(", ")
-        : rpcOptions.routingKey;
-      const queue = rpcOptions.queue || "";
-
-      this.logger.log(
-        `${handlerName}.${String(methodName)} {rpc} -> ${exchange}::${routingKey}::${queue}`,
-      );
-
-      // Setup the RPC consumer if queue is specified
-      if (queue) {
-        await this.subscribe(queue, async (message) => {
-          this.logger.debug(`RPC handler ${handlerName}.${String(methodName)} called`);
-        });
-      }
+      await this.setupRpcHandler(instance, handlerName, methodName, rpcOptions);
     }
   }
 
   /**
-   * @deprecated Use registerHandlers instead
+   * Set up a single @RabbitSubscribe handler:
+   * assert exchange, assert & bind queue, start consuming
    */
-  async createSubscriber(
-    handler: new (...args: unknown[]) => object,
-    options?: { consumerTag?: string },
+  private async setupSubscribeHandler(
+    instance: object,
+    handlerName: string,
+    methodName: string | symbol,
+    options: RabbitSubscribeOptions,
   ): Promise<void> {
-    return this.registerHandlers(handler, options);
+    const exchange = options.exchange;
+    const routingKeys = Array.isArray(options.routingKey)
+      ? options.routingKey
+      : [options.routingKey];
+    const queue = options.queue || "";
+
+    this.logger.log(
+      `${handlerName}.${String(methodName)} {subscribe} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
+    );
+
+    // Assert exchange
+    await this.assertExchange({
+      name: exchange,
+      type: "topic",
+      options: options.exchangeOptions,
+    });
+
+    // Assert and bind queue
+    if (queue) {
+      await this.assertQueue({
+        name: queue,
+        options: options.queueOptions,
+        bindings: routingKeys.map((rk) => ({ exchange, routingKey: rk })),
+      });
+
+      // Subscribe with a callback that invokes the actual method
+      await this.subscribe(queue, async (message) => {
+        try {
+          const method = (instance as Record<string | symbol, Function>)[methodName];
+          await method.call(instance, message.content);
+          message.ack();
+        } catch (error) {
+          this.logger.error(
+            `Error in ${handlerName}.${String(methodName)}:`,
+            error,
+          );
+          message.nack(false);
+        }
+      });
+    }
+  }
+
+  /**
+   * Set up a single @RabbitRPC handler:
+   * assert exchange, assert & bind queue, consume and reply
+   */
+  private async setupRpcHandler(
+    instance: object,
+    handlerName: string,
+    methodName: string | symbol,
+    options: RabbitRPCOptions,
+  ): Promise<void> {
+    const exchange = options.exchange;
+    const routingKeys = Array.isArray(options.routingKey)
+      ? options.routingKey
+      : [options.routingKey];
+    const queue = options.queue || "";
+
+    this.logger.log(
+      `${handlerName}.${String(methodName)} {rpc} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
+    );
+
+    // Assert exchange
+    await this.assertExchange({
+      name: exchange,
+      type: "direct",
+      options: options.exchangeOptions,
+    });
+
+    // Assert and bind queue
+    if (queue) {
+      await this.assertQueue({
+        name: queue,
+        options: options.queueOptions,
+        bindings: routingKeys.map((rk) => ({ exchange, routingKey: rk })),
+      });
+
+      // Subscribe with a callback that invokes the method and sends a reply
+      await this.subscribe(queue, async (message) => {
+        try {
+          const method = (instance as Record<string | symbol, Function>)[methodName];
+          const result = await method.call(instance, message.content);
+
+          // Send RPC reply if replyTo is set
+          if (message.properties.replyTo && message.properties.correlationId) {
+            const content = this.serializer.serialize(result);
+            this.publisherChannel?.sendToQueue(
+              message.properties.replyTo,
+              content,
+              {
+                correlationId: message.properties.correlationId,
+                persistent: false,
+              },
+            );
+          }
+
+          message.ack();
+        } catch (error) {
+          this.logger.error(
+            `Error in ${handlerName}.${String(methodName)}:`,
+            error,
+          );
+          message.nack(false);
+        }
+      });
+    }
   }
 }
 

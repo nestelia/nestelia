@@ -1,6 +1,6 @@
 # Class: RabbitMQModule
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:35](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L35)
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:76](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L76)
 
 RabbitMQ module for
 
@@ -42,7 +42,7 @@ new RabbitMQModule(): RabbitMQModule;
 static forFeature(handlers): DynamicModule;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:196](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L196)
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:237](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L237)
 
 Register a RabbitMQ feature module with specific handlers
 
@@ -66,7 +66,7 @@ Dynamic module
 static forRoot(options): DynamicModule;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:134](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L134)
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:175](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L175)
 
 Register RabbitMQ module with configuration
 
@@ -90,7 +90,7 @@ Dynamic module
 static forRootAsync(options): DynamicModule;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:162](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L162)
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:203](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L203)
 
 Register RabbitMQ module with async configuration
 
