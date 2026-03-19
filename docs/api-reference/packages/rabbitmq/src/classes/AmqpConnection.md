@@ -13,7 +13,7 @@ This is the main class for RabbitMQ operations
 new AmqpConnection(config, logger): AmqpConnection;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:63](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L63)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:68](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L68)
 
 #### Parameters
 
@@ -34,9 +34,10 @@ Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:63](https://git
 assertExchange(config): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:312](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L312)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:374](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L374)
 
 Assert an exchange.
+Uses the dedicated assertion channel so broker errors never kill consumers.
 When createIfNotExists is false, uses checkExchange (passive declare).
 
 #### Parameters
@@ -57,9 +58,10 @@ When createIfNotExists is false, uses checkExchange (passive declare).
 assertQueue(config): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:340](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L340)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:400](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L400)
 
-Assert a queue
+Assert a queue.
+Uses the dedicated assertion channel so broker errors never kill consumers.
 
 #### Parameters
 
@@ -79,7 +81,7 @@ Assert a queue
 connect(): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:104](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L104)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:108](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L108)
 
 Connect to RabbitMQ
 
@@ -95,7 +97,7 @@ Connect to RabbitMQ
 disconnect(): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:248](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L248)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:276](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L276)
 
 Disconnect from RabbitMQ
 
@@ -111,7 +113,7 @@ Disconnect from RabbitMQ
 getChannel(): Channel | null;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:553](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L553)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:611](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L611)
 
 Get the consumer channel (for consuming messages)
 
@@ -127,7 +129,7 @@ Get the consumer channel (for consuming messages)
 getConnection(): ChannelModel | null;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:567](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L567)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:625](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L625)
 
 Get the underlying connection (for advanced usage)
 
@@ -143,7 +145,7 @@ Get the underlying connection (for advanced usage)
 getLogger(): Logger;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:546](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L546)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:604](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L604)
 
 Get the logger instance
 
@@ -159,7 +161,7 @@ Get the logger instance
 getPublisherChannel(): Channel | null;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:560](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L560)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:618](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L618)
 
 Get the publisher channel (for publishing messages)
 
@@ -175,7 +177,7 @@ Get the publisher channel (for publishing messages)
 isConnectionReady(): boolean;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:304](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L304)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:336](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L336)
 
 Check if connected to RabbitMQ
 
@@ -195,7 +197,7 @@ publish<T>(
 options?): Promise<boolean>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:380](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L380)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:438](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L438)
 
 Publish a message to an exchange
 
@@ -226,7 +228,7 @@ Publish a message to an exchange
 registerHandlers(instance): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:727](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L727)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:785](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L785)
 
 Register RabbitMQ handlers from a service instance
 Scans the instance's class for
@@ -264,7 +266,7 @@ await amqpConnection.registerHandlers(ordersHandlerInstance);
 request<T, R>(options): Promise<R>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:589](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L589)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:647](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L647)
 
 Make an RPC request and wait for a response
 This method creates a temporary reply queue, sends the request, and waits for a response
@@ -311,7 +313,7 @@ sendToQueue<T>(
 options?): Promise<boolean>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:414](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L414)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:472](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L472)
 
 Send a message directly to a queue
 
@@ -344,7 +346,7 @@ subscribe<T>(
 options?): Promise<string>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:445](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L445)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:503](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L503)
 
 Subscribe to messages from a queue
 
@@ -376,7 +378,7 @@ Subscribe to messages from a queue
 unsubscribe(consumerTag): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:484](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L484)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:542](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L542)
 
 Cancel a consumer subscription
 

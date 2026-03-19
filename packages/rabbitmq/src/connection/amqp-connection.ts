@@ -45,6 +45,13 @@ export class AmqpConnection {
   private connection: ChannelModel | null = null;
   private channel: Channel | null = null;
   private publisherChannel: Channel | null = null;
+  /**
+   * Dedicated channel for exchange/queue assertions.
+   * Kept separate from the consumer channel so that a 406/404 AMQP error
+   * (e.g. type or durable mismatch) only kills this channel and never
+   * disrupts active consumers.
+   */
+  private assertionChannel: Channel | null = null;
   private config: RabbitMQConfig;
   private logger: Logger;
   private isConnected = false;
@@ -57,8 +64,6 @@ export class AmqpConnection {
   // Track already asserted exchanges and queues to avoid duplicate assertions
   private assertedExchanges = new Set<string>();
   private assertedQueues = new Set<string>();
-  // Unique connection ID for tracking
-  private readonly connectionId: string;
 
   constructor(config: RabbitMQConfig, logger: Logger) {
     this.config = {
@@ -70,7 +75,6 @@ export class AmqpConnection {
     };
     this.serializer = new MessageSerializer(config.maxMessageSize);
     this.logger = logger;
-    this.connectionId = randomUUID().slice(0, 8);
   }
 
   /**
@@ -153,9 +157,10 @@ export class AmqpConnection {
         });
       });
 
-      // Create separate channels for publishing and consuming
+      // Create separate channels for publishing, consuming, and asserting
       this.channel = await conn.createChannel();
       this.publisherChannel = await conn.createChannel();
+      this.assertionChannel = await conn.createChannel();
 
       // Set prefetch count on consumer channel
       if (this.config.prefetchCount) {
@@ -178,21 +183,44 @@ export class AmqpConnection {
         this.logger.warn("RabbitMQ publisher channel closed");
       });
 
+      this.assertionChannel.on("error", (err: Error) => {
+        this.logger.error("RabbitMQ assertion channel error:", err);
+        this.assertionChannel = null;
+      });
+
+      this.assertionChannel.on("close", () => {
+        this.assertionChannel = null;
+      });
+
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.isInitializing = false;
 
-      // Assert configured exchanges
+      // Assert configured exchanges — errors are non-fatal so that a type/durable
+      // mismatch on an existing exchange does not abort the whole connection.
       if (this.config.exchanges?.length) {
         for (const exchange of this.config.exchanges) {
-          await this.assertExchange(exchange);
+          try {
+            await this.assertExchange(exchange);
+          } catch (err) {
+            this.logger.error(
+              `Failed to assert exchange '${exchange.name}': ${(err as Error).message}. ` +
+              `Check that the exchange type and options match what is already declared on the broker.`,
+            );
+          }
         }
       }
 
       // Assert configured queues
       if (this.config.queues?.length) {
         for (const queue of this.config.queues) {
-          await this.assertQueue(queue);
+          try {
+            await this.assertQueue(queue);
+          } catch (err) {
+            this.logger.error(
+              `Failed to assert queue '${queue.name}': ${(err as Error).message}.`,
+            );
+          }
         }
       }
 
@@ -278,6 +306,10 @@ export class AmqpConnection {
     }
 
     try {
+      if (this.assertionChannel) {
+        await this.assertionChannel.close();
+        this.assertionChannel = null;
+      }
       if (this.publisherChannel) {
         await this.publisherChannel.close();
         this.publisherChannel = null;
@@ -306,14 +338,40 @@ export class AmqpConnection {
   }
 
   /**
+   * Get or create the assertion channel.
+   * The assertion channel is used exclusively for assertExchange / assertQueue
+   * so that a broker-level error (406 type/durable mismatch, 404 not found)
+   * closes only this channel and never disrupts active consumers.
+   */
+  private async getOrCreateAssertionChannel(): Promise<Channel> {
+    if (this.assertionChannel) {
+      return this.assertionChannel;
+    }
+
+    if (!this.connection) {
+      throw new Error("RabbitMQ connection not available");
+    }
+
+    this.assertionChannel = await this.connection.createChannel();
+
+    this.assertionChannel.on("error", (err: Error) => {
+      this.logger.error("RabbitMQ assertion channel error:", err);
+      this.assertionChannel = null;
+    });
+
+    this.assertionChannel.on("close", () => {
+      this.assertionChannel = null;
+    });
+
+    return this.assertionChannel;
+  }
+
+  /**
    * Assert an exchange.
+   * Uses the dedicated assertion channel so broker errors never kill consumers.
    * When createIfNotExists is false, uses checkExchange (passive declare).
    */
   async assertExchange(config: RabbitMQExchangeConfig): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not available");
-    }
-
     const exchangeName = this.getExchangeName(config.name);
 
     // Skip if already asserted to avoid redundant operations
@@ -321,13 +379,14 @@ export class AmqpConnection {
       return;
     }
 
+    const ch = await this.getOrCreateAssertionChannel();
     const shouldCreate = config.createIfNotExists !== false;
 
     if (shouldCreate) {
       const type = config.type || this.config.defaultExchangeType || "topic";
-      await this.channel.assertExchange(exchangeName, type, config.options);
+      await ch.assertExchange(exchangeName, type, config.options);
     } else {
-      await this.channel.checkExchange(exchangeName);
+      await ch.checkExchange(exchangeName);
     }
 
     this.assertedExchanges.add(exchangeName);
@@ -335,13 +394,10 @@ export class AmqpConnection {
   }
 
   /**
-   * Assert a queue
+   * Assert a queue.
+   * Uses the dedicated assertion channel so broker errors never kill consumers.
    */
   async assertQueue(config: RabbitMQQueueConfig): Promise<void> {
-    if (!this.channel) {
-      throw new Error("RabbitMQ channel not available");
-    }
-
     const queueName = this.getQueueName(config.name);
 
     // Skip if already asserted to avoid redundant operations
@@ -349,13 +405,15 @@ export class AmqpConnection {
       return;
     }
 
-    await this.channel.assertQueue(queueName, config.options);
+    const ch = await this.getOrCreateAssertionChannel();
+
+    await ch.assertQueue(queueName, config.options);
 
     // Bind queue to exchanges (from bindings array)
     if (config.bindings) {
       for (const binding of config.bindings) {
         const exchangeName = this.getExchangeName(binding.exchange);
-        await this.channel.bindQueue(
+        await ch.bindQueue(
           queueName,
           exchangeName,
           binding.routingKey,
@@ -367,7 +425,7 @@ export class AmqpConnection {
     // Shortcut: bind to exchange directly (for simple cases)
     if (config.exchange && config.routingKey !== undefined) {
       const exchangeName = this.getExchangeName(config.exchange);
-      await this.channel.bindQueue(queueName, exchangeName, config.routingKey);
+      await ch.bindQueue(queueName, exchangeName, config.routingKey);
     }
 
     this.assertedQueues.add(queueName);

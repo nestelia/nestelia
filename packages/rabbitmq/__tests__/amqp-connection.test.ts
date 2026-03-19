@@ -125,8 +125,8 @@ describe("AmqpConnection", () => {
   // ── Connection lifecycle ─────────────────────────────────────────────
 
   describe("connect / disconnect", () => {
-    it("creates two channels (consumer + publisher)", () => {
-      expect(mockConn.createChannel).toHaveBeenCalledTimes(2);
+    it("creates three channels (consumer + publisher + assertion)", () => {
+      expect(mockConn.createChannel).toHaveBeenCalledTimes(3);
     });
 
     it("sets prefetch on consumer channel", () => {
