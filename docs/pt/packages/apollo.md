@@ -396,17 +396,16 @@ map:        {"0":["variables.file"]}
 
 ### Limites de upload
 
-Passe um objeto `UploadOptions` como segundo argumento para `processMultipartRequest`:
+Configure os limites pela opção `upload` em `GraphQLModule.forRoot` (ou `forRootAsync`):
 
 ```typescript
-import { processMultipartRequest, type UploadOptions } from "nestelia/apollo";
-
-const options: UploadOptions = {
-  maxFiles: 5,              // máx. arquivos por requisição (padrão: 10)
-  maxFileSize: 10_485_760,  // 10 MB por arquivo
-};
-
-const operations = await processMultipartRequest(body, options);
+GraphQLModule.forRoot({
+  autoSchemaFile: true,
+  upload: {
+    maxFiles: 5,              // máx. arquivos por requisição (padrão: 10)
+    maxFileSize: 10_485_760,  // 10 MB por arquivo
+  },
+})
 ```
 
 | Opção | Tipo | Padrão | Descrição |

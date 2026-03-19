@@ -2,7 +2,7 @@ import { HeaderMap } from "@apollo/server";
 import type { Context, Elysia } from "elysia";
 
 import { ApolloService } from "./services";
-import { processMultipartRequest } from "./upload";
+import { processMultipartRequest, type UploadOptions } from "./upload";
 
 /** Apollo Server HTTP response structure. */
 interface ApolloHTTPResponse {
@@ -61,6 +61,7 @@ export function registerGraphQLRoutes(
   app: Elysia,
   apolloService: ApolloService,
   path: string,
+  uploadOptions?: UploadOptions,
 ): void {
   const handler = async (ctx: Context): Promise<Response> => {
     const apolloServer = apolloService.getServer();
@@ -86,7 +87,7 @@ export function registerGraphQLRoutes(
     const headerMap = new HeaderMap();
     request.headers.forEach((value, key) => headerMap.set(key, value));
 
-    const body = method === "POST" ? await extractBody(ctx) : undefined;
+    const body = method === "POST" ? await extractBody(ctx, uploadOptions) : undefined;
 
     const httpResponse = await (
       apolloServer as unknown as ApolloServerWithHTTP
@@ -129,10 +130,10 @@ export function registerGraphQLRoutes(
  * @param ctx - Elysia context with request and body.
  * @returns Parsed body or undefined.
  */
-async function extractBody(ctx: {
-  request: Request;
-  body: unknown;
-}): Promise<unknown> {
+async function extractBody(
+  ctx: { request: Request; body: unknown },
+  uploadOptions?: UploadOptions,
+): Promise<unknown> {
   const contentType = ctx.request.headers.get("content-type") ?? "";
   const ctxBody = ctx.body;
 
@@ -143,6 +144,7 @@ async function extractBody(ctx: {
   ) {
     return processMultipartRequest(
       ctxBody as FormData | Record<string, unknown>,
+      uploadOptions,
     );
   }
 

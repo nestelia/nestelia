@@ -57,7 +57,7 @@ export class GraphQLModule {
             const path = options.path ?? "/graphql";
             const service = new ApolloService(options, elysiaApp);
             await service.start();
-            registerGraphQLRoutes(elysiaApp, service, path);
+            registerGraphQLRoutes(elysiaApp, service, path, options.upload);
             return service;
           },
           inject: ["ELYSIA_APP"],
@@ -109,7 +109,7 @@ export class GraphQLModule {
             const path = opts.path ?? "/graphql";
             const service = new ApolloService(opts, elysiaApp);
             await service.start();
-            registerGraphQLRoutes(elysiaApp, service, path);
+            registerGraphQLRoutes(elysiaApp, service, path, opts.upload);
             return service;
           },
           inject: ["ELYSIA_APP", ...(options.inject ?? [])],

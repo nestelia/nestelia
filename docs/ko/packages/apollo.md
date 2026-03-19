@@ -397,17 +397,16 @@ map:        {"0":["variables.file"]}
 
 ### 업로드 제한
 
-`UploadOptions` 객체를 `processMultipartRequest`의 두 번째 인수로 전달합니다:
+`GraphQLModule.forRoot`（또는 `forRootAsync`）의 `upload` 옵션으로 제한을 설정합니다:
 
 ```typescript
-import { processMultipartRequest, type UploadOptions } from "nestelia/apollo";
-
-const options: UploadOptions = {
-  maxFiles: 5,              // 요청당 최대 파일 수 (기본값: 10)
-  maxFileSize: 10_485_760,  // 파일당 10 MB
-};
-
-const operations = await processMultipartRequest(body, options);
+GraphQLModule.forRoot({
+  autoSchemaFile: true,
+  upload: {
+    maxFiles: 5,              // 요청당 최대 파일 수 (기본값: 10)
+    maxFileSize: 10_485_760,  // 파일당 10 MB
+  },
+})
 ```
 
 | 옵션 | 타입 | 기본값 | 설명 |

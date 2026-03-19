@@ -396,17 +396,16 @@ map:        {"0":["variables.file"]}
 
 ### 上传限制
 
-将 `UploadOptions` 对象作为第二个参数传入 `processMultipartRequest`：
+通过 `GraphQLModule.forRoot`（或 `forRootAsync`）中的 `upload` 选项配置限制：
 
 ```typescript
-import { processMultipartRequest, type UploadOptions } from "nestelia/apollo";
-
-const options: UploadOptions = {
-  maxFiles: 5,              // 每次请求最大文件数（默认：10）
-  maxFileSize: 10_485_760,  // 每个文件 10 MB
-};
-
-const operations = await processMultipartRequest(body, options);
+GraphQLModule.forRoot({
+  autoSchemaFile: true,
+  upload: {
+    maxFiles: 5,              // 每次请求最大文件数（默认：10）
+    maxFileSize: 10_485_760,  // 每个文件 10 MB
+  },
+})
 ```
 
 | 选项 | 类型 | 默认值 | 描述 |

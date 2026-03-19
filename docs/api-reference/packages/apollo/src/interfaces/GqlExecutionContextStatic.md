@@ -1,6 +1,6 @@
 # Interface: GqlExecutionContextStatic
 
-Defined in: [packages/apollo/src/interfaces/apollo-options.interface.ts:219](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/interfaces/apollo-options.interface.ts#L219)
+Defined in: [packages/apollo/src/interfaces/apollo-options.interface.ts:222](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/interfaces/apollo-options.interface.ts#L222)
 
 Static interface for creating GqlExecutionContext instances.
 
@@ -12,7 +12,7 @@ Static interface for creating GqlExecutionContext instances.
 create<TContext>(context): GqlExecutionContext<TContext>;
 ```
 
-Defined in: [packages/apollo/src/interfaces/apollo-options.interface.ts:225](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/interfaces/apollo-options.interface.ts#L225)
+Defined in: [packages/apollo/src/interfaces/apollo-options.interface.ts:228](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/interfaces/apollo-options.interface.ts#L228)
 
 Creates a GqlExecutionContext from an ExecutionContext.
 

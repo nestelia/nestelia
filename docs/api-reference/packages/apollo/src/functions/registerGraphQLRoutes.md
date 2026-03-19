@@ -4,7 +4,8 @@
 function registerGraphQLRoutes(
    app, 
    apolloService, 
-   path): void;
+   path, 
+   uploadOptions?): void;
 ```
 
 Defined in: [packages/apollo/src/graphql.controller.ts:60](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/graphql.controller.ts#L60)
@@ -19,6 +20,7 @@ Handles GET, POST, and OPTIONS requests for the GraphQL endpoint.
 | `app` | `Elysia` | Elysia application instance. |
 | `apolloService` | [`ApolloService`](../classes/ApolloService.md) | Apollo service instance. |
 | `path` | `string` | GraphQL endpoint path. |
+| `uploadOptions?` | [`UploadOptions`](../interfaces/UploadOptions.md) | - |
 
 ## Returns
 

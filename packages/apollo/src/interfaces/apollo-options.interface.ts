@@ -10,6 +10,7 @@ import type {
 } from "graphql";
 
 import type { ExecutionContext } from "nestelia";
+import type { UploadOptions } from "../upload";
 
 /** Date scalar serialization mode. */
 export type DateScalarMode = "isoDate" | "timestamp";
@@ -181,6 +182,8 @@ export interface ApolloOptions<TContext = unknown> {
   sortSchema?: boolean;
   /** Additional Apollo Server plugins. */
   plugins?: ApolloServerOptions<BaseContext>["plugins"];
+  /** File upload limits for multipart requests. */
+  upload?: UploadOptions;
 }
 
 /** Elysia-specific GraphQL request context. */

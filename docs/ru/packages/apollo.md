@@ -404,17 +404,16 @@ map:        {"0":["variables.file"]}
 
 ### Лимиты загрузки
 
-Передайте объект `UploadOptions` вторым аргументом в `processMultipartRequest`:
+Настройте лимиты через опцию `upload` в `GraphQLModule.forRoot` (или `forRootAsync`):
 
 ```typescript
-import { processMultipartRequest, type UploadOptions } from "nestelia/apollo";
-
-const options: UploadOptions = {
-  maxFiles: 5,              // макс. файлов за запрос (по умолчанию: 10)
-  maxFileSize: 10_485_760,  // 10 МБ на файл
-};
-
-const operations = await processMultipartRequest(body, options);
+GraphQLModule.forRoot({
+  autoSchemaFile: true,
+  upload: {
+    maxFiles: 5,              // макс. файлов за запрос (по умолчанию: 10)
+    maxFileSize: 10_485_760,  // 10 МБ на файл
+  },
+})
 ```
 
 | Опция | Тип | По умолчанию | Описание |
