@@ -119,7 +119,7 @@ export interface RabbitMQExchangeConfig {
    * Create exchange if it doesn't exist (default: true).
    * When false, uses checkExchange instead of assertExchange.
    */
-  createExchangeIfNotExists?: boolean;
+  createIfNotExists?: boolean;
 }
 
 /**

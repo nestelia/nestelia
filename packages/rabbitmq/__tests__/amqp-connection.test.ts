@@ -195,8 +195,8 @@ describe("AmqpConnection", () => {
       await c.disconnect();
     });
 
-    it("uses checkExchange when createExchangeIfNotExists is false", async () => {
-      await conn.assertExchange({ name: "existing-ex", createExchangeIfNotExists: false });
+    it("uses checkExchange when createIfNotExists is false", async () => {
+      await conn.assertExchange({ name: "existing-ex", createIfNotExists: false });
       expect(mockChannel.assertExchange).not.toHaveBeenCalledWith(
         "existing-ex",
         expect.anything(),

@@ -307,7 +307,7 @@ export class AmqpConnection {
 
   /**
    * Assert an exchange.
-   * When createExchangeIfNotExists is false, uses checkExchange (passive declare).
+   * When createIfNotExists is false, uses checkExchange (passive declare).
    */
   async assertExchange(config: RabbitMQExchangeConfig): Promise<void> {
     if (!this.channel) {
@@ -321,7 +321,7 @@ export class AmqpConnection {
       return;
     }
 
-    const shouldCreate = config.createExchangeIfNotExists !== false;
+    const shouldCreate = config.createIfNotExists !== false;
 
     if (shouldCreate) {
       const type = config.type || this.config.defaultExchangeType || "topic";

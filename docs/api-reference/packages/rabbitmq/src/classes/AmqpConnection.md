@@ -37,7 +37,7 @@ assertExchange(config): Promise<void>;
 Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:312](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L312)
 
 Assert an exchange.
-When createExchangeIfNotExists is false, uses checkExchange (passive declare).
+When createIfNotExists is false, uses checkExchange (passive declare).
 
 #### Parameters
 
