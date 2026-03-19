@@ -87,10 +87,14 @@ describe("MessageSerializer", () => {
       expect(MessageSerializer.sanitizeExchangeName("my-exchange.v1")).toBe("my-exchange.v1");
     });
 
-    it("throws for invalid characters", () => {
-      expect(() => MessageSerializer.sanitizeExchangeName("bad name!")).toThrow(
+    it("throws for null bytes", () => {
+      expect(() => MessageSerializer.sanitizeExchangeName("bad\x00name")).toThrow(
         "Invalid exchange name",
       );
+    });
+
+    it("accepts names with colons, spaces and special chars", () => {
+      expect(MessageSerializer.sanitizeExchangeName("my.exchange::v1")).toBe("my.exchange::v1");
     });
 
     it("throws for name exceeding max length", () => {
@@ -109,9 +113,15 @@ describe("MessageSerializer", () => {
       expect(MessageSerializer.sanitizeQueueName("")).toBe("");
     });
 
-    it("throws for invalid characters", () => {
-      expect(() => MessageSerializer.sanitizeQueueName("bad queue!")).toThrow(
+    it("throws for null bytes", () => {
+      expect(() => MessageSerializer.sanitizeQueueName("bad\x00queue")).toThrow(
         "Invalid queue name",
+      );
+    });
+
+    it("accepts names with colons and special chars", () => {
+      expect(MessageSerializer.sanitizeQueueName("clothoff.net::expiredQueue")).toBe(
+        "clothoff.net::expiredQueue",
       );
     });
 

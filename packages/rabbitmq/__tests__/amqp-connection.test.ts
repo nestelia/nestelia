@@ -214,8 +214,8 @@ describe("AmqpConnection", () => {
       expect(calls).toHaveLength(1);
     });
 
-    it("throws for invalid exchange name", async () => {
-      await expect(conn.assertExchange({ name: "bad name!" })).rejects.toThrow(
+    it("throws for exchange name with null byte", async () => {
+      await expect(conn.assertExchange({ name: "bad\x00name" })).rejects.toThrow(
         "Invalid exchange name",
       );
     });

@@ -4,8 +4,9 @@
 
 const DEFAULT_MAX_MESSAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
-// Valid RabbitMQ name pattern (alphanumeric, hyphens, underscores, dots)
-const VALID_NAME_PATTERN = /^[a-zA-Z0-9_.-]+$/;
+// RabbitMQ allows any printable characters in exchange/queue names except null bytes.
+// Only reject names containing null bytes (ASCII 0), which are truly forbidden.
+const INVALID_NAME_PATTERN = /\x00/;
 
 // Maximum name lengths per AMQP spec
 const MAX_EXCHANGE_NAME_LENGTH = 255;
@@ -83,10 +84,8 @@ export class MessageSerializer {
         `Exchange name exceeds maximum length of ${MAX_EXCHANGE_NAME_LENGTH} characters`,
       );
     }
-    if (!VALID_NAME_PATTERN.test(name)) {
-      throw new Error(
-        `Invalid exchange name "${name}". Only alphanumeric characters, hyphens, underscores, and dots are allowed`,
-      );
+    if (INVALID_NAME_PATTERN.test(name)) {
+      throw new Error(`Invalid exchange name "${name}": null bytes are not allowed`);
     }
     return name;
   }
@@ -101,10 +100,8 @@ export class MessageSerializer {
       );
     }
     // Empty string is allowed for auto-generated queues
-    if (name && !VALID_NAME_PATTERN.test(name)) {
-      throw new Error(
-        `Invalid queue name "${name}". Only alphanumeric characters, hyphens, underscores, and dots are allowed`,
-      );
+    if (name && INVALID_NAME_PATTERN.test(name)) {
+      throw new Error(`Invalid queue name "${name}": null bytes are not allowed`);
     }
     return name;
   }
