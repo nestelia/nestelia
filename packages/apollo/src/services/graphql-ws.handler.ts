@@ -1,6 +1,6 @@
 import type { Elysia } from "elysia";
 import type { ElysiaWS } from "elysia/ws";
-import type { GraphQLSchema } from "graphql";
+import { parse, subscribe, validate, type GraphQLSchema } from "graphql";
 import {
   CloseCode,
   type ConnectionInitMessage,
@@ -48,7 +48,12 @@ interface ConnectionState {
   isInitialized: boolean;
   /** Active subscriptions for this connection. */
   subscriptions: Map<string, AbortController>;
+  /** Timer for connectionInitWaitTimeout (cleared after init). */
+  initTimer?: ReturnType<typeof setTimeout>;
 }
+
+/** Default timeout to wait for connection_init before closing (ms). */
+const DEFAULT_INIT_TIMEOUT_MS = 3_000;
 
 /**
  * Handler for GraphQL WebSocket subscriptions using the graphql-ws protocol.
@@ -93,6 +98,16 @@ export class GraphQLWsHandler {
   }
 
   private handleOpen(socket: WsSocket): void {
+    const timeoutMs =
+      this.wsOptions.connectionInitWaitTimeout ?? DEFAULT_INIT_TIMEOUT_MS;
+
+    const initTimer = setTimeout(() => {
+      const state = this.connections.get(socket.id);
+      if (state && !state.isInitialized) {
+        socket.close(CloseCode.ConnectionInitialisationTimeout);
+      }
+    }, timeoutMs);
+
     this.connections.set(socket.id, {
       socket,
       context: {
@@ -102,6 +117,7 @@ export class GraphQLWsHandler {
       },
       isInitialized: false,
       subscriptions: new Map(),
+      initTimer,
     });
   }
 
@@ -126,6 +142,7 @@ export class GraphQLWsHandler {
   private handleClose(socket: WsSocket): void {
     const state = this.connections.get(socket.id);
     if (state) {
+      clearTimeout(state.initTimer);
       for (const sub of state.subscriptions.values()) {
         sub.abort();
       }
@@ -189,7 +206,7 @@ export class GraphQLWsHandler {
       }
 
       case "ping": {
-        socket.send(JSON.stringify({ type: "pong" }));
+        this.safeSend(socket, JSON.stringify({ type: "pong" }));
         break;
       }
 
@@ -222,8 +239,9 @@ export class GraphQLWsHandler {
       }
     }
 
+    clearTimeout(state.initTimer);
     state.isInitialized = true;
-    socket.send(JSON.stringify({ type: "connection_ack" }));
+    this.safeSend(socket, JSON.stringify({ type: "connection_ack" }));
   }
 
   private async handleSubscribe(
@@ -247,8 +265,6 @@ export class GraphQLWsHandler {
     message: SubscribeMessage,
     state: ConnectionState,
   ): Promise<void> {
-    const { subscribe, parse, validate } = await import("graphql");
-
     const contextValue = await this.buildContext(
       state.context.request,
       state.context.connectionParams ?? {},
@@ -288,24 +304,68 @@ export class GraphQLWsHandler {
   private async handleAsyncIterator(
     state: ConnectionState,
     id: string,
-    iterator: AsyncIterable<unknown>,
+    iterable: AsyncIterable<unknown>,
   ): Promise<void> {
     const abortController = new AbortController();
     state.subscriptions.set(id, abortController);
 
+    const iter = iterable[Symbol.asyncIterator]();
     try {
-      for await (const value of iterator) {
-        if (abortController.signal.aborted) {
+      while (!abortController.signal.aborted) {
+        // Race the next value against the abort signal so the loop exits
+        // immediately on disconnect without waiting for the next event.
+        const next = await this.nextOrAbort(iter, abortController.signal);
+        if (next === null || abortController.signal.aborted) {
           break;
         }
-        this.sendNext(state.socket, id, value);
+        if (next.done) {
+          this.sendComplete(state.socket, id);
+          return;
+        }
+        this.sendNext(state.socket, id, next.value);
       }
-      this.sendComplete(state.socket, id);
     } catch (err) {
-      this.sendError(state.socket, id, [{ message: String(err) }]);
+      if (!abortController.signal.aborted) {
+        this.sendError(state.socket, id, [{ message: String(err) }]);
+      }
     } finally {
+      // Signal the upstream publisher to release resources.
+      try {
+        await iter.return?.();
+      } catch {
+        // ignore errors from iterator cleanup
+      }
       state.subscriptions.delete(id);
     }
+  }
+
+  /**
+   * Returns the next iterator result or `null` if the abort signal fires first.
+   */
+  private nextOrAbort(
+    iter: AsyncIterator<unknown>,
+    signal: AbortSignal,
+  ): Promise<IteratorResult<unknown> | null> {
+    return new Promise<IteratorResult<unknown> | null>((resolve, reject) => {
+      if (signal.aborted) {
+        resolve(null);
+        return;
+      }
+
+      const onAbort = (): void => resolve(null);
+      signal.addEventListener("abort", onAbort, { once: true });
+
+      iter.next().then(
+        (result) => {
+          signal.removeEventListener("abort", onAbort);
+          resolve(result);
+        },
+        (err: unknown) => {
+          signal.removeEventListener("abort", onAbort);
+          reject(err as Error);
+        },
+      );
+    });
   }
 
   private async buildContext(
@@ -330,12 +390,21 @@ export class GraphQLWsHandler {
     return { req: request, ctx: baseContext.elysiaContext };
   }
 
+  /** Sends a raw string, silently ignoring errors if the socket is closed. */
+  private safeSend(socket: WsSocket, data: string): void {
+    try {
+      socket.send(data);
+    } catch {
+      // socket already closed
+    }
+  }
+
   private sendNext(socket: WsSocket, id: string, payload: unknown): void {
-    socket.send(JSON.stringify({ type: "next", id, payload }));
+    this.safeSend(socket, JSON.stringify({ type: "next", id, payload }));
   }
 
   private sendComplete(socket: WsSocket, id: string): void {
-    socket.send(JSON.stringify({ type: "complete", id }));
+    this.safeSend(socket, JSON.stringify({ type: "complete", id }));
   }
 
   private sendError(
@@ -343,7 +412,7 @@ export class GraphQLWsHandler {
     id: string,
     payload: Array<{ message: string }>,
   ): void {
-    socket.send(JSON.stringify({ type: "error", id, payload }));
+    this.safeSend(socket, JSON.stringify({ type: "error", id, payload }));
   }
 
   private isRecord(value: unknown): value is Record<string, unknown> {

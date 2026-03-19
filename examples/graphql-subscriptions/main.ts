@@ -1,0 +1,13 @@
+import "reflect-metadata";
+
+import { createElysiaApplication } from "nestelia";
+
+import { AppModule } from "./src/app.module";
+
+const app = await createElysiaApplication(AppModule);
+app.listen(3000, () =>
+  console.log(
+    "GraphQL Subscriptions example on http://localhost:3000/graphql\n" +
+      "WebSocket endpoint: ws://localhost:3000/graphql",
+  ),
+);
