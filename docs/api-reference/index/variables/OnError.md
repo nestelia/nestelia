@@ -1,4 +1,4 @@
-# Variable: OnError()
+# Variable: OnError
 
 ```ts
 const OnError: (options?) => MethodDecorator;

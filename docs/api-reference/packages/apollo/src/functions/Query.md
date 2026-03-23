@@ -12,7 +12,7 @@ Decorator for a GraphQL Query.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `typeFn?` | `string` \| () => `unknown` \| [`QueryOptions`](../interfaces/QueryOptions.md) | Return type factory, options object, or query name. |
+| `typeFn?` | \| `string` \| (() => `unknown`) \| [`QueryOptions`](../interfaces/QueryOptions.md) | Return type factory, options object, or query name. |
 | `options?` | [`QueryOptions`](../interfaces/QueryOptions.md) | Query options when typeFn is a function. |
 
 ## Returns

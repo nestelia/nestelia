@@ -16,7 +16,7 @@ Decorator for GraphQL Scalar.
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
 | `name` | `string` | Scalar name. |
-| `typeFnOrOptions?` | \| () => `unknown` \| \{ `description?`: `string`; \} | Type factory function or scalar options. |
+| `typeFnOrOptions?` | \| (() => `unknown`) \| \{ `description?`: `string`; \} | Type factory function or scalar options. |
 | `options?` | \{ `description?`: `string`; \} | Scalar options when typeFnOrOptions is a function. |
 | `options.description?` | `string` | - |
 

@@ -15,15 +15,21 @@ const defaultOptions: InjectableOptions = {
   providedIn: "root",
 };
 
+export const INJECTABLE_SOURCE = Symbol("INJECTABLE_SOURCE");
+
 export function Injectable(
   options: InjectableOptions = defaultOptions,
 ): ClassDecorator {
+  const sourceStack = new Error().stack;
   return (target) => {
     Reflect.defineMetadata(
       INJECTABLE_METADATA,
       { ...defaultOptions, ...options },
       target,
     );
+    if (sourceStack) {
+      Reflect.defineMetadata(INJECTABLE_SOURCE, sourceStack, target);
+    }
     return target;
   };
 }

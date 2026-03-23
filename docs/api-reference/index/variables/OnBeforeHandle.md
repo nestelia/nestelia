@@ -1,4 +1,4 @@
-# Variable: OnBeforeHandle()
+# Variable: OnBeforeHandle
 
 ```ts
 const OnBeforeHandle: (options?) => MethodDecorator;

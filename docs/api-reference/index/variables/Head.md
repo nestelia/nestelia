@@ -1,4 +1,4 @@
-# Variable: Head()
+# Variable: Head
 
 ```ts
 const Head: (path) => MethodDecorator;

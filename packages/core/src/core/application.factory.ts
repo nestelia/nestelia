@@ -2,7 +2,7 @@ import type { Elysia } from "elysia";
 import { ElysiaNestApplication } from "../../../../packages/microservices/src/elysia-nest-application";
 import { APP_FILTERS_METADATA, MODULE_METADATA } from "../decorators/constants";
 import type { ModuleOptions } from "../decorators/types";
-import { Container, type Type } from "../di";
+import { Container, DIError, type Type } from "../di";
 import type { ExceptionFilter } from "../exceptions";
 import type { LoggerService, LogLevel } from "../logger";
 import { Logger } from "../logger";
@@ -82,9 +82,17 @@ export async function createElysiaApplication(
   const elysiaApp = await rootModule();
 
   // All modules are now registered and import relationships are fully wired.
-  // Call initializeSingletonProviders once here so that cross-module dependency
-  // lookups succeed for every provider regardless of initialization order.
-  await initializeSingletonProviders();
+  // Eagerly resolve every provider & controller so missing/circular dependencies
+  // surface immediately instead of at first request time.
+  try {
+    await initializeSingletonProviders();
+  } catch (e) {
+    if (e instanceof DIError) {
+      Logger.error(`\n${e.message}`, "DependencyInjection");
+      process.exit(1);
+    }
+    throw e;
+  }
 
   // Get module metadata to extract controllers
   const moduleMetadata: ModuleOptions = Reflect.getMetadata(MODULE_METADATA, rootModule) || {};

@@ -1,4 +1,4 @@
-# Variable: OnMapResponse()
+# Variable: OnMapResponse
 
 ```ts
 const OnMapResponse: (options?) => MethodDecorator;

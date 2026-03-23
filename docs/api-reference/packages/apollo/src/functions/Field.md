@@ -17,7 +17,7 @@ For all other types — enums, classes, union types — an explicit type factory
 
 | Parameter | Type |
 | ------ | ------ |
-| `typeFnOrOptions?` | \| () => `unknown` \| \{ `defaultValue?`: `unknown`; `deprecationReason?`: `string`; `description?`: `string`; `nullable?`: `boolean`; `type?`: () => `unknown`; \} |
+| `typeFnOrOptions?` | \| (() => `unknown`) \| \{ `defaultValue?`: `unknown`; `deprecationReason?`: `string`; `description?`: `string`; `nullable?`: `boolean`; `type?`: () => `unknown`; \} |
 | `fieldOptions?` | \{ `defaultValue?`: `unknown`; `deprecationReason?`: `string`; `description?`: `string`; `nullable?`: `boolean`; \} |
 | `fieldOptions.defaultValue?` | `unknown` |
 | `fieldOptions.deprecationReason?` | `string` |

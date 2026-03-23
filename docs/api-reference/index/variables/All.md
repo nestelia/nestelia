@@ -1,4 +1,4 @@
-# Variable: All()
+# Variable: All
 
 ```ts
 const All: (path) => MethodDecorator;

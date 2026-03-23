@@ -1,4 +1,4 @@
-# Variable: OnRequest()
+# Variable: OnRequest
 
 ```ts
 const OnRequest: (options?) => MethodDecorator;

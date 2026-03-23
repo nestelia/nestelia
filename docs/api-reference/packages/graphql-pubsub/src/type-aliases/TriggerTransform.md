@@ -1,4 +1,4 @@
-# Type Alias: TriggerTransform()
+# Type Alias: TriggerTransform
 
 ```ts
 type TriggerTransform = (trigger, options) => string;

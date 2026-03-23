@@ -1,4 +1,4 @@
-# Type Alias: RabbitMQSerializer()
+# Type Alias: RabbitMQSerializer
 
 ```ts
 type RabbitMQSerializer = (message) => Buffer;

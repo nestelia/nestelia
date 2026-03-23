@@ -1,4 +1,4 @@
-# Variable: Response()
+# Variable: Response
 
 ```ts
 const Response: () => ParameterDecorator = Res;

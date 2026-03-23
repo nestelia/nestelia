@@ -1,4 +1,4 @@
-# Type Alias: TaskCallback()
+# Type Alias: TaskCallback
 
 ```ts
 type TaskCallback = () => Promise<void> | void;

@@ -1,6 +1,6 @@
 # Class: Injector
 
-Defined in: [packages/core/src/di/injector.ts:11](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L11)
+Defined in: [packages/core/src/di/injector.ts:21](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L21)
 
 ## Constructors
 
@@ -10,7 +10,7 @@ Defined in: [packages/core/src/di/injector.ts:11](https://github.com/nestelia/ne
 new Injector(container): Injector;
 ```
 
-Defined in: [packages/core/src/di/injector.ts:12](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L12)
+Defined in: [packages/core/src/di/injector.ts:24](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L24)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ loadInstance(
 contextId?): Promise<void>;
 ```
 
-Defined in: [packages/core/src/di/injector.ts:14](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L14)
+Defined in: [packages/core/src/di/injector.ts:26](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L26)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [packages/core/src/di/injector.ts:14](https://github.com/nestelia/ne
 loadPrototype(wrapper, contextId?): Promise<void>;
 ```
 
-Defined in: [packages/core/src/di/injector.ts:45](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L45)
+Defined in: [packages/core/src/di/injector.ts:74](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injector.ts#L74)
 
 #### Parameters
 

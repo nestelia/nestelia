@@ -1,4 +1,4 @@
-# Variable: Form()
+# Variable: Form
 
 ```ts
 const Form: (paramNameOrDtoOrOptions?, dtoTypeOrFileOptions?) => (target, propertyKey, parameterIndex) => void;
@@ -15,21 +15,4 @@ Defined in: [packages/core/src/decorators/param.decorators.ts:454](https://githu
 
 ## Returns
 
-```ts
-(
-   target, 
-   propertyKey, 
-   parameterIndex): void;
-```
-
-### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `target` | `object` |
-| `propertyKey` | `string` \| `symbol` |
-| `parameterIndex` | `number` |
-
-### Returns
-
-`void`
+(`target`, `propertyKey`, `parameterIndex`) => `void`

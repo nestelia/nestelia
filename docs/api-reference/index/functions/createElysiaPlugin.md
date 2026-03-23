@@ -71,69 +71,7 @@ Helper function to create the Elysia plugin from module metadata.
 
 ## Returns
 
-```ts
-(app): Promise<Elysia<"", {
-  decorator: {
-  };
-  derive: {
-  };
-  resolve: {
-  };
-  store: {
-  };
-}, {
-  error: {
-  };
-  typebox: {
-  };
-}, {
-  macro: {
-  };
-  macroFn: {
-  };
-  parser: {
-  };
-  response: {
-  };
-  schema: {
-  };
-  standaloneSchema: {
-  };
-}, {
-}, {
-  derive: {
-  };
-  resolve: {
-  };
-  response: {
-  };
-  schema: {
-  };
-  standaloneSchema: {
-  };
-}, {
-  derive: {
-  };
-  resolve: {
-  };
-  response: {
-  };
-  schema: {
-  };
-  standaloneSchema: {
-  };
-}>>;
-```
-
-### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `app` | `Elysia` |
-
-### Returns
-
-`Promise`\<`Elysia`\<`""`, \{
+(`app`) => `Promise`\<`Elysia`\<`""`, \{
   `decorator`: \{
   \};
   `derive`: \{

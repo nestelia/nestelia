@@ -4,7 +4,7 @@
 function Injectable(options?): ClassDecorator;
 ```
 
-Defined in: [packages/core/src/di/injectable.decorator.ts:18](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injectable.decorator.ts#L18)
+Defined in: [packages/core/src/di/injectable.decorator.ts:20](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injectable.decorator.ts#L20)
 
 ## Parameters
 

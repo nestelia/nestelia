@@ -12,7 +12,7 @@ Decorator for a GraphQL Subscription.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `typeFn?` | \| `string` \| () => `unknown` \| [`SubscriptionOptions`](../interfaces/SubscriptionOptions.md) | Return type factory, options object, or subscription name. |
+| `typeFn?` | \| `string` \| (() => `unknown`) \| [`SubscriptionOptions`](../interfaces/SubscriptionOptions.md) | Return type factory, options object, or subscription name. |
 | `options?` | [`SubscriptionOptions`](../interfaces/SubscriptionOptions.md) | Subscription options when typeFn is a function. |
 
 ## Returns

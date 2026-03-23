@@ -12,7 +12,7 @@ Decorator for a GraphQL Mutation.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `typeFn?` | \| `string` \| () => `unknown` \| [`MutationOptions`](../interfaces/MutationOptions.md) | Return type factory, options object, or mutation name. |
+| `typeFn?` | \| `string` \| (() => `unknown`) \| [`MutationOptions`](../interfaces/MutationOptions.md) | Return type factory, options object, or mutation name. |
 | `options?` | [`MutationOptions`](../interfaces/MutationOptions.md) | Mutation options when typeFn is a function. |
 
 ## Returns

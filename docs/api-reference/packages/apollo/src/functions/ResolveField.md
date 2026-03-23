@@ -13,7 +13,7 @@ Used to resolve individual fields of a type.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `typeFn?` | \| `string` \| () => `unknown` \| [`FieldResolverOptions`](../interfaces/FieldResolverOptions.md) | Return type factory, options object, or field name. |
+| `typeFn?` | \| `string` \| (() => `unknown`) \| [`FieldResolverOptions`](../interfaces/FieldResolverOptions.md) | Return type factory, options object, or field name. |
 | `options?` | [`FieldResolverOptions`](../interfaces/FieldResolverOptions.md) | Field resolver options when typeFn is a function. |
 
 ## Returns

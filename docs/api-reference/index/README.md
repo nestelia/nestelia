@@ -8,6 +8,7 @@
 | [ConfigurableModuleBuilder](classes/ConfigurableModuleBuilder.md) | Factory that lets you create configurable modules and provides a way to reduce the majority of dynamic module boilerplate. |
 | [ConsoleLogger](classes/ConsoleLogger.md) | - |
 | [Container](classes/Container.md) | - |
+| [DIError](classes/DIError.md) | Error thrown when the DI container cannot resolve a dependency. |
 | [FileValidationError](classes/FileValidationError.md) | - |
 | [ForbiddenException](classes/ForbiddenException.md) | Exception for 403 Forbidden errors |
 | [HttpAdapterHost](classes/HttpAdapterHost.md) | Host class for accessing the HTTP adapter. Used to abstract the underlying HTTP server. |
@@ -192,6 +193,7 @@
 | [HTTP\_CODE\_METADATA](variables/HTTP_CODE_METADATA.md) | - |
 | [INJECT\_METADATA](variables/INJECT_METADATA.md) | - |
 | [INJECTABLE\_METADATA](variables/INJECTABLE_METADATA.md) | - |
+| [INJECTABLE\_SOURCE](variables/INJECTABLE_SOURCE.md) | - |
 | [INTERCEPTORS\_METADATA](variables/INTERCEPTORS_METADATA.md) | - |
 | [Ip](variables/Ip.md) | - |
 | [LOG\_LEVELS](variables/LOG_LEVELS.md) | - |

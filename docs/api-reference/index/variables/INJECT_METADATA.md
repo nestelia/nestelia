@@ -4,4 +4,4 @@
 const INJECT_METADATA: typeof INJECT_METADATA;
 ```
 
-Defined in: [packages/core/src/di/injectable.decorator.ts:32](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injectable.decorator.ts#L32)
+Defined in: [packages/core/src/di/injectable.decorator.ts:38](https://github.com/nestelia/nestelia/blob/main/packages/core/src/di/injectable.decorator.ts#L38)

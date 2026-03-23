@@ -1,4 +1,4 @@
-# Variable: Post()
+# Variable: Post
 
 ```ts
 const Post: (path) => MethodDecorator;

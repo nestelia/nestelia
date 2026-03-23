@@ -1,4 +1,4 @@
-# Type Alias: MessageHandler()\<T\>
+# Type Alias: MessageHandler\<T\>
 
 ```ts
 type MessageHandler<T> = (message) => void;

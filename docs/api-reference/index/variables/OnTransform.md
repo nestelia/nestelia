@@ -1,4 +1,4 @@
-# Variable: OnTransform()
+# Variable: OnTransform
 
 ```ts
 const OnTransform: (options?) => MethodDecorator;

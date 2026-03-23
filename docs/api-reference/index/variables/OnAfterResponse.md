@@ -1,4 +1,4 @@
-# Variable: OnAfterResponse()
+# Variable: OnAfterResponse
 
 ```ts
 const OnAfterResponse: (options?) => MethodDecorator;

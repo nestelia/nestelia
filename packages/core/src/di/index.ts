@@ -6,10 +6,11 @@ export {
   INJECT_METADATA,
   Injectable,
   type InjectableOptions,
+  INJECTABLE_SOURCE,
   Optional,
   OPTIONAL_METADATA,
 } from "./injectable.decorator";
-export { Injector } from "./injector";
+export { DIError, Injector } from "./injector";
 export { type InstancePerContext, InstanceWrapper } from "./instance-wrapper";
 export { type GetOptions, ModuleRef } from "./module-ref";
 export {

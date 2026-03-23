@@ -17,21 +17,4 @@ Useful for composing multiple decorators into a single one.
 
 ## Returns
 
-```ts
-(
-   target, 
-   propertyKey?, 
-   descriptor?): void;
-```
-
-### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `target` | `object` |
-| `propertyKey?` | `string` \| `symbol` |
-| `descriptor?` | `number` \| `TypedPropertyDescriptor`\<`unknown`\> |
-
-### Returns
-
-`void`
+(`target`, `propertyKey?`, `descriptor?`) => `void`

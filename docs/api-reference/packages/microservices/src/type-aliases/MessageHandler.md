@@ -1,4 +1,4 @@
-# Type Alias: MessageHandler()\<T, R\>
+# Type Alias: MessageHandler\<T, R\>
 
 ```ts
 type MessageHandler<T, R> = (data, ctx) => Promise<R> | Observable<R> | R;

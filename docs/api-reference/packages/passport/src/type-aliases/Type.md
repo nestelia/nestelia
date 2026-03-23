@@ -1,4 +1,4 @@
-# Type Alias: Type()\<T\>
+# Type Alias: Type\<T\>
 
 ```ts
 type Type<T> = (...args) => T;

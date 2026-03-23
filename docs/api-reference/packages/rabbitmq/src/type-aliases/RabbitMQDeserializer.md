@@ -1,4 +1,4 @@
-# Type Alias: RabbitMQDeserializer()
+# Type Alias: RabbitMQDeserializer
 
 ```ts
 type RabbitMQDeserializer = (message, msg) => unknown;

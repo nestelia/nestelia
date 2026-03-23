@@ -11,25 +11,7 @@ Classes decorated with
 
 ## Returns
 
-```ts
-<T>(target): T;
-```
-
-### Type Parameters
-
-| Type Parameter |
-| ------ |
-| `T` *extends* (...`args`) => `unknown` |
-
-### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `target` | `T` |
-
-### Returns
-
-`T`
+\<`T`\>(`target`) => `T`
 
 ## Args Type
 

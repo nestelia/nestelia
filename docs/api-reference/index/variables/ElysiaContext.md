@@ -1,4 +1,4 @@
-# Variable: ElysiaContext()
+# Variable: ElysiaContext
 
 ```ts
 const ElysiaContext: () => ParameterDecorator;

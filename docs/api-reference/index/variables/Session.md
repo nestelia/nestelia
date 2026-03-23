@@ -1,4 +1,4 @@
-# Variable: Session()
+# Variable: Session
 
 ```ts
 const Session: () => ParameterDecorator;

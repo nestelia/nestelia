@@ -1,4 +1,4 @@
-# Variable: Root()
+# Variable: Root
 
 ```ts
 const Root: () => ParameterDecorator = Parent;

@@ -1,4 +1,4 @@
-# Variable: Ctx()
+# Variable: Ctx
 
 ```ts
 const Ctx: (property?) => ParameterDecorator = Context;

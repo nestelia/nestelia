@@ -1,4 +1,4 @@
-# Variable: Options()
+# Variable: Options
 
 ```ts
 const Options: (path) => MethodDecorator;

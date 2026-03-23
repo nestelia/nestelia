@@ -1,4 +1,4 @@
-# Variable: Query()
+# Variable: Query
 
 ```ts
 const Query: (schema) => ParameterDecorator;

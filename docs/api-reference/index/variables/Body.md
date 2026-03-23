@@ -1,4 +1,4 @@
-# Variable: Body()
+# Variable: Body
 
 ```ts
 const Body: (schema) => ParameterDecorator;

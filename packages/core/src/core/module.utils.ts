@@ -60,29 +60,38 @@ export function extractProviderInfo(provider: any): {
 }
 
 /**
- * Calls onModuleInit for all singleton providers across all registered modules.
+ * Eagerly resolves all singleton providers and controllers across all registered
+ * modules.  Any missing-provider, unresolvable-dependency, or circular-dependency
+ * error will propagate immediately so the application fails fast at bootstrap.
  */
 export async function initializeSingletonProviders(): Promise<void> {
   const container = Container.instance;
   const processedTokens = new Set<unknown>();
   const instances: unknown[] = [];
 
-  // First pass: load all provider instances
+  // First pass: eagerly load all provider and controller instances
   for (const moduleRef of container.getModules().values()) {
+    // Providers
     for (const [token, wrapper] of moduleRef.getProviders()) {
       if (processedTokens.has(token) || !wrapper.metatype) {
         continue;
       }
       processedTokens.add(token);
 
-      try {
-        const instance = await container.get(token);
-        if (instance) {
-          instances.push(instance);
-        }
-      } catch (e) {
-        Logger.error(`Error initializing provider:`, e);
+      // Let DI errors propagate — they are caught by createElysiaApplication
+      const instance = await container.get(token);
+      if (instance) {
+        instances.push(instance);
       }
+    }
+
+    // Controllers — must also be resolved eagerly
+    for (const [token, wrapper] of moduleRef.getControllers()) {
+      if (processedTokens.has(token) || !wrapper.metatype) {
+        continue;
+      }
+      processedTokens.add(token);
+      await container.get(token);
     }
   }
 
@@ -97,7 +106,7 @@ export async function initializeSingletonProviders(): Promise<void> {
         (instance as any).__onModuleInitCalled = true;
         getLifecycleManager().register(instance);
       } catch (e) {
-        Logger.error(`Error initializing provider:`, e);
+        Logger.error(`Error in onModuleInit:`, e);
       }
     }
   }

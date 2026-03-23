@@ -1,14 +1,26 @@
 
 import { type ContextId, STATIC_CONTEXT } from "./constants";
 import type { Container } from "./container";
-import { INJECT_METADATA } from "./injectable.decorator";
+import { INJECT_METADATA, INJECTABLE_SOURCE, OPTIONAL_METADATA } from "./injectable.decorator";
 import type { InstanceWrapper } from "./instance-wrapper";
 import type { Module } from "./module";
 import { ModuleRef } from "./module-ref";
 import type { ProviderToken, Type } from "./provider.interface";
 import { isForwardRef } from "./provider.interface";
 
+/**
+ * Error thrown when the DI container cannot resolve a dependency.
+ */
+export class DIError extends Error {
+  constructor(message: string, options?: ErrorOptions) {
+    super(message, options);
+    this.name = "DIError";
+  }
+}
+
 export class Injector {
+  private readonly _resolutionChain: InstanceWrapper[] = [];
+
   constructor(private readonly container: Container) {}
 
   public async loadInstance(
@@ -26,20 +38,37 @@ export class Injector {
       return;
     }
 
-    // Resolve constructor dependencies
-    const dependencies = await this.resolveConstructorParams(
-      wrapper,
-      moduleRef,
-      contextId,
-    );
+    // Circular dependency detection
+    const cycleStart = this._resolutionChain.indexOf(wrapper);
+    if (cycleStart !== -1) {
+      const cycle = this._resolutionChain
+        .slice(cycleStart)
+        .map((w) => this.formatTokenName(w.token));
+      cycle.push(this.formatTokenName(wrapper.token));
+      throw new DIError(
+        `DI Error: Circular dependency detected:\n  ${cycle.join(" → ")}`,
+      );
+    }
 
-    // Create instance
-    const instance = await this.instantiateClass(wrapper, dependencies);
+    this._resolutionChain.push(wrapper);
+    try {
+      // Resolve constructor dependencies
+      const dependencies = await this.resolveConstructorParams(
+        wrapper,
+        moduleRef,
+        contextId,
+      );
 
-    // Store instance
-    instancePerContext.instance = instance;
-    instancePerContext.isResolved = true;
-    wrapper.setInstanceByContextId(contextId, instancePerContext);
+      // Create instance
+      const instance = await this.instantiateClass(wrapper, dependencies);
+
+      // Store instance
+      instancePerContext.instance = instance;
+      instancePerContext.isResolved = true;
+      wrapper.setInstanceByContextId(contextId, instancePerContext);
+    } finally {
+      this._resolutionChain.pop();
+    }
   }
 
   public async loadPrototype(
@@ -71,6 +100,8 @@ export class Injector {
       const dependencies: unknown[] = [];
       const injectionMetadata: Array<{ index: number; token: unknown }> =
         Reflect.getMetadata(INJECT_METADATA, metatype) || [];
+      const optionalParams: number[] =
+        Reflect.getMetadata(OPTIONAL_METADATA, metatype) || [];
 
       for (let i = 0; i < paramTypes.length; i++) {
         const paramType = paramTypes[i];
@@ -80,22 +111,50 @@ export class Injector {
         const token = customInjection
           ? customInjection.token
           : (paramType as ProviderToken);
+        const isOptional = optionalParams.includes(i);
 
         if (token === undefined) {
-          throw new Error(
-            `Cannot resolve dependency at index ${i} in ${wrapper.name.toString()}. ` +
-              `Make sure it's properly decorated with @Inject() or is a class.`,
+          if (isOptional) {
+            dependencies.push(undefined);
+            continue;
+          }
+          throw this.createResolutionError(
+            wrapper,
+            i,
+            "undefined",
+            moduleRef,
+            metatype,
           );
         }
 
         const resolvedToken = isForwardRef(token) ? token.forwardRef() : token;
 
-        const dep = await this.resolveDependency(
-          resolvedToken as ProviderToken,
-          moduleRef,
-          contextId,
-        );
-        dependencies.push(dep);
+        try {
+          const dep = await this.resolveDependency(
+            resolvedToken as ProviderToken,
+            moduleRef,
+            contextId,
+          );
+          dependencies.push(dep);
+        } catch (e) {
+          if (isOptional) {
+            dependencies.push(undefined);
+          } else if (e instanceof DIError) {
+            throw e;
+          } else {
+            const tokenName = this.formatTokenName(
+              resolvedToken as ProviderToken,
+            );
+            throw this.createResolutionError(
+              wrapper,
+              i,
+              tokenName,
+              moduleRef,
+              metatype,
+              e as Error,
+            );
+          }
+        }
       }
 
       return dependencies;
@@ -105,26 +164,49 @@ export class Injector {
     const inject = wrapper.inject || [];
     const dependencies: unknown[] = [];
 
-    for (const tokenOrConfig of inject) {
+    for (let i = 0; i < inject.length; i++) {
+      const tokenOrConfig = inject[i];
       let token: ProviderToken;
+      let isOptional = false;
       if (
         typeof tokenOrConfig === "object" &&
         tokenOrConfig !== null &&
         "token" in tokenOrConfig
       ) {
         token = tokenOrConfig.token as ProviderToken;
+        isOptional = !!(tokenOrConfig as { optional?: boolean }).optional;
       } else {
         token = tokenOrConfig as ProviderToken;
       }
 
       const resolvedToken = isForwardRef(token) ? token.forwardRef() : token;
 
-      const dep = await this.resolveDependency(
-        resolvedToken as ProviderToken,
-        moduleRef,
-        contextId,
-      );
-      dependencies.push(dep);
+      try {
+        const dep = await this.resolveDependency(
+          resolvedToken as ProviderToken,
+          moduleRef,
+          contextId,
+        );
+        dependencies.push(dep);
+      } catch (e) {
+        if (isOptional) {
+          dependencies.push(undefined);
+        } else if (e instanceof DIError) {
+          throw e;
+        } else {
+          const tokenName = this.formatTokenName(
+            resolvedToken as ProviderToken,
+          );
+          throw this.createResolutionError(
+            wrapper,
+            i,
+            tokenName,
+            moduleRef,
+            metatype,
+            e as Error,
+          );
+        }
+      }
     }
 
     return dependencies;
@@ -165,7 +247,7 @@ export class Injector {
 
     if (!wrapper) {
       throw new Error(
-        `Provider ${typeof token === "function" ? token.name : String(token)} not found in module ${moduleRef.name}`,
+        `Provider ${this.formatTokenName(token)} not found in module ${moduleRef.name}`,
       );
     }
 
@@ -203,5 +285,59 @@ export class Injector {
     // Class provider
     const ClassConstructor = metatype as Type;
     return new ClassConstructor(...dependencies);
+  }
+
+  private formatTokenName(token: ProviderToken): string {
+    if (typeof token === "function") return token.name;
+    if (typeof token === "symbol") return token.toString();
+    return String(token);
+  }
+
+  private getSourceLocation(
+    metatype: Type | Function,
+  ): string | undefined {
+    const stack: string | undefined = Reflect.getMetadata(
+      INJECTABLE_SOURCE,
+      metatype,
+    );
+    if (!stack) return undefined;
+    const lines = stack.split("\n");
+    // Skip the Error line and frames within elysia-nest/packages/core internals
+    for (const line of lines.slice(1)) {
+      const trimmed = line.trim();
+      if (
+        trimmed.startsWith("at ") &&
+        !trimmed.includes("/packages/core/") &&
+        !trimmed.includes("node_modules")
+      ) {
+        const match =
+          trimmed.match(/\((.+)\)$/) || trimmed.match(/at\s+(.+)$/);
+        if (match) return match[1].trim();
+      }
+    }
+    return undefined;
+  }
+
+  private createResolutionError(
+    wrapper: InstanceWrapper,
+    paramIndex: number,
+    dependencyName: string,
+    moduleRef: Module,
+    metatype: Type | Function,
+    cause?: Error,
+  ): DIError {
+    const wrapperName = this.formatTokenName(wrapper.token);
+    const source = this.getSourceLocation(metatype);
+    const sourceInfo = source
+      ? `  at ${wrapperName} constructor (${source})`
+      : `  at ${wrapperName} constructor`;
+
+    const message =
+      `DI Error: Cannot resolve dependency "${wrapperName}" ` +
+      `(parameter ${paramIndex}: ${dependencyName})\n` +
+      `  in module ${moduleRef.name}\n` +
+      sourceInfo;
+
+    return new DIError(message, cause ? { cause } : undefined);
   }
 }

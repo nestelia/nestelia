@@ -1,4 +1,4 @@
-# Variable: Put()
+# Variable: Put
 
 ```ts
 const Put: (path) => MethodDecorator;

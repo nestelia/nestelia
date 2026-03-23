@@ -1,4 +1,4 @@
-# Variable: Delete()
+# Variable: Delete
 
 ```ts
 const Delete: (path) => MethodDecorator;

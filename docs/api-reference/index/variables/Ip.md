@@ -1,4 +1,4 @@
-# Variable: Ip()
+# Variable: Ip
 
 ```ts
 const Ip: () => ParameterDecorator;

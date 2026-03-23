@@ -1,4 +1,4 @@
-# Variable: Files()
+# Variable: Files
 
 ```ts
 const Files: (paramNameOrDtoOrOptions?, dtoTypeOrFileOptions?) => (target, propertyKey, parameterIndex) => void;
@@ -15,21 +15,4 @@ Defined in: [packages/core/src/decorators/param.decorators.ts:458](https://githu
 
 ## Returns
 
-```ts
-(
-   target, 
-   propertyKey, 
-   parameterIndex): void;
-```
-
-### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `target` | `object` |
-| `propertyKey` | `string` \| `symbol` |
-| `parameterIndex` | `number` |
-
-### Returns
-
-`void`
+(`target`, `propertyKey`, `parameterIndex`) => `void`

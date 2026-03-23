@@ -1,4 +1,4 @@
-# Variable: OnParse()
+# Variable: OnParse
 
 ```ts
 const OnParse: (options?) => MethodDecorator;

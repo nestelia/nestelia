@@ -1,4 +1,4 @@
-# Type Alias: CacheKeyFactory()
+# Type Alias: CacheKeyFactory
 
 ```ts
 type CacheKeyFactory = (ctx) => string;

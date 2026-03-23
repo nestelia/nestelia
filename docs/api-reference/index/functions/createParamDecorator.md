@@ -16,13 +16,7 @@ Defined in: [packages/core/src/decorators/http.decorators.ts:36](https://github.
 
 ### Returns
 
-```ts
-(): ParameterDecorator;
-```
-
-#### Returns
-
-`ParameterDecorator`
+() => `ParameterDecorator`
 
 ## Call Signature
 
@@ -41,10 +35,4 @@ Defined in: [packages/core/src/decorators/http.decorators.ts:39](https://github.
 
 ### Returns
 
-```ts
-(): ParameterDecorator;
-```
-
-#### Returns
-
-`ParameterDecorator`
+() => `ParameterDecorator`

@@ -1,4 +1,4 @@
-# Type Alias: CacheTTLFactory()
+# Type Alias: CacheTTLFactory
 
 ```ts
 type CacheTTLFactory = (ctx) => Promise<number> | number;

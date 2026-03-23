@@ -331,19 +331,7 @@ Defined in: [packages/core/src/logger/console-logger.service.ts:109](https://git
 
 #### Returns
 
-```ts
-(message): string;
-```
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `message` | `string` |
-
-##### Returns
-
-`string`
+(`message`) => `string`
 
 ***
 

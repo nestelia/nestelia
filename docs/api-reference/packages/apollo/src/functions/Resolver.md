@@ -12,7 +12,7 @@ Decorator for a GraphQL resolver class.
 
 | Parameter | Type | Description |
 | ------ | ------ | ------ |
-| `options?` | \| `string` \| [`ResolverOptions`](../interfaces/ResolverOptions.md) \| () => `Constructor` | Resolver options, type name string, or type factory function. |
+| `options?` | \| `string` \| [`ResolverOptions`](../interfaces/ResolverOptions.md) \| (() => `Constructor`) | Resolver options, type name string, or type factory function. |
 
 ## Returns
 

@@ -1,4 +1,4 @@
-# Variable: Req()
+# Variable: Req
 
 ```ts
 const Req: () => ParameterDecorator;

@@ -1,4 +1,4 @@
-# Variable: Get()
+# Variable: Get
 
 ```ts
 const Get: (path) => MethodDecorator;

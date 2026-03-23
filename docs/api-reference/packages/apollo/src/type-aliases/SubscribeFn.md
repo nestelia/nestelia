@@ -1,4 +1,4 @@
-# Type Alias: SubscribeFn()
+# Type Alias: SubscribeFn
 
 ```ts
 type SubscribeFn = (root, args, context, info) => AsyncIterator<unknown>;

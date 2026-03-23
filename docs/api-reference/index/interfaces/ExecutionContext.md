@@ -91,19 +91,7 @@ Returns the handler function
 
 #### Returns
 
-```ts
-(...args): unknown;
-```
-
-##### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| ...`args` | `unknown`[] |
-
-##### Returns
-
-`unknown`
+(...`args`) => `unknown`
 
 ***
 

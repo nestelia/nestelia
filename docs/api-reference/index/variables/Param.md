@@ -1,4 +1,4 @@
-# Variable: Param()
+# Variable: Param
 
 ```ts
 const Param: (schema) => ParameterDecorator;

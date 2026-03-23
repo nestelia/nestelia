@@ -10,7 +10,7 @@ metadata.
 
 | Property | Type | Description | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="argtype"></a> `argType?` | `string` \| () => `unknown` \| `Constructor`\<`unknown`\> | Argument type. | [packages/apollo/src/decorators/types.ts:153](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/types.ts#L153) |
+| <a id="argtype"></a> `argType?` | `string` \| (() => `unknown`) \| `Constructor`\<`unknown`\> | Argument type. | [packages/apollo/src/decorators/types.ts:153](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/types.ts#L153) |
 | <a id="defaultvalue"></a> `defaultValue?` | `unknown` | Default value. | [packages/apollo/src/decorators/types.ts:159](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/types.ts#L159) |
 | <a id="description"></a> `description?` | `string` | Description. | [packages/apollo/src/decorators/types.ts:155](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/types.ts#L155) |
 | <a id="index"></a> `index` | `number` | - | [packages/apollo/src/decorators/types.ts:149](https://github.com/nestelia/nestelia/blob/main/packages/apollo/src/decorators/types.ts#L149) |

@@ -50,8 +50,8 @@ Defined in: node\_modules/cache-manager/dist/index.d.ts:72
 | ------ | ------ |
 | `key` | `string` |
 | `fnc` | () => `T` \| `Promise`\<`T`\> |
-| `ttl?` | `number` \| (`value`) => `number` |
-| `refreshThreshold?` | `number` \| (`value`) => `number` |
+| `ttl?` | `number` \| ((`value`) => `number`) |
+| `refreshThreshold?` | `number` \| ((`value`) => `number`) |
 
 ##### Returns
 

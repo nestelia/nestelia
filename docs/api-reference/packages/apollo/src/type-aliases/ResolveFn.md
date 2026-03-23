@@ -1,4 +1,4 @@
-# Type Alias: ResolveFn()
+# Type Alias: ResolveFn
 
 ```ts
 type ResolveFn = (payload) => unknown;

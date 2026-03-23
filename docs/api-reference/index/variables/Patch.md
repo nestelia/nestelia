@@ -1,4 +1,4 @@
-# Variable: Patch()
+# Variable: Patch
 
 ```ts
 const Patch: (path) => MethodDecorator;
