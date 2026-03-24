@@ -36,6 +36,7 @@ import {
   INFO_METADATA,
   PARENT_METADATA,
   RESOLVER_METADATA,
+  SUBSCRIPTION_METADATA,
   UNION_TYPE_METADATA,
 } from "./decorators/constants";
 import { Float, ID, Int } from "./decorators/type.decorator";
@@ -491,15 +492,34 @@ export class SchemaBuilder {
     for (const sub of typeMetadataStorage.getSubscriptions()) {
       const resolverClass = (sub.target as { constructor: Constructor }).constructor;
       const subCtx = `${resolverClass.name ?? "Resolver"}.${sub.name}`;
+
+      // Read custom subscribe/resolve from @Subscription decorator metadata
+      const decoratorMeta = Reflect.getMetadata(
+        SUBSCRIPTION_METADATA,
+        sub.target,
+        sub.methodName,
+      ) as { subscribe?: (...args: unknown[]) => unknown; resolve?: (payload: unknown) => unknown } | undefined;
+
+      const hasCustomSubscribe = typeof decoratorMeta?.subscribe === "function";
+
+      // If custom subscribe is provided: use it for subscribe, method body for resolve
+      // If no custom subscribe: method body is subscribe, resolve extracts payload[name]
+      const subscribeFn = hasCustomSubscribe
+        ? decoratorMeta!.subscribe!
+        : this.createResolver(sub);
+
+      const resolveFn = decoratorMeta?.resolve
+        ?? (hasCustomSubscribe
+          ? this.createResolver(sub)
+          : (payload: unknown) => (payload as Record<string, unknown>)[sub.name]);
+
       fields[sub.name] = {
         type: this.resolveOutputType(sub.returnType, sub.nullable, subCtx),
         description: sub.description,
         deprecationReason: sub.deprecationReason,
         args: this.buildArgDefinitions(sub),
-        // subscribe calls the resolver method (with Guards) to get AsyncIterator
-        subscribe: this.createResolver(sub),
-        // resolve extracts the field with the subscription name from payload
-        resolve: (payload: unknown) => (payload as Record<string, unknown>)[sub.name],
+        subscribe: subscribeFn,
+        resolve: resolveFn,
       };
     }
     return fields;
