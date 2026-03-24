@@ -4,7 +4,7 @@
 const RabbitMQService: typeof AmqpConnection = AmqpConnection;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:963](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L963)
+Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:939](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L939)
 
 Alias for AmqpConnection for backward compatibility
 

@@ -4,7 +4,7 @@
 type RabbitMQDeserializer = (message, msg) => unknown;
 ```
 
-Defined in: [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:292](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L292)
+Defined in: [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:284](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L284)
 
 Deserializer function type for custom message deserialization
 

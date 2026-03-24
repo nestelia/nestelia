@@ -840,20 +840,8 @@ export class AmqpConnection {
       `${handlerName}.${String(methodName)} {subscribe} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
     );
 
-    // Ensure the exchange exists before binding queues to it.
-    // If the subscriber doesn't specify exchangeType, look up the exchange
-    // configuration from forRoot() so we don't accidentally assert with a
-    // wrong default type (e.g. "topic" instead of "x-delayed-message").
-    if (exchange) {
-      const configuredExchange = this.config.exchanges?.find(
-        (e) => e.name === exchange,
-      );
-      await this.assertExchange({
-        name: exchange,
-        type: options.exchangeType ?? configuredExchange?.type,
-        options: options.exchangeOptions ?? configuredExchange?.options,
-      });
-    }
+    // Exchanges are asserted during connect() from forRoot() config.
+    // Subscribers only assert queues and bind them to existing exchanges.
 
     // Assert and bind queue
     if (queue) {
@@ -901,20 +889,8 @@ export class AmqpConnection {
       `${handlerName}.${String(methodName)} {rpc} -> ${exchange}::${routingKeys.join(",")}::${queue}`,
     );
 
-    // Ensure the exchange exists before binding queues to it.
-    // If the RPC handler doesn't specify exchangeType, look up the exchange
-    // configuration from forRoot() so we don't accidentally assert with a
-    // wrong default type (e.g. "topic" instead of "x-delayed-message").
-    if (exchange) {
-      const configuredExchange = this.config.exchanges?.find(
-        (e) => e.name === exchange,
-      );
-      await this.assertExchange({
-        name: exchange,
-        type: options.exchangeType ?? configuredExchange?.type,
-        options: options.exchangeOptions ?? configuredExchange?.options,
-      });
-    }
+    // Exchanges are asserted during connect() from forRoot() config.
+    // RPC handlers only assert queues and bind them to existing exchanges.
 
     // Assert and bind queue
     if (queue) {

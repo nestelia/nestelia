@@ -480,7 +480,7 @@ describe("AmqpConnection", () => {
   // ── registerHandlers ────────────────────────────────────────────────
 
   describe("registerHandlers", () => {
-    it("asserts exchange, queue, binds, and starts consuming for @RabbitSubscribe", async () => {
+    it("asserts queue, binds, and starts consuming for @RabbitSubscribe (no exchange assert)", async () => {
       class TestHandler {
         @RabbitSubscribe({ exchange: "events", routingKey: "user.created", queue: "user-q" })
         handleUser() {}
@@ -489,8 +489,11 @@ describe("AmqpConnection", () => {
       mockChannel.assertExchange.mockClear();
       await conn.registerHandlers(new TestHandler());
 
-      // Exchange asserted before binding queue
-      expect(mockChannel.assertExchange).toHaveBeenCalledWith("events", "topic", undefined);
+      // Exchange is NOT asserted by subscriber — only by connect() from forRoot config
+      const subscriberExchangeCalls = mockChannel.assertExchange.mock.calls.filter(
+        (c: unknown[]) => c[0] === "events",
+      );
+      expect(subscriberExchangeCalls).toHaveLength(0);
       // Queue asserted
       const queueCalls = mockChannel.assertQueue.mock.calls.filter(
         (c: unknown[]) => c[0] === "user-q",
@@ -575,7 +578,7 @@ describe("AmqpConnection", () => {
       expect((bindCalls[1] as any)[2]).toBe("order.updated");
     });
 
-    it("registers @RabbitRPC handlers, asserts exchange, and replies", async () => {
+    it("registers @RabbitRPC handlers without asserting exchange, and replies", async () => {
       class CalcHandler {
         @RabbitRPC({ exchange: "rpc", routingKey: "calc.add", queue: "calc-q" })
         add(data: { a: number; b: number }) {
@@ -586,8 +589,11 @@ describe("AmqpConnection", () => {
       mockChannel.assertExchange.mockClear();
       await conn.registerHandlers(new CalcHandler());
 
-      // Exchange asserted before binding queue
-      expect(mockChannel.assertExchange).toHaveBeenCalledWith("rpc", "topic", undefined);
+      // Exchange is NOT asserted by RPC handler — only by connect() from forRoot config
+      const rpcExchangeCalls = mockChannel.assertExchange.mock.calls.filter(
+        (c: unknown[]) => c[0] === "rpc",
+      );
+      expect(rpcExchangeCalls).toHaveLength(0);
       // Consumer started
       expect(mockChannel.consume).toHaveBeenCalled();
 
@@ -630,7 +636,7 @@ describe("AmqpConnection", () => {
         }
       }
 
-      // Register handler (asserts exchange, queue, binds, starts consuming)
+      // Register handler (asserts queue, binds, starts consuming)
       await conn.registerHandlers(new OrderHandler());
 
       // Simulate what would happen when broker delivers a message
