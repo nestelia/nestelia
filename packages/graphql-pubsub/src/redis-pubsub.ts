@@ -62,6 +62,8 @@ export class RedisPubSub implements PubSubEngine {
   private readonly subscriptionMap: SubscriptionMap = new Map();
   /** `channel → [subId, …]` map for fan-out dispatch. */
   private readonly subsRefsMap: SubsRefsMap = new Map();
+  /** In-flight Redis (P)SUBSCRIBE promises keyed by trigger name. */
+  private readonly pendingSubscribes = new Map<string, Promise<void>>();
   /** Monotonically increasing counter used to generate subscription IDs. */
   private currentSubscriptionId = 0;
 
@@ -172,21 +174,27 @@ export class RedisPubSub implements PubSubEngine {
 
     const refs = this.subsRefsMap.get(triggerName);
 
-    // Re-use existing Redis subscription when channel already has listeners.
     if (refs && refs.length > 0) {
+      // Channel already has listeners — piggyback on the existing entry.
       this.subsRefsMap.set(triggerName, [...refs, id]);
+      // If the initial Redis SUBSCRIBE is still in-flight, wait for it so
+      // the caller doesn't start publishing before the channel is active.
+      const pending = this.pendingSubscribes.get(triggerName);
+      if (pending) await pending;
       return id;
     }
 
-    // Issue the Redis (P)SUBSCRIBE command asynchronously.
-    this.performSubscribe(triggerName, isPattern).catch((err: unknown) => {
-      packageLogger.error(
-        `[RedisPubSub] Failed to subscribe to "${triggerName}":`,
-        err,
-      );
-    });
-
+    // First subscriber — issue the Redis (P)SUBSCRIBE command.
     this.subsRefsMap.set(triggerName, [id]);
+    const subscribePromise = this.performSubscribe(triggerName, isPattern);
+    this.pendingSubscribes.set(triggerName, subscribePromise);
+
+    try {
+      await subscribePromise;
+    } finally {
+      this.pendingSubscribes.delete(triggerName);
+    }
+
     return id;
   }
 

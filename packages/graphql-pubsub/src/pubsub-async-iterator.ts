@@ -36,6 +36,8 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
   private pushQueue: T[] = [];
   /** `false` once {@link return} or {@link throw} has been called. */
   private listening = true;
+  /** Resolves once all triggers have been subscribed. */
+  private readonly subscribePromise: Promise<void>;
 
   constructor(
     pubsub: PubSubEngine,
@@ -46,14 +48,18 @@ export class PubSubAsyncIterator<T> implements AsyncIterator<T> {
     this.triggers = triggers;
     this.options = options;
 
-    // Subscribe immediately; errors are logged but do not throw synchronously.
-    this.subscribeAll().catch((err: unknown) => {
-      console.error("[PubSubAsyncIterator] Failed to subscribe:", err);
-    });
+    // Begin subscribing immediately. The promise is awaited in `next()` to
+    // guarantee the underlying pubsub is ready before the first value is
+    // consumed — preventing a race where published messages are lost because
+    // the subscription hasn't been established yet.
+    this.subscribePromise = this.subscribeAll();
   }
 
   /** Returns the next message, waiting if none is buffered yet. */
   public async next(): Promise<IteratorResult<T>> {
+    // Ensure the underlying subscriptions are active before consuming.
+    await this.subscribePromise;
+
     if (this.pushQueue.length > 0) {
       return { value: this.pushQueue.shift()!, done: false };
     }
