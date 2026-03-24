@@ -212,7 +212,9 @@ export class GraphQLWsHandler {
       }
 
       case "ping": {
-        this.safeSend(socket, JSON.stringify({ type: "pong" }));
+        const payload = (message as { payload?: unknown }).payload;
+        const pong = payload !== undefined ? { type: "pong", payload } : { type: "pong" };
+        this.safeSend(socket, JSON.stringify(pong));
         break;
       }
 
@@ -313,7 +315,10 @@ export class GraphQLWsHandler {
     });
 
     if (Symbol.asyncIterator in result || Symbol.iterator in result) {
-      await this.handleAsyncIterator(
+      // Run the subscription loop in the background so the message handler
+      // is not blocked and can process subsequent messages (ping, complete,
+      // new subscriptions) on the same connection.
+      void this.handleAsyncIterator(
         state,
         message.id,
         result as AsyncIterable<unknown>,

@@ -281,6 +281,9 @@ describe("subscribe", () => {
       payload: { query: "subscription { count }" },
     });
 
+    // handleAsyncIterator runs in the background — wait for it to drain.
+    await wait(20);
+
     expect(socket.messages("next").map((m) => (m.payload as { data: { count: number } }).data.count)).toEqual([1, 2]);
     expect(socket.messages("complete")).toHaveLength(1);
   });
@@ -299,6 +302,9 @@ describe("subscribe", () => {
       id: "e1",
       payload: { query: "subscription { count }" },
     });
+
+    // handleAsyncIterator runs in the background — wait for the error to propagate.
+    await wait(20);
 
     expect(socket.messages("error")).toHaveLength(1);
   });
