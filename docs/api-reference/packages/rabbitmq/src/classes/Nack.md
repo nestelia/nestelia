@@ -1,58 +1,39 @@
 # Class: Nack
 
-Defined in: [packages/rabbitmq/src/nack.ts:22](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/nack.ts#L22)
+Defined in: [packages/rabbitmq/src/amqp/handlerResponses.ts:1](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/handlerResponses.ts#L1)
 
-Nack (Negative Acknowledgment) class for RabbitMQ message handling
-Used in
+## Accessors
 
-## Rabbit Subscribe
+### requeue
 
-and
+#### Get Signature
 
-## Rabbit RPC
-
-handlers to reject messages
-
-## Example
-
-```typescript
-@RabbitSubscribe({
-  exchange: 'orders',
-  routingKey: 'order.created',
-  queue: 'orders-queue',
-})
-async handleOrder(message: OrderMessage) {
-  try {
-    await processOrder(message);
-  } catch (error) {
-    // Requeue the message for retry
-    throw new Nack(true);
-  }
-}
+```ts
+get requeue(): boolean;
 ```
+
+Defined in: [packages/rabbitmq/src/amqp/handlerResponses.ts:4](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/handlerResponses.ts#L4)
+
+##### Returns
+
+`boolean`
 
 ## Constructors
 
 ### Constructor
 
 ```ts
-new Nack(requeue?): Nack;
+new Nack(_requeue?): Nack;
 ```
 
-Defined in: [packages/rabbitmq/src/nack.ts:27](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/nack.ts#L27)
+Defined in: [packages/rabbitmq/src/amqp/handlerResponses.ts:2](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/handlerResponses.ts#L2)
 
 #### Parameters
 
-| Parameter | Type | Default value | Description |
-| ------ | ------ | ------ | ------ |
-| `requeue` | `boolean` | `false` | If true, the message will be requeued and redelivered. If false (default), the message will be discarded or sent to DLQ. |
+| Parameter | Type | Default value |
+| ------ | ------ | ------ |
+| `_requeue` | `boolean` | `false` |
 
 #### Returns
 
 `Nack`
-
-## Properties
-
-| Property | Modifier | Type | Default value | Description | Defined in |
-| ------ | ------ | ------ | ------ | ------ | ------ |
-| <a id="requeue"></a> `requeue` | `readonly` | `boolean` | `false` | If true, the message will be requeued and redelivered. If false (default), the message will be discarded or sent to DLQ. | [packages/rabbitmq/src/nack.ts:27](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/nack.ts#L27) |

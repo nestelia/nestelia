@@ -1,35 +1,17 @@
 # Function: RabbitRPC()
 
 ```ts
-function RabbitRPC(options): MethodDecorator;
+function RabbitRPC(config): MethodDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:76](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L76)
-
-Decorator for RabbitMQ RPC handlers
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:31](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L31)
 
 ## Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options` | [`RabbitRPCOptions`](../interfaces/RabbitRPCOptions.md) | RPC options |
+| Parameter | Type |
+| ------ | ------ |
+| `config` | `Omit`\<[`RabbitHandlerConfig`](../interfaces/RabbitHandlerConfig.md), `"type"`\> |
 
 ## Returns
 
 `MethodDecorator`
-
-## Example
-
-```typescript
-@Injectable()
-export class CalculatorService {
-  @RabbitRPC({
-    exchange: 'rpc',
-    routingKey: 'calculator.add',
-    queue: 'calculator-queue',
-  })
-  async add(data: { a: number; b: number }) {
-    return { result: data.a + data.b };
-  }
-}
-```

@@ -1,22 +1,17 @@
 # Function: RabbitHandler()
 
 ```ts
-function RabbitHandler(): ClassDecorator;
+function RabbitHandler(config): (target, key, _descriptor) => void;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:147](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L147)
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:13](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L13)
 
-Decorator to mark a class as a RabbitMQ handler
-Scans the class for
+## Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `config` | [`RabbitHandlerConfig`](../interfaces/RabbitHandlerConfig.md) |
 
 ## Returns
 
-`ClassDecorator`
-
-## Rabbit Subscribe
-
-and
-
-## Rabbit RPC
-
-decorators
+(`target`, `key`, `_descriptor`) => `void`

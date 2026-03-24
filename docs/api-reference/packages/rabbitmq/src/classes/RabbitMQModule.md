@@ -1,26 +1,6 @@
 # Class: RabbitMQModule
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:81](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L81)
-
-RabbitMQ module for
-
-## Nestelia
-
-Provides RabbitMQ integration with decorators for messaging
-
-## Example
-
-```typescript
-@Module({
-  imports: [
-    RabbitMQModule.forRoot({
-      urls: ['amqp://localhost:5672'],
-      queuePrefix: 'myapp',
-    }),
-  ],
-})
-export class AppModule {}
-```
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:113](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L113)
 
 ## Constructors
 
@@ -36,27 +16,63 @@ new RabbitMQModule(): RabbitMQModule;
 
 ## Methods
 
+### AmqpConnectionFactory()
+
+```ts
+static AmqpConnectionFactory(config): Promise<AmqpConnection | undefined>;
+```
+
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:117](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L117)
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `config` | [`RabbitMQConfig`](../interfaces/RabbitMQConfig.md) |
+
+#### Returns
+
+`Promise`\<[`AmqpConnection`](AmqpConnection.md) \| `undefined`\>
+
+***
+
+### attach()
+
+```ts
+static attach(connection): DynamicModule;
+```
+
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:229](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L229)
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `connection` | [`AmqpConnection`](AmqpConnection.md) |
+
+#### Returns
+
+[`DynamicModule`](../../../../index/interfaces/DynamicModule.md)
+
+***
+
 ### forFeature()
 
 ```ts
 static forFeature(handlers): DynamicModule;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:254](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L254)
-
-Register a RabbitMQ feature module with specific handlers
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:221](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L221)
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `handlers` | `unknown`[] | Array of handler classes with @RabbitSubscribe/@RabbitRPC decorators |
+| Parameter | Type |
+| ------ | ------ |
+| `handlers` | `unknown`[] |
 
 #### Returns
 
 [`DynamicModule`](../../../../index/interfaces/DynamicModule.md)
-
-Dynamic module
 
 ***
 
@@ -66,21 +82,17 @@ Dynamic module
 static forRoot(options): DynamicModule;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:192](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L192)
-
-Register RabbitMQ module with configuration
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:139](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L139)
 
 #### Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options` | [`RabbitMQModuleOptions`](../interfaces/RabbitMQModuleOptions.md) | RabbitMQ configuration options |
+| Parameter | Type |
+| ------ | ------ |
+| `options` | [`RabbitMQModuleOptions`](../interfaces/RabbitMQModuleOptions.md) |
 
 #### Returns
 
 [`DynamicModule`](../../../../index/interfaces/DynamicModule.md)
-
-Dynamic module
 
 ***
 
@@ -90,9 +102,7 @@ Dynamic module
 static forRootAsync(options): DynamicModule;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:220](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L220)
-
-Register RabbitMQ module with async configuration
+Defined in: [packages/rabbitmq/src/rabbitmq.module.ts:174](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.module.ts#L174)
 
 #### Parameters
 
@@ -106,15 +116,3 @@ Register RabbitMQ module with async configuration
 #### Returns
 
 [`DynamicModule`](../../../../index/interfaces/DynamicModule.md)
-
-#### Example
-
-```typescript
-RabbitMQModule.forRootAsync({
-  useFactory: async (configService: ConfigService) => ({
-    urls: [configService.get('RABBITMQ_URL')],
-    queuePrefix: configService.get('RABBITMQ_QUEUE_PREFIX'),
-  }),
-  inject: [ConfigService],
-})
-```

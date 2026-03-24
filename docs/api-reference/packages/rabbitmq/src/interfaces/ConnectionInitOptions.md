@@ -1,15 +1,13 @@
 # Interface: ConnectionInitOptions
 
-Defined in: [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:16](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L16)
-
-Connection initialization options
+Defined in: [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:109](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L109)
 
 ## Properties
 
-| Property | Type | Description | Defined in |
-| ------ | ------ | ------ | ------ |
-| <a id="heartbeatintervalinseconds"></a> `heartbeatIntervalInSeconds?` | `number` | Heartbeat interval in seconds | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:20](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L20) |
-| <a id="interval"></a> `interval?` | `number` | Interval to check connection status in milliseconds | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:24](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L24) |
-| <a id="maxwaittime"></a> `maxWaitTime?` | `number` | Maximum time to wait for connection in milliseconds | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:26](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L26) |
-| <a id="timeout"></a> `timeout?` | `number` | Timeout for connection initialization in milliseconds | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:18](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L18) |
-| <a id="wait"></a> `wait?` | `boolean` | Wait for connection to be established before resolving | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:22](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L22) |
+| Property | Type | Defined in |
+| ------ | ------ | ------ |
+| <a id="reject"></a> `reject?` | `boolean` | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:112](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L112) |
+| <a id="skipconnectionfailedlogging"></a> `skipConnectionFailedLogging?` | `boolean` | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:113](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L113) |
+| <a id="skipdisconnectfailedlogging"></a> `skipDisconnectFailedLogging?` | `boolean` | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:114](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L114) |
+| <a id="timeout"></a> `timeout?` | `number` | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:111](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L111) |
+| <a id="wait"></a> `wait?` | `boolean` | [packages/rabbitmq/src/interfaces/rabbitmq.interface.ts:110](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/interfaces/rabbitmq.interface.ts#L110) |

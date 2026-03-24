@@ -1,27 +1,31 @@
 # Function: RabbitPayload()
 
+## Call Signature
+
 ```ts
 function RabbitPayload(): ParameterDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:325](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L325)
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:52](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L52)
 
-Parameter decorator to extract the message payload
-In @nestelia/rabbitmq this extracts the actual message content
-
-## Returns
+### Returns
 
 `ParameterDecorator`
 
-## Example
+## Call Signature
 
-```typescript
-@RabbitSubscribe({
-  exchange: 'orders',
-  routingKey: 'order.created',
-  queue: 'orders-queue',
-})
-async handleOrder(@RabbitPayload() data: OrderData) {
-  console.log('Order:', data);
-}
+```ts
+function RabbitPayload(propertyKey): ParameterDecorator;
 ```
+
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:53](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L53)
+
+### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `propertyKey` | `string` |
+
+### Returns
+
+`ParameterDecorator`

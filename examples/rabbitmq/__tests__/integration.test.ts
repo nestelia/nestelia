@@ -2,9 +2,9 @@ import "reflect-metadata";
 
 import { afterAll, beforeAll, describe, expect, it, jest, mock } from "bun:test";
 
-// ── amqplib mock ────────────────────────────────────────────────────────
-// Mock amqplib before any imports that use it, so RabbitMQModule.forRoot
-// can call AmqpConnection.connect() without a running broker.
+// ── amqp-connection-manager mock ─────────────────────────────────────
+// Mock amqp-connection-manager before any imports, so RabbitMQModule.forRoot
+// can call AmqpConnection.init() without a running broker.
 
 function createMockChannel() {
   const consumers = new Map<string, (msg: unknown) => void>();
@@ -12,12 +12,15 @@ function createMockChannel() {
 
   return {
     assertExchange: jest.fn(async () => ({ exchange: "" })),
+    checkExchange: jest.fn(async () => ({})),
     assertQueue: jest.fn(async (q: string) => ({
       queue: q || `amq.gen-${++tagCounter}`,
       messageCount: 0,
       consumerCount: 0,
     })),
+    checkQueue: jest.fn(async (q: string) => ({ queue: q, messageCount: 0, consumerCount: 0 })),
     bindQueue: jest.fn(async () => ({})),
+    bindExchange: jest.fn(async () => ({})),
     deleteQueue: jest.fn(async () => ({ messageCount: 0 })),
     publish: jest.fn(() => true),
     sendToQueue: jest.fn(() => true),
@@ -27,6 +30,7 @@ function createMockChannel() {
       return { consumerTag: tag };
     }),
     cancel: jest.fn(async () => ({})),
+    cancelAll: jest.fn(async () => {}),
     ack: jest.fn(),
     nack: jest.fn(),
     reject: jest.fn(),
@@ -48,13 +52,44 @@ function createMockChannel() {
 
 let channel: ReturnType<typeof createMockChannel>;
 
-mock.module("amqplib", () => ({
-  connect: jest.fn(async () => {
-    channel = createMockChannel();
+// The ChannelWrapper mock — wraps the channel and runs addSetup callbacks immediately
+function createMockChannelWrapper() {
+  const setupFns: ((ch: unknown) => Promise<void>)[] = [];
+  channel = createMockChannel();
+
+  return {
+    name: "AmqpConnection",
+    publish: jest.fn(async (exchange: string, routingKey: string, content: Buffer, options?: unknown) => {
+      channel.publish(exchange, routingKey, content, options);
+      return true;
+    }),
+    addSetup: jest.fn(async (fn: (ch: unknown) => Promise<void>) => {
+      setupFns.push(fn);
+      await fn(channel);
+    }),
+    cancelAll: jest.fn(async () => {}),
+    close: jest.fn(async () => {}),
+    on: jest.fn(),
+    _channel: channel,
+  };
+}
+
+let channelWrapper: ReturnType<typeof createMockChannelWrapper>;
+
+mock.module("amqp-connection-manager", () => ({
+  connect: jest.fn(() => {
+    channelWrapper = createMockChannelWrapper();
+
     return {
-      createChannel: jest.fn(async () => channel),
+      createChannel: jest.fn(() => channelWrapper),
+      isConnected: jest.fn(() => true),
       close: jest.fn(async () => {}),
-      on: jest.fn(),
+      on: jest.fn((event: string, cb: Function) => {
+        // Simulate immediate connection
+        if (event === "connect") {
+          cb({ connection: {} });
+        }
+      }),
     };
   }),
 }));
@@ -63,8 +98,7 @@ mock.module("amqplib", () => ({
 
 import { Container } from "nestelia";
 import { initializeSingletonProviders } from "../../../packages/core/src/core/module.utils";
-import { AmqpConnection } from "../../../packages/rabbitmq/src/connection/amqp-connection";
-import { RabbitMQModule } from "../../../packages/rabbitmq/src";
+import { AmqpConnection, RabbitMQModule } from "../../../packages/rabbitmq/src";
 import { OrdersHandler } from "../src/orders.handler";
 import { OrdersService } from "../src/orders.service";
 import { AppModule } from "../src/app.module";
@@ -76,16 +110,14 @@ let ordersService: OrdersService;
 let ordersHandler: OrdersHandler;
 
 beforeAll(async () => {
-  // Reset singleton so module creates a fresh connection
-  (RabbitMQModule as any).connectionInstance = null;
-  (RabbitMQModule as any).connectionPromise = null;
+  // Reset statics
+  (RabbitMQModule as any).connectionManager = new (await import("../../../packages/rabbitmq/src")).AmqpConnectionManager();
+  (RabbitMQModule as any).bootstrapped = false;
 
   Container.instance.beginInitSession();
 
-  // Register RabbitMQModule
   const dynamicModule = RabbitMQModule.forRoot({
-    urls: ["amqp://localhost:5672"],
-    reconnect: false,
+    uri: "amqp://localhost:5672",
     exchanges: [{ name: "orders", type: "topic", options: { durable: true } }],
   });
   const rabbitModuleRef = Container.instance.addModule(RabbitMQModule, "RabbitMQModule");
@@ -96,14 +128,11 @@ beforeAll(async () => {
     rabbitModuleRef.addExport(exp as any);
   }
 
-  // Register AppModule with handlers
   const appModuleRef = Container.instance.addModule(AppModule, "AppModule");
   appModuleRef.addImport(rabbitModuleRef);
   appModuleRef.addProvider(OrdersHandler);
   appModuleRef.addProvider(OrdersService);
 
-  // Init all singletons — this triggers RabbitMQExplorer.onModuleInit(),
-  // which auto-discovers @RabbitSubscribe handlers and registers consumers
   await initializeSingletonProviders();
 
   connection = (await Container.instance.get(AmqpConnection))!;
@@ -112,7 +141,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  await connection?.disconnect();
+  await connection?.close();
 });
 
 // ── Tests ───────────────────────────────────────────────────────────────
@@ -121,7 +150,7 @@ describe("RabbitMQ Integration", () => {
   describe("connection", () => {
     it("AmqpConnection is connected", () => {
       expect(connection).toBeDefined();
-      expect(connection.isConnectionReady()).toBe(true);
+      expect(connection.connected).toBe(true);
     });
 
     it("OrdersService has AmqpConnection injected", () => {
@@ -167,12 +196,12 @@ describe("RabbitMQ Integration", () => {
     it("OrdersService publishes to orders exchange", async () => {
       await ordersService.createOrder(100, "user-1");
 
-      const publishCalls = channel.publish.mock.calls as any[];
+      const publishCalls = channelWrapper.publish.mock.calls as any[];
       expect(publishCalls.length).toBeGreaterThanOrEqual(1);
 
       const lastCall = publishCalls[publishCalls.length - 1];
-      expect(lastCall[0]).toBe("orders"); // exchange
-      expect(lastCall[1]).toBe("order.created"); // routing key
+      expect(lastCall[0]).toBe("orders");
+      expect(lastCall[1]).toBe("order.created");
 
       const payload = JSON.parse((lastCall[2] as Buffer).toString());
       expect(payload.amount).toBe(100);
@@ -183,7 +212,6 @@ describe("RabbitMQ Integration", () => {
     it("handler receives message when broker delivers to queue", async () => {
       const before = ordersHandler.processed.length;
 
-      // Simulate broker delivering a message to the subscribed queue
       channel._deliver("orders-created-queue", {
         orderId: "integration-001",
         amount: 42,
@@ -225,62 +253,6 @@ describe("RabbitMQ Integration", () => {
       await new Promise((r) => setTimeout(r, 20));
 
       expect(ordersHandler.processed.length).toBe(before + 3);
-    });
-  });
-
-  describe("module-level exchange configuration", () => {
-    it("exchanges are asserted once at init, not per handler", () => {
-      // The 'orders' exchange was configured in forRoot({ exchanges: [...] })
-      // and asserted during connect(), not during handler registration
-      const ordersCalls = (channel.assertExchange.mock.calls as any[]).filter(
-        (c) => c[0] === "orders",
-      );
-      expect(ordersCalls).toHaveLength(1);
-      expect(ordersCalls[0][1]).toBe("topic");
-    });
-
-    it("handlers do not call assertExchange", async () => {
-      channel.assertExchange.mockClear();
-
-      await (connection as any).setupSubscribeHandler(
-        { handleTest: jest.fn() },
-        "TestHandler",
-        "handleTest",
-        {
-          exchange: "orders",
-          routingKey: "order.test",
-          queue: "test-handler-queue",
-        },
-      );
-
-      // Handler setup should NOT assert exchange — only queue + bind
-      expect(channel.assertExchange).not.toHaveBeenCalled();
-    });
-
-    it("handler still asserts queue and binds to exchange", async () => {
-      channel.assertQueue.mockClear();
-      channel.bindQueue.mockClear();
-
-      await (connection as any).setupSubscribeHandler(
-        { handleBind: jest.fn() },
-        "TestHandler",
-        "handleBind",
-        {
-          exchange: "orders",
-          routingKey: "order.bind-test",
-          queue: "bind-test-queue",
-        },
-      );
-
-      const queueCalls = (channel.assertQueue.mock.calls as any[]).filter(
-        (c) => c[0] === "bind-test-queue",
-      );
-      expect(queueCalls).toHaveLength(1);
-
-      const bindCalls = (channel.bindQueue.mock.calls as any[]).filter(
-        (c) => c[0] === "bind-test-queue" && c[1] === "orders" && c[2] === "order.bind-test",
-      );
-      expect(bindCalls).toHaveLength(1);
     });
   });
 });

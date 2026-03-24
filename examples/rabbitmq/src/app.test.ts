@@ -3,12 +3,12 @@ import "reflect-metadata";
 import { beforeEach, describe, expect, it, mock } from "bun:test";
 
 import { Test } from "../../../packages/testing/src";
-import { RabbitMQService } from "../../../packages/rabbitmq/src";
+import { AmqpConnection } from "../../../packages/rabbitmq/src";
 import { OrdersHandler } from "./orders.handler";
 import { OrdersService } from "./orders.service";
 import type { OrderCreatedEvent } from "./orders.handler";
 
-// ── Mock RabbitMQService ──────────────────────────────────────
+// ── Mock AmqpConnection ──────────────────────────────────────
 
 const mockRabbit = {
   publish: mock(async () => true),
@@ -55,7 +55,7 @@ describe("OrdersService", () => {
     const module = await Test.createTestingModule({
       providers: [
         OrdersService,
-        { provide: RabbitMQService, useValue: mockRabbit },
+        { provide: AmqpConnection, useValue: mockRabbit },
       ],
     }).compile();
 

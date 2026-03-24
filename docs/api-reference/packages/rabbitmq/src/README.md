@@ -4,67 +4,97 @@
 
 | Class | Description |
 | ------ | ------ |
-| [AmqpConnection](classes/AmqpConnection.md) | RabbitMQ connection class for publishing and consuming messages This is the main class for RabbitMQ operations |
-| [Nack](classes/Nack.md) | Nack (Negative Acknowledgment) class for RabbitMQ message handling Used in |
-| [RabbitMQModule](classes/RabbitMQModule.md) | RabbitMQ module for |
+| [AmqpConnection](classes/AmqpConnection.md) | - |
+| [AmqpConnectionManager](classes/AmqpConnectionManager.md) | - |
+| [ChannelNotAvailableError](classes/ChannelNotAvailableError.md) | - |
+| [ConnectionNotAvailableError](classes/ConnectionNotAvailableError.md) | - |
+| [Nack](classes/Nack.md) | - |
+| [NullMessageError](classes/NullMessageError.md) | - |
+| [RabbitMQModule](classes/RabbitMQModule.md) | - |
+| [RpcTimeoutError](classes/RpcTimeoutError.md) | - |
 
 ## Functions
 
 | Function | Description |
 | ------ | ------ |
-| [InjectRabbitMQ](functions/InjectRabbitMQ.md) | Inject RabbitMQ connection |
-| [InjectRabbitMQChannel](functions/InjectRabbitMQChannel.md) | Inject RabbitMQ channel |
-| [InjectRabbitMQConnection](functions/InjectRabbitMQConnection.md) | Inject RabbitMQ connection name Useful when multiple connections are configured |
-| [isRabbitContext](functions/isRabbitContext.md) | Check if the current execution context is a RabbitMQ context Useful for guards and interceptors that need to handle RabbitMQ differently |
-| [RabbitBatch](functions/RabbitBatch.md) | Decorator to mark a method for batch processing |
-| [RabbitConnection](functions/RabbitConnection.md) | Decorator for connection-aware handlers Useful when using multiple RabbitMQ connections |
-| [RabbitDLQ](functions/RabbitDLQ.md) | Decorator to configure dead letter queue behavior |
-| [RabbitErrorHandler](functions/RabbitErrorHandler.md) | Decorator for consumer error handlers |
-| [RabbitHandler](functions/RabbitHandler.md) | Decorator to mark a class as a RabbitMQ handler Scans the class for |
-| [RabbitInterceptor](functions/RabbitInterceptor.md) | Decorator for message interceptors/transformers |
-| [RabbitPayload](functions/RabbitPayload.md) | Parameter decorator to extract the message payload In @nestelia/rabbitmq this extracts the actual message content |
-| [RabbitPriority](functions/RabbitPriority.md) | Decorator to configure message priority |
-| [RabbitQueueArguments](functions/RabbitQueueArguments.md) | Decorator to configure queue arguments |
-| [RabbitRetry](functions/RabbitRetry.md) | Decorator to configure retry behavior for a specific handler |
-| [RabbitRPC](functions/RabbitRPC.md) | Decorator for RabbitMQ RPC handlers |
-| [RabbitSubscribe](functions/RabbitSubscribe.md) | Decorator to subscribe to RabbitMQ messages |
-| [RabbitTTL](functions/RabbitTTL.md) | Decorator to set message TTL |
+| [getHandlerForLegacyBehavior](functions/getHandlerForLegacyBehavior.md) | - |
+| [InjectRabbitMQ](functions/InjectRabbitMQ.md) | - |
+| [InjectRabbitMQChannel](functions/InjectRabbitMQChannel.md) | - |
+| [InjectRabbitMQConnection](functions/InjectRabbitMQConnection.md) | - |
+| [isRabbitContext](functions/isRabbitContext.md) | - |
+| [matchesRoutingKey](functions/matchesRoutingKey.md) | - |
+| [RabbitHandler](functions/RabbitHandler.md) | - |
+| [RabbitHeader](functions/RabbitHeader.md) | - |
+| [RabbitPayload](functions/RabbitPayload.md) | - |
+| [RabbitRequest](functions/RabbitRequest.md) | - |
+| [RabbitRPC](functions/RabbitRPC.md) | - |
+| [RabbitSubscribe](functions/RabbitSubscribe.md) | - |
+| [resolveHandlerConfigs](functions/resolveHandlerConfigs.md) | Resolves the list of per-registration handler configs for a given handler. |
 
 ## Interfaces
 
 | Interface | Description |
 | ------ | ------ |
-| [ConnectionInitOptions](interfaces/ConnectionInitOptions.md) | Connection initialization options |
-| [RabbitMQChannelConfig](interfaces/RabbitMQChannelConfig.md) | Channel configuration |
-| [RabbitMQConfig](interfaces/RabbitMQConfig.md) | RabbitMQ connection configuration |
-| [RabbitMQConnectionConfig](interfaces/RabbitMQConnectionConfig.md) | RabbitMQ connection configuration (single URL) |
-| [RabbitMQExchangeConfig](interfaces/RabbitMQExchangeConfig.md) | Exchange configuration |
-| [RabbitMQMessage](interfaces/RabbitMQMessage.md) | Message wrapper interface |
-| [RabbitMQModuleOptions](interfaces/RabbitMQModuleOptions.md) | RabbitMQ connection configuration |
-| [RabbitMQPublishOptions](interfaces/RabbitMQPublishOptions.md) | Publisher options |
-| [RabbitMQQueueBinding](interfaces/RabbitMQQueueBinding.md) | Queue binding configuration |
-| [RabbitMQQueueConfig](interfaces/RabbitMQQueueConfig.md) | Queue configuration |
-| [RabbitRPCOptions](interfaces/RabbitRPCOptions.md) | RPC handler options for |
-| [RabbitSubscribeOptions](interfaces/RabbitSubscribeOptions.md) | Message handler options for |
-| [RequestOptions](interfaces/RequestOptions.md) | RPC Request options for AmqpConnection.request() |
+| [BatchOptions](interfaces/BatchOptions.md) | - |
+| [ConnectionInitOptions](interfaces/ConnectionInitOptions.md) | - |
+| [CorrelationMessage](interfaces/CorrelationMessage.md) | - |
+| [MessageHandlerOptions](interfaces/MessageHandlerOptions.md) | - |
+| [MessageOptions](interfaces/MessageOptions.md) | - |
+| [QueueOptions](interfaces/QueueOptions.md) | - |
+| [RabbitHandlerConfig](interfaces/RabbitHandlerConfig.md) | - |
+| [RabbitMQChannelConfig](interfaces/RabbitMQChannelConfig.md) | - |
+| [RabbitMQConfig](interfaces/RabbitMQConfig.md) | - |
+| [RabbitMQExchangeBindingConfig](interfaces/RabbitMQExchangeBindingConfig.md) | - |
+| [RabbitMQExchangeConfig](interfaces/RabbitMQExchangeConfig.md) | - |
+| [RabbitMQModuleOptions](interfaces/RabbitMQModuleOptions.md) | - |
+| [RabbitMQQueueConfig](interfaces/RabbitMQQueueConfig.md) | - |
+| [RabbitSubscribeBinding](interfaces/RabbitSubscribeBinding.md) | - |
+| [RequestOptions](interfaces/RequestOptions.md) | - |
+| [SubscriptionResult](interfaces/SubscriptionResult.md) | - |
 
 ## Type Aliases
 
 | Type Alias | Description |
 | ------ | ------ |
-| [MessageHandlerErrorBehavior](type-aliases/MessageHandlerErrorBehavior.md) | Error behavior for message handlers |
-| [RabbitMQDeserializer](type-aliases/RabbitMQDeserializer.md) | Deserializer function type for custom message deserialization |
-| [RabbitMQExchangeType](type-aliases/RabbitMQExchangeType.md) | RabbitMQ exchange types |
-| [RabbitMQSerializer](type-aliases/RabbitMQSerializer.md) | Serializer function type for custom message serialization |
+| [AssertQueueErrorHandler](type-aliases/AssertQueueErrorHandler.md) | - |
+| [BaseConsumerHandler](type-aliases/BaseConsumerHandler.md) | - |
+| [BatchMessageErrorHandler](type-aliases/BatchMessageErrorHandler.md) | - |
+| [BatchSubscriberHandler](type-aliases/BatchSubscriberHandler.md) | - |
+| [ConsumeOptions](type-aliases/ConsumeOptions.md) | - |
+| [ConsumerHandler](type-aliases/ConsumerHandler.md) | - |
+| [ConsumerTag](type-aliases/ConsumerTag.md) | - |
+| [LegacyMessageErrorHandler](type-aliases/LegacyMessageErrorHandler.md) | - |
+| [MessageDeserializer](type-aliases/MessageDeserializer.md) | - |
+| [MessageErrorHandler](type-aliases/MessageErrorHandler.md) | - |
+| [MessageSerializer](type-aliases/MessageSerializer.md) | - |
+| [RabbitHandlerType](type-aliases/RabbitHandlerType.md) | - |
+| [RabbitMQChannels](type-aliases/RabbitMQChannels.md) | - |
+| [RabbitMQHandlers](type-aliases/RabbitMQHandlers.md) | - |
+| [RabbitMQUriConfig](type-aliases/RabbitMQUriConfig.md) | - |
+| [RpcResponse](type-aliases/RpcResponse.md) | - |
+| [RpcSubscriberHandler](type-aliases/RpcSubscriberHandler.md) | - |
+| [SubscribeResponse](type-aliases/SubscribeResponse.md) | - |
+| [SubscriberHandler](type-aliases/SubscriberHandler.md) | - |
+
+## Enumerations
+
+| Enumeration | Description |
+| ------ | ------ |
+| [MessageHandlerErrorBehavior](enumerations/MessageHandlerErrorBehavior.md) | - |
 
 ## Variables
 
 | Variable | Description |
 | ------ | ------ |
-| [RABBIT\_CONTEXT\_TYPE\_KEY](variables/RABBIT_CONTEXT_TYPE_KEY.md) | Context type key for RabbitMQ execution contexts Used for interceptors, guards, and filters |
+| [ackErrorHandler](variables/ackErrorHandler.md) | - |
+| [defaultAssertQueueErrorHandler](variables/defaultAssertQueueErrorHandler.md) | - |
+| [defaultNackErrorHandler](variables/defaultNackErrorHandler.md) | - |
+| [forceDeleteAssertQueueErrorHandler](variables/forceDeleteAssertQueueErrorHandler.md) | - |
+| [PRECONDITION\_FAILED\_CODE](variables/PRECONDITION_FAILED_CODE.md) | - |
+| [RABBIT\_CONFIG\_TOKEN](variables/RABBIT_CONFIG_TOKEN.md) | - |
+| [RABBIT\_CONTEXT\_TYPE\_KEY](variables/RABBIT_CONTEXT_TYPE_KEY.md) | - |
+| [RABBIT\_HANDLER](variables/RABBIT_HANDLER.md) | - |
+| [RABBIT\_HEADER\_METADATA](variables/RABBIT_HEADER_METADATA.md) | - |
 | [RABBIT\_PAYLOAD\_METADATA](variables/RABBIT_PAYLOAD_METADATA.md) | - |
-| [RABBIT\_RPC\_METADATA](variables/RABBIT_RPC_METADATA.md) | - |
-| [RABBIT\_SUBSCRIBE\_METADATA](variables/RABBIT_SUBSCRIBE_METADATA.md) | - |
-| [RABBITMQ\_CONFIG](variables/RABBITMQ_CONFIG.md) | - |
-| [RABBITMQ\_CONNECTION](variables/RABBITMQ_CONNECTION.md) | - |
-| [~~RabbitMQService~~](variables/RabbitMQService.md) | Alias for AmqpConnection for backward compatibility |
+| [RABBIT\_REQUEST\_METADATA](variables/RABBIT_REQUEST_METADATA.md) | - |
+| [requeueErrorHandler](variables/requeueErrorHandler.md) | - |

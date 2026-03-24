@@ -1,6 +1,10 @@
+export * from "./amqp/connection";
+export * from "./amqp/connectionManager";
+export * from "./amqp/errorBehaviors";
+export * from "./amqp/errors";
+export * from "./amqp/handlerResponses";
+export { matchesRoutingKey } from "./amqp/utils";
 export * from "./decorators";
 export * from "./interfaces";
-export * from "./nack";
-export * from "./rabbitmq.constants";
+export { RABBIT_HANDLER, RABBIT_CONFIG_TOKEN, RABBIT_CONTEXT_TYPE_KEY, isRabbitContext } from "./rabbitmq.constants";
 export * from "./rabbitmq.module";
-export * from "./rabbitmq.service";

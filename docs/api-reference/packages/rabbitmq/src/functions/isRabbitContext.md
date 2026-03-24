@@ -4,35 +4,14 @@
 function isRabbitContext(contextType): boolean;
 ```
 
-Defined in: [packages/rabbitmq/src/rabbitmq.constants.ts:29](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.constants.ts#L29)
-
-Check if the current execution context is a RabbitMQ context
-Useful for guards and interceptors that need to handle RabbitMQ differently
+Defined in: [packages/rabbitmq/src/rabbitmq.constants.ts:9](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/rabbitmq.constants.ts#L9)
 
 ## Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `contextType` | `string` | The context type from ExecutionContext |
+| Parameter | Type |
+| ------ | ------ |
+| `contextType` | `string` |
 
 ## Returns
 
 `boolean`
-
-true if the context is RabbitMQ
-
-## Example
-
-```typescript
-@Injectable()
-class MyGuard implements CanActivate {
-  canActivate(context: ExecutionContext): boolean {
-    if (isRabbitContext(context.getType())) {
-      // Handle RabbitMQ context
-      return true;
-    }
-    // Handle HTTP/WS context
-    return true;
-  }
-}
-```

@@ -1,7 +1,0 @@
-# Variable: RABBITMQ\_CONNECTION
-
-```ts
-const RABBITMQ_CONNECTION: "RABBITMQ_CONNECTION" = "RABBITMQ_CONNECTION";
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:19](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L19)

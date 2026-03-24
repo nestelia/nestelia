@@ -1,26 +1,166 @@
 # Class: AmqpConnection
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:44](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L44)
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:124](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L124)
 
-RabbitMQ connection class for publishing and consuming messages
-This is the main class for RabbitMQ operations
+## Accessors
+
+### channel
+
+#### Get Signature
+
+```ts
+get channel(): ConfirmChannel;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:165](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L165)
+
+##### Returns
+
+`ConfirmChannel`
+
+***
+
+### channels
+
+#### Get Signature
+
+```ts
+get channels(): Record<string, ConfirmChannel>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:187](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L187)
+
+##### Returns
+
+`Record`\<`string`, `ConfirmChannel`\>
+
+***
+
+### configuration
+
+#### Get Signature
+
+```ts
+get configuration(): Required<RabbitMQConfig>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:183](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L183)
+
+##### Returns
+
+`Required`\<[`RabbitMQConfig`](../interfaces/RabbitMQConfig.md)\>
+
+***
+
+### connected
+
+#### Get Signature
+
+```ts
+get connected(): boolean;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:195](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L195)
+
+##### Returns
+
+`boolean`
+
+***
+
+### connection
+
+#### Get Signature
+
+```ts
+get connection(): Connection;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:170](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L170)
+
+##### Returns
+
+`Connection`
+
+***
+
+### consumerTags
+
+#### Get Signature
+
+```ts
+get consumerTags(): string[];
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:1172](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L1172)
+
+##### Returns
+
+`string`[]
+
+***
+
+### managedChannel
+
+#### Get Signature
+
+```ts
+get managedChannel(): ChannelWrapper;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:175](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L175)
+
+##### Returns
+
+`ChannelWrapper`
+
+***
+
+### managedChannels
+
+#### Get Signature
+
+```ts
+get managedChannels(): Record<string, ChannelWrapper>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:191](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L191)
+
+##### Returns
+
+`Record`\<`string`, `ChannelWrapper`\>
+
+***
+
+### managedConnection
+
+#### Get Signature
+
+```ts
+get managedConnection(): IAmqpConnectionManager;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:179](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L179)
+
+##### Returns
+
+`IAmqpConnectionManager`
 
 ## Constructors
 
 ### Constructor
 
 ```ts
-new AmqpConnection(config, logger): AmqpConnection;
+new AmqpConnection(config): AmqpConnection;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:68](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L68)
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:153](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L153)
 
 #### Parameters
 
 | Parameter | Type |
 | ------ | ------ |
 | `config` | [`RabbitMQConfig`](../interfaces/RabbitMQConfig.md) |
-| `logger` | [`Logger`](../../../../index/classes/Logger.md) |
 
 #### Returns
 
@@ -28,359 +168,13 @@ Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:68](https://git
 
 ## Methods
 
-### assertExchange()
+### cancelConsumer()
 
 ```ts
-assertExchange(config): Promise<void>;
+cancelConsumer(consumerTag): Promise<void>;
 ```
 
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:374](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L374)
-
-Assert an exchange.
-Uses the dedicated assertion channel so broker errors never kill consumers.
-When createIfNotExists is false, uses checkExchange (passive declare).
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `config` | [`RabbitMQExchangeConfig`](../interfaces/RabbitMQExchangeConfig.md) |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
-### assertQueue()
-
-```ts
-assertQueue(config): Promise<void>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:400](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L400)
-
-Assert a queue.
-Uses the dedicated assertion channel so broker errors never kill consumers.
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `config` | [`RabbitMQQueueConfig`](../interfaces/RabbitMQQueueConfig.md) |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
-### connect()
-
-```ts
-connect(): Promise<void>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:108](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L108)
-
-Connect to RabbitMQ
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
-### disconnect()
-
-```ts
-disconnect(): Promise<void>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:276](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L276)
-
-Disconnect from RabbitMQ
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
-### getChannel()
-
-```ts
-getChannel(): Channel | null;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:611](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L611)
-
-Get the consumer channel (for consuming messages)
-
-#### Returns
-
-`Channel` \| `null`
-
-***
-
-### getConnection()
-
-```ts
-getConnection(): ChannelModel | null;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:625](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L625)
-
-Get the underlying connection (for advanced usage)
-
-#### Returns
-
-`ChannelModel` \| `null`
-
-***
-
-### getLogger()
-
-```ts
-getLogger(): Logger;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:604](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L604)
-
-Get the logger instance
-
-#### Returns
-
-[`Logger`](../../../../index/classes/Logger.md)
-
-***
-
-### getPublisherChannel()
-
-```ts
-getPublisherChannel(): Channel | null;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:618](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L618)
-
-Get the publisher channel (for publishing messages)
-
-#### Returns
-
-`Channel` \| `null`
-
-***
-
-### isConnectionReady()
-
-```ts
-isConnectionReady(): boolean;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:336](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L336)
-
-Check if connected to RabbitMQ
-
-#### Returns
-
-`boolean`
-
-***
-
-### publish()
-
-```ts
-publish<T>(
-   exchange, 
-   routingKey, 
-   message, 
-options?): Promise<boolean>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:438](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L438)
-
-Publish a message to an exchange
-
-#### Type Parameters
-
-| Type Parameter | Default type |
-| ------ | ------ |
-| `T` | `unknown` |
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `exchange` | `string` |
-| `routingKey` | `string` |
-| `message` | `T` |
-| `options?` | [`RabbitMQPublishOptions`](../interfaces/RabbitMQPublishOptions.md) |
-
-#### Returns
-
-`Promise`\<`boolean`\>
-
-***
-
-### registerHandlers()
-
-```ts
-registerHandlers(instance): Promise<void>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:785](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L785)
-
-Register RabbitMQ handlers from a service instance
-Scans the instance's class for
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `instance` | `object` | The handler instance with @RabbitSubscribe/@RabbitRPC methods |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-#### Rabbit Subscribe
-
-and
-
-#### Rabbit RPC
-
-decorators
-and sets up consumers that invoke the actual methods
-
-#### Example
-
-```typescript
-await amqpConnection.registerHandlers(ordersHandlerInstance);
-```
-
-***
-
-### request()
-
-```ts
-request<T, R>(options): Promise<R>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:647](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L647)
-
-Make an RPC request and wait for a response
-This method creates a temporary reply queue, sends the request, and waits for a response
-
-#### Type Parameters
-
-| Type Parameter | Default type |
-| ------ | ------ |
-| `T` | `unknown` |
-| `R` | `unknown` |
-
-#### Parameters
-
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options` | [`RequestOptions`](../interfaces/RequestOptions.md)\<`T`\> | Request options including exchange, routingKey, and payload |
-
-#### Returns
-
-`Promise`\<`R`\>
-
-Promise that resolves with the response
-
-#### Example
-
-```typescript
-const response = await amqpConnection.request({
-  exchange: 'rpc',
-  routingKey: 'calculator.add',
-  payload: { a: 1, b: 2 },
-  timeout: 10000,
-});
-console.log(response); // { result: 3 }
-```
-
-***
-
-### sendToQueue()
-
-```ts
-sendToQueue<T>(
-   queue, 
-   message, 
-options?): Promise<boolean>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:472](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L472)
-
-Send a message directly to a queue
-
-#### Type Parameters
-
-| Type Parameter | Default type |
-| ------ | ------ |
-| `T` | `unknown` |
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `queue` | `string` |
-| `message` | `T` |
-| `options?` | [`RabbitMQPublishOptions`](../interfaces/RabbitMQPublishOptions.md) |
-
-#### Returns
-
-`Promise`\<`boolean`\>
-
-***
-
-### subscribe()
-
-```ts
-subscribe<T>(
-   queue, 
-   handler, 
-options?): Promise<string>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:503](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L503)
-
-Subscribe to messages from a queue
-
-#### Type Parameters
-
-| Type Parameter | Default type |
-| ------ | ------ |
-| `T` | `unknown` |
-
-#### Parameters
-
-| Parameter | Type |
-| ------ | ------ |
-| `queue` | `string` |
-| `handler` | (`message`) => `void` \| `Promise`\<`void`\> |
-| `options?` | \{ `consumerTag?`: `string`; `noAck?`: `boolean`; \} |
-| `options.consumerTag?` | `string` |
-| `options.noAck?` | `boolean` |
-
-#### Returns
-
-`Promise`\<`string`\>
-
-***
-
-### unsubscribe()
-
-```ts
-unsubscribe(consumerTag): Promise<void>;
-```
-
-Defined in: [packages/rabbitmq/src/connection/amqp-connection.ts:542](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/connection/amqp-connection.ts#L542)
-
-Cancel a consumer subscription
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:1176](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L1176)
 
 #### Parameters
 
@@ -391,3 +185,235 @@ Cancel a consumer subscription
 #### Returns
 
 `Promise`\<`void`\>
+
+***
+
+### close()
+
+```ts
+close(): Promise<void>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:1221](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L1221)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### createBatchSubscriber()
+
+```ts
+createBatchSubscriber<T>(
+   handler, 
+   msgOptions, 
+consumeOptions?): Promise<SubscriptionResult>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:488](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L488)
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `T` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `handler` | [`BatchSubscriberHandler`](../type-aliases/BatchSubscriberHandler.md)\<`T`\> |
+| `msgOptions` | [`MessageHandlerOptions`](../interfaces/MessageHandlerOptions.md) |
+| `consumeOptions?` | `Consume` |
+
+#### Returns
+
+`Promise`\<[`SubscriptionResult`](../interfaces/SubscriptionResult.md)\>
+
+***
+
+### createRpc()
+
+```ts
+createRpc<T, U>(handler, rpcOptions): Promise<SubscriptionResult>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:799](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L799)
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `T` |
+| `U` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `handler` | [`RpcSubscriberHandler`](../type-aliases/RpcSubscriberHandler.md)\<`T`, `U`\> |
+| `rpcOptions` | [`MessageHandlerOptions`](../interfaces/MessageHandlerOptions.md) |
+
+#### Returns
+
+`Promise`\<[`SubscriptionResult`](../interfaces/SubscriptionResult.md)\>
+
+***
+
+### createSubscriber()
+
+```ts
+createSubscriber<T>(
+   handler, 
+   msgOptions, 
+   originalHandlerName, 
+consumeOptions?): Promise<SubscriptionResult>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:467](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L467)
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `T` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `handler` | [`SubscriberHandler`](../type-aliases/SubscriberHandler.md)\<`T`\> |
+| `msgOptions` | [`MessageHandlerOptions`](../interfaces/MessageHandlerOptions.md) |
+| `originalHandlerName` | `string` |
+| `consumeOptions?` | `Consume` |
+
+#### Returns
+
+`Promise`\<[`SubscriptionResult`](../interfaces/SubscriptionResult.md)\>
+
+***
+
+### init()
+
+```ts
+init(): Promise<void>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:199](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L199)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
+### publish()
+
+```ts
+publish(
+   exchange, 
+   routingKey, 
+   message, 
+options?): Promise<boolean>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:984](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L984)
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `exchange` | `string` |
+| `routingKey` | `string` |
+| `message` | `unknown` |
+| `options?` | `Publish` |
+
+#### Returns
+
+`Promise`\<`boolean`\>
+
+***
+
+### request()
+
+```ts
+request<T>(requestOptions): Promise<T>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:420](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L420)
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `T` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `requestOptions` | [`RequestOptions`](../interfaces/RequestOptions.md) |
+
+#### Returns
+
+`Promise`\<`T`\>
+
+***
+
+### resumeConsumer()
+
+```ts
+resumeConsumer<T, U>(consumerTag): Promise<string | null>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:1184](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L1184)
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `T` |
+| `U` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `consumerTag` | `string` |
+
+#### Returns
+
+`Promise`\<`string` \| `null`\>
+
+***
+
+### setupRpcChannel()
+
+```ts
+setupRpcChannel<T, U>(
+   handler, 
+   rpcOptions, 
+channel): Promise<string>;
+```
+
+Defined in: [packages/rabbitmq/src/amqp/connection.ts:860](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/amqp/connection.ts#L860)
+
+#### Type Parameters
+
+| Type Parameter |
+| ------ |
+| `T` |
+| `U` |
+
+#### Parameters
+
+| Parameter | Type |
+| ------ | ------ |
+| `handler` | [`RpcSubscriberHandler`](../type-aliases/RpcSubscriberHandler.md)\<`T`, `U`\> |
+| `rpcOptions` | [`MessageHandlerOptions`](../interfaces/MessageHandlerOptions.md) |
+| `channel` | `ConfirmChannel` |
+
+#### Returns
+
+`Promise`\<`string`\>

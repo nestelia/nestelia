@@ -1,36 +1,17 @@
 # Function: RabbitSubscribe()
 
 ```ts
-function RabbitSubscribe(options): MethodDecorator;
+function RabbitSubscribe(config): MethodDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:31](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L31)
-
-Decorator to subscribe to RabbitMQ messages
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:18](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L18)
 
 ## Parameters
 
-| Parameter | Type | Description |
-| ------ | ------ | ------ |
-| `options` | [`RabbitSubscribeOptions`](../interfaces/RabbitSubscribeOptions.md) | Subscription options |
+| Parameter | Type |
+| ------ | ------ |
+| `config` | `Omit`\<[`RabbitHandlerConfig`](../interfaces/RabbitHandlerConfig.md), `"type"`\> |
 
 ## Returns
 
 `MethodDecorator`
-
-## Example
-
-```typescript
-@Injectable()
-export class OrdersService {
-  @RabbitSubscribe({
-    exchange: 'orders',
-    routingKey: 'order.created',
-    queue: 'orders-queue',
-  })
-  async handleOrderCreated(message: RabbitMQMessage<Order>) {
-    console.log('Order created:', message.content);
-    message.ack();
-  }
-}
-```

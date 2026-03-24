@@ -1,19 +1,16 @@
 # Function: InjectRabbitMQConnection()
 
 ```ts
-function InjectRabbitMQConnection(connectionName): ParameterDecorator;
+function InjectRabbitMQConnection(_connectionName): ParameterDecorator;
 ```
 
-Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:131](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L131)
-
-Inject RabbitMQ connection name
-Useful when multiple connections are configured
+Defined in: [packages/rabbitmq/src/decorators/rabbitmq.decorators.ts:123](https://github.com/nestelia/nestelia/blob/main/packages/rabbitmq/src/decorators/rabbitmq.decorators.ts#L123)
 
 ## Parameters
 
 | Parameter | Type |
 | ------ | ------ |
-| `connectionName` | `string` |
+| `_connectionName` | `string` |
 
 ## Returns
 

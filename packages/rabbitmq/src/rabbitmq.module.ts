@@ -1,222 +1,176 @@
 import { Module, Injectable, Inject, Container } from "nestelia";
-import type { DynamicModule, Provider, ProviderToken } from "nestelia";
+import type { DynamicModule, Provider, ProviderToken, LoggerService } from "nestelia";
 import { Logger } from "nestelia";
-import { AmqpConnection, RABBITMQ_CONFIG } from "./connection";
-import { RABBIT_SUBSCRIBE_METADATA, RABBIT_RPC_METADATA } from "./decorators/rabbitmq.decorators";
-import type { RabbitMQConfig } from "./interfaces";
+import { AmqpConnection } from "./amqp/connection";
+import { AmqpConnectionManager } from "./amqp/connectionManager";
+import { convertUriConfigObjectsToUris, validateRabbitMqUris } from "./amqp/utils";
+import {
+  RABBIT_HANDLER,
+  RABBIT_CONFIG_TOKEN,
+  RABBIT_PARAM_TYPE,
+  RABBIT_HEADER_TYPE,
+  RABBIT_REQUEST_TYPE,
+} from "./rabbitmq.constants";
+import {
+  RABBIT_PAYLOAD_METADATA,
+  RABBIT_HEADER_METADATA,
+  RABBIT_REQUEST_METADATA,
+} from "./decorators/rabbitmq.decorators";
+import type {
+  RabbitMQConfig,
+  RabbitHandlerConfig,
+  MessageHandlerOptions,
+  RabbitMQHandlers,
+} from "./interfaces/rabbitmq.interface";
 
 /**
- * Internal service that scans all providers for @RabbitSubscribe/@RabbitRPC
- * decorators and registers them with the AmqpConnection on module init.
+ * Resolves the list of per-registration handler configs for a given handler.
  */
-@Injectable()
-class RabbitMQExplorer {
-  constructor(
-    @Inject(AmqpConnection) private readonly connection: AmqpConnection,
-  ) {}
-
-  async onModuleInit(): Promise<void> {
-    const container = Container.instance;
-    const processedTokens = new Set<unknown>();
-
-    for (const moduleRef of container.getModules().values()) {
-      for (const [token, wrapper] of moduleRef.getProviders()) {
-        if (processedTokens.has(token)) continue;
-        processedTokens.add(token);
-
-        // Only check class-based providers that could have decorators
-        if (!wrapper.metatype || typeof wrapper.metatype !== "function") continue;
-
-        const hasSubscribers = Reflect.getMetadata(RABBIT_SUBSCRIBE_METADATA, wrapper.metatype);
-        const hasRpc = Reflect.getMetadata(RABBIT_RPC_METADATA, wrapper.metatype);
-        if (!hasSubscribers && !hasRpc) continue;
-
-        // Resolve the instance and register its handlers
-        try {
-          const instance = await container.get(token);
-          if (instance) {
-            await this.connection.registerHandlers(instance as object);
-          }
-        } catch (err) {
-          // Log the error so handler registration failures are visible
-          const name = (wrapper.metatype as { name?: string }).name ?? String(token);
-          this.connection.getLogger().error(
-            `Failed to register RabbitMQ handlers for ${name}: ${(err as Error).message}. ` +
-            `Make sure all exchanges used in @RabbitSubscribe/@RabbitRPC are configured in RabbitMQModule.forRoot({ exchanges: [...] }).`,
-          );
-        }
-      }
-    }
+export function resolveHandlerConfigs(
+  handlers: RabbitMQHandlers,
+  lookupKey: string | undefined,
+): (MessageHandlerOptions | undefined)[] {
+  if (!lookupKey) {
+    return [undefined];
   }
+  if (!Object.prototype.hasOwnProperty.call(handlers, lookupKey)) {
+    return [];
+  }
+  const raw = handlers[lookupKey];
+  if (Array.isArray(raw)) {
+    return raw;
+  }
+  return [raw];
 }
 
+// ── Parameter decorator resolution ─────────────────────────────────
+
+interface ParamMeta {
+  index: number;
+  propertyKey?: string;
+  type: number;
+}
+
+function resolveHandlerArgs(
+  instance: object,
+  methodName: string | symbol,
+  message: unknown,
+  rawMessage: unknown,
+  headers: unknown,
+): unknown[] {
+  const proto = Object.getPrototypeOf(instance);
+  const payloadMeta: ParamMeta[] =
+    Reflect.getMetadata(RABBIT_PAYLOAD_METADATA, proto, methodName) || [];
+  const headerMeta: ParamMeta[] =
+    Reflect.getMetadata(RABBIT_HEADER_METADATA, proto, methodName) || [];
+  const requestMeta: ParamMeta[] =
+    Reflect.getMetadata(RABBIT_REQUEST_METADATA, proto, methodName) || [];
+
+  const allMeta = [...payloadMeta, ...headerMeta, ...requestMeta];
+
+  // No parameter decorators — pass (message, rawMessage, headers) directly
+  if (allMeta.length === 0) {
+    return [message, rawMessage, headers];
+  }
+
+  const maxIndex = Math.max(...allMeta.map((m) => m.index));
+  const args = new Array(maxIndex + 1);
+
+  for (const meta of allMeta) {
+    let value: unknown;
+    if (meta.type === RABBIT_PARAM_TYPE) {
+      value =
+        meta.propertyKey && message && typeof message === "object"
+          ? (message as Record<string, unknown>)[meta.propertyKey]
+          : message;
+    } else if (meta.type === RABBIT_HEADER_TYPE) {
+      value =
+        meta.propertyKey && headers && typeof headers === "object"
+          ? (headers as Record<string, unknown>)[meta.propertyKey]
+          : headers;
+    } else if (meta.type === RABBIT_REQUEST_TYPE) {
+      value =
+        meta.propertyKey && rawMessage && typeof rawMessage === "object"
+          ? (rawMessage as Record<string, unknown>)[meta.propertyKey]
+          : rawMessage;
+    }
+    args[meta.index] = value;
+  }
+
+  return args;
+}
+
+// ── Module ─────────────────────────────────────────────────────────
+
 export interface RabbitMQModuleOptions extends RabbitMQConfig {
-  /**
-   * If true, register module as global
-   */
   isGlobal?: boolean;
 }
 
-/**
- * RabbitMQ module for @nestelia
- * Provides RabbitMQ integration with decorators for messaging
- *
- * @example
- * ```typescript
- * @Module({
- *   imports: [
- *     RabbitMQModule.forRoot({
- *       urls: ['amqp://localhost:5672'],
- *       queuePrefix: 'myapp',
- *     }),
- *   ],
- * })
- * export class AppModule {}
- * ```
- */
 @Module({
   providers: [],
   exports: [],
 })
 export class RabbitMQModule {
-  // Singleton instance and initialization promise to prevent duplicate connections
-  private static connectionInstance: AmqpConnection | null = null;
-  private static connectionPromise: Promise<AmqpConnection> | null = null;
+  private static connectionManager = new AmqpConnectionManager();
+  private static bootstrapped = false;
 
-  /**
-   * Get or create connection instance (singleton pattern)
-   */
-  private static async getOrCreateConnection(
-    configFactory: () => Promise<RabbitMQConfig> | RabbitMQConfig,
-  ): Promise<AmqpConnection> {
-    // If connection already exists, assert any new exchanges/queues from this config
-    if (RabbitMQModule.connectionInstance) {
-      const config = await configFactory();
-      const conn = RabbitMQModule.connectionInstance;
-      if (config.exchanges?.length) {
-        for (const exchange of config.exchanges) {
-          await conn.assertExchange(exchange);
-        }
-      }
-      if (config.queues?.length) {
-        for (const queue of config.queues) {
-          await conn.assertQueue(queue);
-        }
-      }
-      return conn;
+  static async AmqpConnectionFactory(
+    config: RabbitMQConfig,
+  ): Promise<AmqpConnection | undefined> {
+    const logger: LoggerService =
+      config?.logger || new Logger(RabbitMQModule.name);
+    if (config == undefined) {
+      logger.log?.(
+        "RabbitMQ config not provided, skipping connection initialization.",
+      );
+      return undefined;
     }
 
-    // If initialization is in progress, wait for it
-    if (RabbitMQModule.connectionPromise) {
-      return RabbitMQModule.connectionPromise;
-    }
+    config.uri = convertUriConfigObjectsToUris(config.uri) as unknown as string;
+    validateRabbitMqUris(config.uri as unknown as string[]);
 
-    // Create initialization promise to prevent duplicate connections
-    RabbitMQModule.connectionPromise = (async () => {
-      const config = await configFactory();
-      const logger = new Logger("RabbitMQ");
-      const connection = new AmqpConnection(config, logger);
-      await connection.connect();
-      RabbitMQModule.connectionInstance = connection;
-      return connection;
-    })();
-
-    return RabbitMQModule.connectionPromise;
+    const connection = new AmqpConnection(config);
+    this.connectionManager.addConnection(connection);
+    await connection.init();
+    logger.log?.("Successfully connected to RabbitMQ");
+    return connection;
   }
 
-  /**
-   * Create connection provider with given factory
-   */
-  private static createConnectionProvider(
-    configFactory: (
-      ...args: unknown[]
-    ) => Promise<RabbitMQConfig> | RabbitMQConfig,
-    inject: Array<
-      ProviderToken | { token: ProviderToken; optional?: boolean }
-    > = [],
-  ): Provider {
-    return {
+  static forRoot(options: RabbitMQModuleOptions): DynamicModule {
+    const connectionProvider: Provider = {
       provide: AmqpConnection,
-      useFactory: async (...args: unknown[]) =>
-        this.getOrCreateConnection(() => configFactory(...args)),
-      inject,
+      useFactory: async () => {
+        await RabbitMQModule.AmqpConnectionFactory(options);
+        const conn = RabbitMQModule.connectionManager.getConnection(
+          options?.name || "default",
+        );
+        return conn!;
+      },
     };
-  }
 
-  /**
-   * Create config provider
-   */
-  private static createConfigProvider(
-    configValue: RabbitMQConfig | undefined,
-    configFactory:
-      | ((...args: unknown[]) => Promise<RabbitMQConfig> | RabbitMQConfig)
-      | undefined,
-    inject: Array<
-      ProviderToken | { token: ProviderToken; optional?: boolean }
-    > = [],
-  ): Provider {
-    if (configFactory) {
-      return {
-        provide: RABBITMQ_CONFIG,
-        useFactory: configFactory,
-        inject,
-      };
-    }
-    return {
-      provide: RABBITMQ_CONFIG,
-      useValue: configValue,
+    const connectionManagerProvider: Provider = {
+      provide: AmqpConnectionManager,
+      useFactory: () => RabbitMQModule.connectionManager,
     };
-  }
 
-  /**
-   * Create module configuration
-   */
-  private static createModuleConfig(
-    providers: Provider[],
-    isGlobal: boolean | undefined,
-  ): DynamicModule {
+    const configProvider: Provider = {
+      provide: RABBIT_CONFIG_TOKEN,
+      useValue: options,
+    };
+
     return {
       module: RabbitMQModule,
-      global: isGlobal,
-      providers: [...providers, RabbitMQExplorer],
-      exports: [AmqpConnection, RABBITMQ_CONFIG],
+      global: options.isGlobal,
+      providers: [
+        connectionProvider,
+        connectionManagerProvider,
+        configProvider,
+        RabbitMQExplorer,
+      ],
+      exports: [AmqpConnection, AmqpConnectionManager, RABBIT_CONFIG_TOKEN],
     };
   }
 
-  /**
-   * Register RabbitMQ module with configuration
-   *
-   * @param options RabbitMQ configuration options
-   * @returns Dynamic module
-   */
-  static forRoot(options: RabbitMQModuleOptions): DynamicModule {
-    const amqpConnectionProvider = this.createConnectionProvider(
-      () => options,
-      [],
-    );
-
-    const configProvider = this.createConfigProvider(options, undefined);
-
-    return this.createModuleConfig(
-      [amqpConnectionProvider, configProvider],
-      options.isGlobal,
-    );
-  }
-
-  /**
-   * Register RabbitMQ module with async configuration
-   *
-   * @example
-   * ```typescript
-   * RabbitMQModule.forRootAsync({
-   *   useFactory: async (configService: ConfigService) => ({
-   *     urls: [configService.get('RABBITMQ_URL')],
-   *     queuePrefix: configService.get('RABBITMQ_QUEUE_PREFIX'),
-   *   }),
-   *   inject: [ConfigService],
-   * })
-   * ```
-   */
   static forRootAsync(options: {
     useFactory: (
       ...args: unknown[]
@@ -228,29 +182,42 @@ export class RabbitMQModule {
   }): DynamicModule {
     const inject = options.inject || [];
 
-    const amqpConnectionProvider = this.createConnectionProvider(
-      options.useFactory,
+    const configProvider: Provider = {
+      provide: RABBIT_CONFIG_TOKEN,
+      useFactory: options.useFactory,
       inject,
-    );
+    };
 
-    const configProvider = this.createConfigProvider(
-      undefined,
-      options.useFactory,
-      inject,
-    );
+    const connectionProvider: Provider = {
+      provide: AmqpConnection,
+      useFactory: async (config: RabbitMQConfig) => {
+        await RabbitMQModule.AmqpConnectionFactory(config);
+        const conn = RabbitMQModule.connectionManager.getConnection(
+          config?.name || "default",
+        );
+        return conn!;
+      },
+      inject: [RABBIT_CONFIG_TOKEN],
+    };
 
-    return this.createModuleConfig(
-      [amqpConnectionProvider, configProvider],
-      options.isGlobal,
-    );
+    const connectionManagerProvider: Provider = {
+      provide: AmqpConnectionManager,
+      useFactory: () => RabbitMQModule.connectionManager,
+    };
+
+    return {
+      module: RabbitMQModule,
+      global: options.isGlobal,
+      providers: [
+        configProvider,
+        connectionProvider,
+        connectionManagerProvider,
+        RabbitMQExplorer,
+      ],
+      exports: [AmqpConnection, AmqpConnectionManager, RABBIT_CONFIG_TOKEN],
+    };
   }
 
-  /**
-   * Register a RabbitMQ feature module with specific handlers
-   *
-   * @param handlers Array of handler classes with @RabbitSubscribe/@RabbitRPC decorators
-   * @returns Dynamic module
-   */
   static forFeature(handlers: unknown[]): DynamicModule {
     return {
       module: RabbitMQModule,
@@ -258,56 +225,205 @@ export class RabbitMQModule {
       exports: handlers as Provider[],
     };
   }
+
+  static attach(connection: AmqpConnection): DynamicModule {
+    return {
+      module: RabbitMQModule,
+      providers: [
+        {
+          provide: AmqpConnection,
+          useValue: connection,
+        },
+      ],
+      exports: [AmqpConnection],
+    };
+  }
 }
 
-// Re-export everything
-export {
-  RabbitBatch,
-  RabbitConnection,
-  RabbitDLQ,
-  RabbitErrorHandler,
-  RabbitHandler,
-  RabbitHeader,
-  RabbitInterceptor,
-  RabbitPayload,
-  RabbitPriority,
-  RabbitQueueArguments,
-  RabbitRequest,
-  RabbitRetry,
-  RabbitRPC,
-  RabbitSubscribe,
-  RabbitTTL,
-} from "./decorators";
-export type {
-  AssertQueueErrorHandler,
-  BatchMessageErrorHandler,
-  BatchOptions,
-  ConnectionInitOptions,
-  MessageErrorHandler,
-  MessageHandlerErrorBehavior,
-  MessageHandlerOptions,
-  QueueOptions,
-  RabbitMQChannelConfig,
-  RabbitMQConfig,
-  RabbitMQConnectionConfig,
-  RabbitMQDeserializer,
-  RabbitMQExchangeBindingConfig,
-  RabbitMQExchangeConfig,
-  RabbitMQExchangeType,
-  RabbitMQMessage,
-  RabbitMQPublishOptions,
-  RabbitMQQueueBinding,
-  RabbitMQQueueConfig,
-  RabbitMQSerializer,
-  RabbitRPCOptions,
-  RabbitSubscribeOptions,
-  RequestOptions,
-} from "./interfaces";
-export { Nack } from "./nack";
-export { isRabbitContext, RABBIT_CONTEXT_TYPE_KEY } from "./rabbitmq.constants";
-export {
-  AmqpConnection,
-  RABBITMQ_CONFIG,
-  RABBITMQ_CONNECTION,
-  RabbitMQService,
-} from "./rabbitmq.service";
+// ── Explorer ───────────────────────────────────────────────────────
+
+@Injectable()
+class RabbitMQExplorer {
+  private readonly logger = new Logger(RabbitMQExplorer.name);
+
+  constructor(
+    @Inject(AmqpConnection) private readonly connection: AmqpConnection,
+  ) {}
+
+  async onModuleInit(): Promise<void> {
+    const config = this.connection.configuration;
+
+    if (config.registerHandlers === false) {
+      this.logger.log(
+        "Skipping RabbitMQ Handlers due to configuration.",
+      );
+      return;
+    }
+
+    if (RabbitMQModule["bootstrapped"]) {
+      return;
+    }
+    (RabbitMQModule as unknown as { bootstrapped: boolean }).bootstrapped = true;
+
+    this.logger.log("Initializing RabbitMQ Handlers");
+
+    const container = Container.instance;
+    const processedTokens = new Set<unknown>();
+
+    for (const moduleRef of container.getModules().values()) {
+      for (const [token, wrapper] of moduleRef.getProviders()) {
+        if (processedTokens.has(token)) continue;
+        processedTokens.add(token);
+
+        if (!wrapper.metatype || typeof wrapper.metatype !== "function")
+          continue;
+
+        const proto = wrapper.metatype.prototype;
+        if (!proto) continue;
+
+        // Check if any method has RABBIT_HANDLER metadata
+        const methodNames = Object.getOwnPropertyNames(proto).filter(
+          (name) => name !== "constructor",
+        );
+
+        const handlerMethods = methodNames.filter((name) =>
+          Reflect.getMetadata(RABBIT_HANDLER, proto, name),
+        );
+
+        if (handlerMethods.length === 0) continue;
+
+        try {
+          const instance = await container.get(token);
+          if (!instance) continue;
+
+          const className =
+            (wrapper.metatype as { name?: string }).name ?? String(token);
+          this.logger.log(`Registering rabbitmq handlers from ${className}`);
+
+          for (const methodName of handlerMethods) {
+            const handlerConfig = Reflect.getMetadata(
+              RABBIT_HANDLER,
+              proto,
+              methodName,
+            ) as RabbitHandlerConfig;
+
+            if (
+              handlerConfig.connection &&
+              handlerConfig.connection !== config.name
+            ) {
+              continue;
+            }
+
+            const originalMethod = (instance as Record<string, Function>)[
+              methodName
+            ];
+            if (typeof originalMethod !== "function") continue;
+
+            // Create bound handler that resolves parameter decorators
+            const boundHandler = async (
+              msg: unknown,
+              rawMessage: unknown,
+              headers: unknown,
+            ) => {
+              const args = resolveHandlerArgs(
+                instance as object,
+                methodName,
+                msg,
+                rawMessage,
+                headers,
+              );
+              return originalMethod.apply(instance, args);
+            };
+
+            const handlerDisplayName = `${className}.${methodName} {${handlerConfig.type}} -> ${
+              handlerConfig.queueOptions?.channel
+                ? `${handlerConfig.queueOptions.channel}::`
+                : ""
+            }${handlerConfig.exchange}::${handlerConfig.routingKey}::${handlerConfig.queue || "amqpgen"}`;
+
+            // Resolve module-level handler configs
+            const handlerLookupKey =
+              handlerConfig.name || config.defaultHandler;
+
+            const moduleHandlerConfigs = resolveHandlerConfigs(
+              config.handlers,
+              handlerLookupKey,
+            );
+
+            for (const moduleHandlerConfig of moduleHandlerConfigs) {
+              const mergedConfig: RabbitHandlerConfig = {
+                ...handlerConfig,
+                ...moduleHandlerConfig,
+                type: handlerConfig.type,
+              };
+
+              if (
+                mergedConfig.type === "rpc" &&
+                !config.enableDirectReplyTo
+              ) {
+                this.logger.warn(
+                  `Direct Reply-To is disabled. RPC handler ${handlerDisplayName} will not be registered`,
+                );
+                continue;
+              }
+
+              this.logger.log(handlerDisplayName);
+
+              try {
+                switch (mergedConfig.type) {
+                  case "rpc":
+                    await this.connection.createRpc(
+                      boundHandler,
+                      mergedConfig,
+                    );
+                    break;
+
+                  case "subscribe":
+                    if (mergedConfig.batchOptions) {
+                      await this.connection.createBatchSubscriber(
+                        boundHandler as (
+                          msg: (unknown | undefined)[],
+                          rawMessage?: unknown[],
+                          headers?: unknown[],
+                        ) => Promise<void>,
+                        mergedConfig,
+                      );
+                    } else {
+                      await this.connection.createSubscriber(
+                        boundHandler,
+                        mergedConfig,
+                        methodName,
+                      );
+                    }
+                    break;
+
+                  default:
+                    throw new Error(
+                      `Unexpected handler type ${mergedConfig.type}`,
+                    );
+                }
+              } catch (err) {
+                this.logger.error(
+                  `Failed to register handler ${handlerDisplayName}: ${(err as Error).message}`,
+                );
+              }
+            }
+          }
+        } catch (err) {
+          const name =
+            (wrapper.metatype as { name?: string }).name ?? String(token);
+          this.logger.error(
+            `Failed to register RabbitMQ handlers for ${name}: ${(err as Error).message}`,
+          );
+        }
+      }
+    }
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    this.logger.verbose?.("Closing AMQP Connections");
+    await this.connection.close();
+    (RabbitMQModule as unknown as { bootstrapped: boolean }).bootstrapped =
+      false;
+  }
+}

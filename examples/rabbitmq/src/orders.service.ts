@@ -1,11 +1,11 @@
 import { Injectable } from "nestelia";
-import { RabbitMQService } from "../../../packages/rabbitmq/src";
+import { AmqpConnection } from "../../../packages/rabbitmq/src";
 import { Inject } from "nestelia";
 
 @Injectable()
 export class OrdersService {
   constructor(
-    @Inject(RabbitMQService) private readonly rabbit: RabbitMQService,
+    @Inject(AmqpConnection) private readonly rabbit: AmqpConnection,
   ) {}
 
   async createOrder(amount: number, userId: string) {
