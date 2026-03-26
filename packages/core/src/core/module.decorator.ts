@@ -146,7 +146,24 @@ function createModuleFactory(target: any, options: ModuleOptions) {
         : instance.constructor
       : target;
 
-    const plugin = createElysiaPlugin(target, options, moduleinstance);
+    // Merge providers/exports set via forRoot()-style static methods.
+    // Those methods store overrides under "providers" / "exports" metadata
+    // keys directly on the moduleFactory function. We merge them here so
+    // that createElysiaPlugin registers them correctly.
+    const providerOverrides: ModuleOptions["providers"] =
+      (Reflect.getMetadata("providers", moduleFactory) as ModuleOptions["providers"]) || [];
+    const exportOverrides: ModuleOptions["exports"] =
+      (Reflect.getMetadata("exports", moduleFactory) as ModuleOptions["exports"]) || [];
+    const resolvedOptions: ModuleOptions =
+      providerOverrides.length || exportOverrides.length
+        ? {
+            ...options,
+            providers: [...(options.providers || []), ...providerOverrides],
+            exports: [...(options.exports || []), ...exportOverrides],
+          }
+        : options;
+
+    const plugin = createElysiaPlugin(target, resolvedOptions, moduleinstance);
     // Create new Elysia app and apply plugin
     const app = new Elysia();
     return await plugin(app);

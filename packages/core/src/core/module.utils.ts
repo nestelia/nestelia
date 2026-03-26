@@ -101,13 +101,9 @@ export async function initializeSingletonProviders(): Promise<void> {
       typeof (instance as any).onModuleInit === "function" &&
       !(instance as any).__onModuleInitCalled
     ) {
-      try {
-        await (instance as any).onModuleInit();
-        (instance as any).__onModuleInitCalled = true;
-        getLifecycleManager().register(instance);
-      } catch (e) {
-        Logger.error(`Error in onModuleInit:`, e);
-      }
+      await (instance as any).onModuleInit();
+      (instance as any).__onModuleInitCalled = true;
+      getLifecycleManager().register(instance);
     }
   }
 }
