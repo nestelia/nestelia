@@ -212,7 +212,7 @@ export class Container {
   }
 
   public beginInitSession(): void {
-    this._sessionInitialized.clear();
+    this.clear();
   }
 
   public isInitializedInSession(metatype: Type): boolean {
