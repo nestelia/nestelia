@@ -59,7 +59,7 @@ function makeApp() {
 }
 
 function makeSchema(
-  subscribeFn?: () => AsyncIterable<unknown> | AsyncIterator<unknown>,
+  subscribeFn?: () => AsyncIterable<unknown> | AsyncIterator<unknown> | Promise<AsyncIterable<unknown>>,
 ): GraphQLSchema {
   return new GraphQLSchema({
     query: new GraphQLObjectType({
