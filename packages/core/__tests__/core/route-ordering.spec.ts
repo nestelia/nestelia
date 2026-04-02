@@ -7,7 +7,6 @@ import { setupController } from "~/src/core/controller-setup";
 import { Module } from "~/src/core/module.decorator";
 import { Controller } from "~/src/decorators/controller.decorator";
 import { Get } from "~/src/decorators/http.decorators";
-import { Param, Query } from "~/src/decorators/param.decorators";
 import { Container, DIContainer } from "~/src/di";
 import { Injectable } from "~/src/di/injectable.decorator";
 
