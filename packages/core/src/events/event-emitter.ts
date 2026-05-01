@@ -91,9 +91,8 @@ export class EventEmitter implements IEventEmitter {
 
     // Remove one-time handlers
     if (oneTimeHandlers.length > 0) {
-      const remainingHandlers = handlers.filter(
-        (reg) => !oneTimeHandlers.includes(reg),
-      );
+      const onceSet = new Set(oneTimeHandlers);
+      const remainingHandlers = handlers.filter((reg) => !onceSet.has(reg));
 
       if (remainingHandlers.length === 0) {
         this.handlers.delete(event);

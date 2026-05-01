@@ -50,12 +50,10 @@ function sanitizeCacheKey(key: string): string {
   }
 
   let sanitized = key
-    .replace(/\0/g, "")
     .replace(/\.{2,}[/\\]/g, "_")
     .replace(/\.{2,}/g, "_")
-    .replace(/[\x00-\x1f\x7f-\x9f]/g, "")
-    .replace(/\ufffd/g, "")
-    .replace(/[<>'"`]/g, "_");
+    .replace(/[\x00-\x1f\x7f-\x9f\uFFFD]/g, "")
+    .replace(/[<>'"\`]/g, "_");
 
   if (sanitized.length > MAX_CACHE_KEY_LENGTH) {
     sanitized = sanitized.slice(0, MAX_CACHE_KEY_LENGTH);
