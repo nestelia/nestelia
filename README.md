@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/nestelia/nestelia/main/assets/logo.svg" alt="nestelia" width="200" height="200" />
+<img src="./assets/logo.svg" alt="nestelia" width="200" height="200" />
 
 <h1>nestelia</h1>
 
