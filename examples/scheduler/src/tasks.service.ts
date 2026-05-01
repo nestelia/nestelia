@@ -1,22 +1,23 @@
 import { Injectable } from "nestelia";
 import { Cron, Interval, Timeout } from "../../../packages/scheduler/src";
+import { Logger } from "~/src/logger";
 
 @Injectable()
 export class TasksService {
-  readonly log: string[] = [];
+  private readonly logger = new Logger(TasksService.name);
 
   @Cron("*/5 * * * * *")
   handleEvery5Seconds() {
-    this.log.push(`cron:${Date.now()}`);
+    this.logger.log(`cron:${Date.now()}`);
   }
 
   @Interval(10_000)
   handleEvery10Seconds() {
-    this.log.push(`interval:${Date.now()}`);
+    this.logger.log(`interval:${Date.now()}`);
   }
 
   @Timeout(30_000)
   handleOnce() {
-    this.log.push(`timeout:${Date.now()}`);
+    this.logger.log(`timeout:${Date.now()}`);
   }
 }

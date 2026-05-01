@@ -4,11 +4,11 @@
  * Run before vitepress build.
  */
 
-import { readdirSync, readFileSync, writeFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readFileSync, writeFileSync, copyFileSync, mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 const DOCS_ROOT = new URL("..", import.meta.url).pathname;
-const OUT_FILE  = join(DOCS_ROOT, "public", "llms-full.txt");
+const OUT_FILE = join(DOCS_ROOT, "public", "llms-full.txt");
 
 // Sections in order — only English (root-level) pages
 const SECTIONS = [
@@ -42,6 +42,9 @@ const SECTIONS = [
   "advanced/forward-ref.md",
   "advanced/container-api.md",
   "advanced/swagger.md",
+  "advanced/eden-treaty.md",
+  "features/websocket-gateways.md",
+  "performance.md",
 ];
 
 const parts: string[] = [
@@ -66,3 +69,12 @@ for (const rel of SECTIONS) {
 
 writeFileSync(OUT_FILE, parts.join("\n"), "utf8");
 console.log(`[gen-llms-full] wrote ${OUT_FILE}`);
+
+// Mirror to .well-known/ for AI crawlers that look there
+const WELL_KNOWN = join(DOCS_ROOT, "public", ".well-known");
+try {
+  mkdirSync(WELL_KNOWN, { recursive: true });
+} catch {}
+copyFileSync(join(DOCS_ROOT, "public", "llms.txt"), join(WELL_KNOWN, "llms.txt"));
+copyFileSync(OUT_FILE, join(WELL_KNOWN, "llms-full.txt"));
+console.log(`[gen-llms-full] mirrored to ${WELL_KNOWN}`);

@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /.well-known/
 
+Host: https://nestelia.dev
 Sitemap: https://nestelia.dev/sitemap.xml

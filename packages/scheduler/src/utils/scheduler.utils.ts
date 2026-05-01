@@ -7,6 +7,9 @@ import {
 import type { TaskHandle } from "../interfaces/scheduler.interface";
 import { packageLogger } from "../logger";
 
+/** Tracks instances whose scheduled jobs have already been registered. */
+const registeredInstances = new WeakSet<object>();
+
 /**
  * Property names that must never be used as method names because accessing
  * them on an arbitrary object can trigger prototype-pollution exploits.
@@ -40,6 +43,15 @@ function isSafeMethodName(name: string | symbol): boolean {
  * @returns The {@link TaskHandle} array for every successfully registered job.
  */
 export function registerScheduledJobs(instance: unknown): TaskHandle[] {
+  if (
+    !instance ||
+    typeof instance !== "object" ||
+    registeredInstances.has(instance)
+  ) {
+    return [];
+  }
+  registeredInstances.add(instance);
+
   const constructor = (instance as { constructor: object }).constructor;
   const jobs: ScheduledJobMetadata[] =
     Reflect.getMetadata(SCHEDULED_JOBS_METADATA, constructor) ?? [];

@@ -5,6 +5,7 @@ import {
   SchedulerConfig,
   SchedulerRegistry,
 } from "./services/scheduler.service";
+import { ScheduleExplorer } from "./services/schedule-explorer";
 
 /**
  * Dynamic module configuration
@@ -59,7 +60,7 @@ export class ScheduleModule {
     return {
       module: ScheduleModule,
       global: true,
-      providers: [schedulerProvider, registryProvider],
+      providers: [schedulerProvider, registryProvider, ScheduleExplorer],
       exports: [Scheduler, SchedulerRegistry],
     };
   }

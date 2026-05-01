@@ -53,8 +53,50 @@ export default defineConfig({
     ["meta", { name: "twitter:title",       content: "Nestelia" }],
     ["meta", { name: "twitter:description", content: SITE_DESC }],
     ["meta", { name: "twitter:image",       content: OG_IMAGE }],
+    ["meta", { name: "twitter:site",        content: "@nesteliajs" }],
 
-    // JSON-LD structured data
+    // Crawler directives
+    ["meta", { name: "robots",      content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" }],
+    ["meta", { name: "googlebot",   content: "index, follow" }],
+    ["meta", { name: "bingbot",     content: "index, follow" }],
+    ["meta", { name: "author",      content: "Nestelia" }],
+    ["meta", { name: "theme-color", content: "#121113", media: "(prefers-color-scheme: dark)" }],
+    ["meta", { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" }],
+
+    // Sitemap & AI discovery
+    ["link", { rel: "sitemap",    type: "application/xml", title: "Sitemap", href: "/sitemap.xml" }],
+    ["link", { rel: "alternate",  type: "text/plain",      title: "llms.txt",      href: "/llms.txt" }],
+    ["link", { rel: "alternate",  type: "text/plain",      title: "llms-full.txt", href: "/llms-full.txt" }],
+
+    // JSON-LD: Organization
+    ["script", { type: "application/ld+json" }, JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Nestelia",
+      "url": SITE_URL,
+      "logo": `${SITE_URL}/logo/light.svg`,
+      "sameAs": [
+        "https://github.com/nestelia/nestelia",
+      ],
+    })],
+
+    // JSON-LD: WebSite (enables Google Sitelinks Searchbox)
+    ["script", { type: "application/ld+json" }, JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Nestelia",
+      "url": SITE_URL,
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": `${SITE_URL}/search.html?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    })],
+
+    // JSON-LD: SoftwareApplication
     ["script", { type: "application/ld+json" }, JSON.stringify({
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
@@ -64,12 +106,20 @@ export default defineConfig({
       "applicationCategory": "DeveloperApplication",
       "operatingSystem": "Any",
       "programmingLanguage": "TypeScript",
+      "softwareVersion": pkg.version,
       "license": "https://opensource.org/licenses/MIT",
       "codeRepository": "https://github.com/nestelia/nestelia",
       "documentation": `${SITE_URL}/introduction`,
+      "downloadUrl": "https://github.com/nestelia/nestelia",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+      },
       "keywords": [
         "elysia", "bun", "typescript", "framework", "dependency injection",
-        "decorators", "nestjs", "modules", "controllers", "graphql", "microservices"
+        "decorators", "nestjs", "modules", "controllers", "graphql", "microservices",
+        "websocket", "realtime", "api", "backend", "server",
       ],
     })],
   ],
@@ -81,10 +131,19 @@ export default defineConfig({
       .replace(/\.md$/, "");
 
     pageData.frontmatter.head ??= [];
+    const pageTitle = pageData.title ? `${pageData.title} | Nestelia` : "Nestelia";
+    const pageDesc  = pageData.frontmatter.description ?? SITE_DESC;
+    const locale    = pageData.frontmatter.lang ?? "en";
+
     pageData.frontmatter.head.push(
       ["link", { rel: "canonical", href: canonical }],
-      ["meta", { property: "og:url",   content: canonical }],
-      ["meta", { property: "og:title", content: pageData.title ? `${pageData.title} | Nestelia` : "Nestelia" }],
+      ["meta", { property: "og:url",         content: canonical }],
+      ["meta", { property: "og:title",       content: pageTitle }],
+      ["meta", { property: "og:description", content: pageDesc }],
+      ["meta", { property: "og:locale",      content: locale === "zh" ? "zh-CN" : locale }],
+      ["meta", { name: "twitter:title",       content: pageTitle }],
+      ["meta", { name: "twitter:description", content: pageDesc }],
+      ["meta", { name: "description",         content: pageDesc }],
     );
 
     // hreflang alternate links for multilingual SEO
