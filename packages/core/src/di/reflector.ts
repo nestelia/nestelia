@@ -1,8 +1,12 @@
 
+import { createMetadataCache } from "../utils/metadata-cache";
+
 /**
  * Type for constructor functions (classes)
  */
 type Constructor = abstract new (...args: unknown[]) => unknown;
+
+const reflectorCache = createMetadataCache<unknown>();
 
 /**
  * Helper class for retrieving metadata from classes and methods using reflect-metadata.
@@ -45,7 +49,9 @@ export class Reflector {
     if (propertyKey !== undefined) {
       return Reflect.getMetadata(metadataKey, target, propertyKey);
     }
-    return Reflect.getMetadata(metadataKey, target);
+    return reflectorCache.get(target, metadataKey, () =>
+      Reflect.getMetadata(metadataKey, target),
+    ) as T | undefined;
   }
 
   /**

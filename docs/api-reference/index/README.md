@@ -37,6 +37,7 @@
 | [createElysiaApplication](functions/createElysiaApplication.md) | Creates an Elysia-Nest application with microservices support. |
 | [createElysiaPlugin](functions/createElysiaPlugin.md) | Helper function to create the Elysia plugin from module metadata. |
 | [createLoggerOptionsProvider](functions/createLoggerOptionsProvider.md) | Factory to create logger options provider with custom options |
+| [createMetadataCache](functions/createMetadataCache.md) | Lazily-populated cache for generic Reflect metadata keyed by (target, metadataKey). Two-level lookup: WeakMap<object, Map<key, T>>. |
 | [createMethodMetadataCache](functions/createMethodMetadataCache.md) | Lazily-populated cache for method-level Reflect metadata. Two-level lookup: WeakMap<object, Map<string | symbol, T>>. |
 | [createParamDecorator](functions/createParamDecorator.md) | - |
 | [forwardRef](functions/forwardRef.md) | - |

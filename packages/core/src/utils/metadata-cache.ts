@@ -44,3 +44,33 @@ export function createMethodMetadataCache<T>() {
     },
   };
 }
+
+/**
+ * Lazily-populated cache for generic Reflect metadata keyed by
+ * (target, metadataKey). Two-level lookup: WeakMap<object, Map<key, T>>.
+ */
+export function createMetadataCache<T>() {
+  let cache = new WeakMap<object, Map<string | symbol, T>>();
+  return {
+    get(
+      target: object,
+      metadataKey: string | symbol,
+      factory: () => T,
+    ): T {
+      let keyMap = cache.get(target);
+      if (!keyMap) {
+        keyMap = new Map();
+        cache.set(target, keyMap);
+      }
+      let value = keyMap.get(metadataKey);
+      if (value === undefined && !keyMap.has(metadataKey)) {
+        value = factory();
+        keyMap.set(metadataKey, value);
+      }
+      return value!;
+    },
+    reset(): void {
+      cache = new WeakMap();
+    },
+  };
+}
