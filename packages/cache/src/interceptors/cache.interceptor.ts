@@ -52,8 +52,9 @@ function sanitizeCacheKey(key: string): string {
   let sanitized = key
     .replace(/\.{2,}[/\\]/g, "_")
     .replace(/\.{2,}/g, "_")
-    .replace(/[\x00-\x1f\x7f-\x9f\uFFFD]/g, "")
-    .replace(/[<>'"\`]/g, "_");
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\x00-\x1f\x7f-\x9f�]/g, "")
+    .replace(/[<>'"`]/g, "_");
 
   if (sanitized.length > MAX_CACHE_KEY_LENGTH) {
     sanitized = sanitized.slice(0, MAX_CACHE_KEY_LENGTH);
