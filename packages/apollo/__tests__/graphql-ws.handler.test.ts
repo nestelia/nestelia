@@ -3,6 +3,7 @@ import "reflect-metadata";
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { CloseCode } from "graphql-ws";
 import {
+  GraphQLError,
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
@@ -146,6 +147,15 @@ describe("connection lifecycle", () => {
 
     callbacks.close!(socket);
     expect(onDisconnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("calls onClose when connection closes", async () => {
+    const onClose = mock(() => {});
+    const { callbacks } = setup({ wsOptions: { onClose } });
+    const socket = await connect(callbacks);
+
+    callbacks.close!(socket);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("does not call onDisconnect for unknown socket", () => {
@@ -307,6 +317,81 @@ describe("subscribe", () => {
     await wait(20);
 
     expect(socket.messages("error")).toHaveLength(1);
+  });
+
+  it("closes with SubscriberAlreadyExists for duplicate active subscription id", async () => {
+    async function* hang() {
+      await new Promise<void>(() => {});
+    }
+
+    const schema = makeSchema(hang);
+    const { callbacks } = setup({ schema });
+    const socket = await connect(callbacks);
+
+    await callbacks.message!(socket, {
+      type: "subscribe",
+      id: "dup",
+      payload: { query: "subscription { count }" },
+    });
+    await wait(10);
+
+    await callbacks.message!(socket, {
+      type: "subscribe",
+      id: "dup",
+      payload: { query: "subscription { count }" },
+    });
+
+    expect(socket.closedWith).toBe(CloseCode.SubscriberAlreadyExists);
+  });
+
+  it("sends onSubscribe GraphQL errors without starting the stream", async () => {
+    const onSubscribe = mock(() => [new GraphQLError("denied")]);
+    let subscribeCalled = false;
+    const schema = makeSchema(() => {
+      subscribeCalled = true;
+      return {
+        [Symbol.asyncIterator]: () => ({
+          next: async () => ({ value: 1, done: false }),
+        }),
+      };
+    });
+    const { callbacks } = setup({ schema, wsOptions: { onSubscribe } });
+    const socket = await connect(callbacks);
+
+    await callbacks.message!(socket, {
+      type: "subscribe",
+      id: "blocked",
+      payload: { query: "subscription { count }" },
+    });
+
+    expect(onSubscribe).toHaveBeenCalledTimes(1);
+    expect(subscribeCalled).toBe(false);
+    expect(socket.messages("error")).toHaveLength(1);
+    expect(
+      (socket.messages("error")[0]!.payload as Array<{ message: string }>)[0]!
+        .message,
+    ).toBe("denied");
+  });
+
+  it("calls onNext for each emitted subscription result", async () => {
+    const onNext = mock(() => {});
+    async function* finite() {
+      yield 1;
+      yield 2;
+    }
+    const schema = makeSchema(finite);
+    const { callbacks } = setup({ schema, wsOptions: { onNext } });
+    const socket = await connect(callbacks);
+
+    await callbacks.message!(socket, {
+      type: "subscribe",
+      id: "observe",
+      payload: { query: "subscription { count }" },
+    });
+    await wait(20);
+
+    expect(socket.messages("next")).toHaveLength(2);
+    expect(onNext).toHaveBeenCalledTimes(2);
   });
 });
 

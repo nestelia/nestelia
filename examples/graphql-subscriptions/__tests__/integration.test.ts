@@ -31,6 +31,12 @@ import { AppModule } from "../src/app.module";
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
+let nextPort = 39200;
+
+function getTestPort(): number {
+  return nextPort++;
+}
+
 function gql(
   server: Elysia,
   query: string,
@@ -151,8 +157,8 @@ describe("graphql-subscriptions integration", () => {
   beforeAll(async () => {
     app = await createElysiaApplication(AppModule, { logger: false });
     server = app.getHttpServer();
-    server.listen(0);
-    port = (server as unknown as { server: { port: number } }).server.port;
+    port = getTestPort();
+    server.listen(port);
   });
 
   afterAll(() => {
@@ -375,6 +381,106 @@ describe("graphql-subscriptions integration", () => {
       client.complete("s1");
       client.complete("s2");
       client.close();
+    });
+
+    it("fan-out stress: every websocket client receives every chat event", async () => {
+      const CLIENTS = 10;
+      const EVENTS = 5;
+      const clients = await Promise.all(
+        Array.from({ length: CLIENTS }, async (_, i) => {
+          const c = new WsClient(`ws://localhost:${port}/graphql`);
+          await c.connect();
+          await c.init();
+          await c.subscribe(
+            `chat-fanout-${i}`,
+            "subscription { messageSent { text } }",
+          );
+          return c;
+        }),
+      );
+
+      await wait(50);
+
+      for (let i = 0; i < EVENTS; i++) {
+        await gql(
+          server,
+          `mutation { sendMessage(author: "Stress", text: "chat-fanout-${i}") { id } }`,
+        );
+      }
+
+      const allMessages = await Promise.all(
+        clients.map((c) => c.collectNext(EVENTS, 5000)),
+      );
+
+      for (const messages of allMessages) {
+        expect(messages).toHaveLength(EVENTS);
+        const texts = messages.map(
+          (m) =>
+            (
+              m.payload as {
+                data: { messageSent: { text: string } };
+              }
+            ).data.messageSent.text,
+        );
+        expect(texts).toEqual(
+          Array.from({ length: EVENTS }, (_, i) => `chat-fanout-${i}`),
+        );
+      }
+
+      for (const c of clients) {
+        c.close();
+      }
+    });
+
+    it("stable subscriber receives all chat events while other clients reconnect", async () => {
+      const EVENTS = 8;
+      const CHURN_CLIENTS = 16;
+      const stable = new WsClient(`ws://localhost:${port}/graphql`);
+      await stable.connect();
+      await stable.init();
+      await stable.subscribe(
+        "chat-stable-during-churn",
+        "subscription { messageSent { text } }",
+      );
+      await wait(50);
+
+      const churn = Promise.all(
+        Array.from({ length: CHURN_CLIENTS }, async (_, i) => {
+          const c = new WsClient(`ws://localhost:${port}/graphql`);
+          await c.connect();
+          await c.init();
+          await c.subscribe(
+            `chat-churn-${i}`,
+            "subscription { messageSent { text } }",
+          );
+          await wait(i % 4);
+          c.close();
+        }),
+      );
+
+      for (let i = 0; i < EVENTS; i++) {
+        await gql(
+          server,
+          `mutation { sendMessage(author: "Churn", text: "chat-stable-churn-${i}") { id } }`,
+        );
+        await wait(2);
+      }
+      await churn;
+
+      const messages = await stable.collectNext(EVENTS, 5000);
+      const texts = messages.map(
+        (m) =>
+          (
+            m.payload as {
+              data: { messageSent: { text: string } };
+            }
+          ).data.messageSent.text,
+      );
+      expect(texts).toEqual(
+        Array.from({ length: EVENTS }, (_, i) => `chat-stable-churn-${i}`),
+      );
+
+      stable.close();
     });
   });
 

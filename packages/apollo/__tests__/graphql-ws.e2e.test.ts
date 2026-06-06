@@ -22,6 +22,12 @@ interface Tracker {
   returned: Set<number>;
 }
 
+let nextPort = 39100;
+
+function getTestPort(): number {
+  return nextPort++;
+}
+
 function makeSchema(): { schema: GraphQLSchema; track: Tracker } {
   const track: Tracker = { iterators: 0, returned: new Set() };
   const schema = new GraphQLSchema({
@@ -84,9 +90,9 @@ async function startServer(
   );
   handler.register("/graphql");
 
-  const server = app.listen(0);
+  const port = getTestPort();
+  const server = app.listen(port);
   await new Promise((r) => setTimeout(r, 30));
-  const port = (server as unknown as { server: { port: number } }).server.port;
   const url = `ws://localhost:${port}/graphql`;
   return {
     url,

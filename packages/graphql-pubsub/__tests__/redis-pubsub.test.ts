@@ -19,6 +19,7 @@ class FakeRedis {
   private readonly listeners = new Map<string, Array<(...args: unknown[]) => void>>();
   public readonly subscribed = new Set<string>();
   public readonly psubscribed = new Set<string>();
+  public readonly published: Array<{ channel: string; message: string }> = [];
 
   on(event: string, cb: (...args: unknown[]) => void): this {
     const arr = this.listeners.get(event) ?? [];
@@ -59,7 +60,8 @@ class FakeRedis {
     this.psubscribed.delete(pattern);
   }
 
-  async publish(): Promise<number> {
+  async publish(channel: string, message: string): Promise<number> {
+    this.published.push({ channel, message });
     return 1;
   }
 
@@ -173,5 +175,86 @@ describe("RedisPubSub observability", () => {
     // Subsequent next() resolves with done=true (iterator already closed).
     const res = await iter.next();
     expect(res.done).toBe(true);
+  });
+
+  it("uses triggerTransform for both subscribe and publish channels", async () => {
+    const subscriber = new FakeRedis();
+    const publisher = new FakeRedis();
+    const pubsub = new RedisPubSub({
+      subscriber: subscriber as unknown as Redis,
+      publisher: publisher as unknown as Redis,
+      triggerTransform: (trigger) => `tenant:${trigger}`,
+    });
+
+    const received: unknown[] = [];
+    const subId = await pubsub.subscribe("orders", (message) => {
+      received.push(message);
+    });
+
+    expect(subscriber.subscribed.has("tenant:orders")).toBe(true);
+
+    await pubsub.publish("orders", { id: 1 });
+    expect(publisher.published[0]?.channel).toBe("tenant:orders");
+
+    subscriber.emitMessage("tenant:orders", JSON.stringify({ id: 1 }));
+    expect(received).toEqual([{ id: 1 }]);
+
+    pubsub.unsubscribe(subId);
+  });
+
+  it("uses keyPrefix before triggerTransform for subscribe and publish", async () => {
+    const subscriber = new FakeRedis();
+    const publisher = new FakeRedis();
+    const seenTriggers: string[] = [];
+    const pubsub = new RedisPubSub({
+      subscriber: subscriber as unknown as Redis,
+      publisher: publisher as unknown as Redis,
+      keyPrefix: "app:",
+      triggerTransform: (trigger) => {
+        seenTriggers.push(trigger);
+        return `tenant:${trigger}`;
+      },
+    });
+
+    const subId = await pubsub.subscribe("orders", () => {});
+    await pubsub.publish("orders", { id: 2 });
+
+    expect(seenTriggers).toEqual(["app:orders", "app:orders"]);
+    expect(subscriber.subscribed.has("tenant:app:orders")).toBe(true);
+    expect(publisher.published[0]?.channel).toBe("tenant:app:orders");
+
+    pubsub.unsubscribe(subId);
+  });
+
+  it("delivers transformed pattern subscriptions through pmessage", async () => {
+    const subscriber = new FakeRedis();
+    const publisher = new FakeRedis();
+    const pubsub = new RedisPubSub({
+      subscriber: subscriber as unknown as Redis,
+      publisher: publisher as unknown as Redis,
+      triggerTransform: (trigger, options) =>
+        options.pattern ? `tenant:${trigger}:*` : `tenant:${trigger}`,
+    });
+
+    const received: unknown[] = [];
+    const subId = await pubsub.subscribe(
+      "orders",
+      (message) => {
+        received.push(message);
+      },
+      { pattern: true },
+    );
+
+    expect(subscriber.psubscribed.has("tenant:orders:*")).toBe(true);
+
+    subscriber.emitPMessage(
+      "tenant:orders:*",
+      "tenant:orders:created",
+      JSON.stringify({ id: 3 }),
+    );
+    expect(received).toEqual([{ id: 3 }]);
+
+    pubsub.unsubscribe(subId);
+    expect(subscriber.psubscribed.has("tenant:orders:*")).toBe(false);
   });
 });

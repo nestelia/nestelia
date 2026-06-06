@@ -124,14 +124,14 @@
 | [GQL\_OPTIONS\_METADATA](variables/GQL_OPTIONS_METADATA.md) | Metadata key for GraphQL options. |
 | [GqlExecutionContext](variables/GqlExecutionContext.md) | Utility for creating GraphQL execution contexts. Provides access to resolver arguments, context, and GraphQL-specific information. |
 | [GraphQLBigInt](variables/GraphQLBigInt.md) | GraphQL scalar for JavaScript bigint values. Serialized as a string to avoid precision loss. |
-| [GraphQLBoolean](variables/GraphQLBoolean.md) | - |
+| [GraphQLBoolean](variables/GraphQLBoolean.md) | The built-in `Boolean` scalar type. |
 | [GraphQLDateTime](variables/GraphQLDateTime.md) | GraphQL scalar that serializes JS Date to/from ISO 8601 strings. |
 | [GraphQLEmailAddress](variables/GraphQLEmailAddress.md) | GraphQL scalar for email address strings (basic RFC format validation). |
-| [GraphQLFloat](variables/GraphQLFloat.md) | - |
-| [GraphQLID](variables/GraphQLID.md) | - |
-| [GraphQLInt](variables/GraphQLInt.md) | - |
+| [GraphQLFloat](variables/GraphQLFloat.md) | The built-in `Float` scalar type. |
+| [GraphQLID](variables/GraphQLID.md) | The built-in `ID` scalar type. |
+| [GraphQLInt](variables/GraphQLInt.md) | The built-in `Int` scalar type. |
 | [GraphQLJSON](variables/GraphQLJSON.md) | GraphQL scalar that accepts any JSON-serializable value. |
-| [GraphQLString](variables/GraphQLString.md) | - |
+| [GraphQLString](variables/GraphQLString.md) | The built-in `String` scalar type. |
 | [GraphQLUpload](variables/GraphQLUpload.md) | GraphQL scalar type for handling file uploads. Implements the GraphQL multipart request specification. |
 | [GraphQLURL](variables/GraphQLURL.md) | GraphQL scalar for validated URL strings. |
 | [GraphQLUUID](variables/GraphQLUUID.md) | GraphQL scalar for UUID strings (any version, canonical lowercase format). |

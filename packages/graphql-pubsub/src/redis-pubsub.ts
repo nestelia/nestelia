@@ -140,7 +140,8 @@ export class RedisPubSub implements PubSubEngine {
    * when provided, otherwise `JSON.stringify`.
    */
   public async publish(trigger: string, payload: unknown): Promise<void> {
-    const channelName = `${this.keyPrefix}${trigger}`;
+    const prefixed = `${this.keyPrefix}${trigger}`;
+    const channelName = this.triggerTransform(prefixed, {});
     const message = this.serializer
       ? this.serializer(payload)
       : JSON.stringify(payload);

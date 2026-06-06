@@ -4,4 +4,6 @@
 const GraphQLString: GraphQLScalarType<string, string>;
 ```
 
-Defined in: node\_modules/graphql/type/scalars.d.ts:15
+Defined in: node\_modules/graphql/type/scalars.d.ts:19
+
+The built-in `String` scalar type.

@@ -1,6 +1,6 @@
 # Class: GraphQLList\<T\>
 
-Defined in: node\_modules/graphql/type/definition.d.ts:178
+Defined in: node\_modules/graphql/type/definition.d.ts:959
 
 List Type Wrapper
 
@@ -8,7 +8,7 @@ A list is a wrapping type which points to another type.
 Lists are often created within the context of defining the fields of
 an object type.
 
-Example:
+## Example
 
 ```ts
 const PersonType = new GraphQLObjectType({
@@ -22,9 +22,9 @@ const PersonType = new GraphQLObjectType({
 
 ## Type Parameters
 
-| Type Parameter |
-| ------ |
-| `T` *extends* `GraphQLType` |
+| Type Parameter | Description |
+| ------ | ------ |
+| `T` *extends* `GraphQLType` | The GraphQL type wrapped by this list type. |
 
 ## Accessors
 
@@ -36,11 +36,15 @@ const PersonType = new GraphQLObjectType({
 get toStringTag: string;
 ```
 
-Defined in: node\_modules/graphql/type/definition.d.ts:181
+Defined in: node\_modules/graphql/type/definition.d.ts:980
+
+Returns the value used by `Object.prototype.toString`.
 
 ##### Returns
 
 `string`
+
+The built-in string tag for this object.
 
 ## Constructors
 
@@ -50,17 +54,30 @@ Defined in: node\_modules/graphql/type/definition.d.ts:181
 new GraphQLList<T>(ofType): GraphQLList<T>;
 ```
 
-Defined in: node\_modules/graphql/type/definition.d.ts:180
+Defined in: node\_modules/graphql/type/definition.d.ts:975
+
+Creates a GraphQLList instance.
 
 #### Parameters
 
-| Parameter | Type |
-| ------ | ------ |
-| `ofType` | `T` |
+| Parameter | Type | Description |
+| ------ | ------ | ------ |
+| `ofType` | `T` | The type to wrap. |
 
 #### Returns
 
 `GraphQLList`\<`T`\>
+
+#### Example
+
+```ts
+import { GraphQLList, GraphQLString } from 'graphql/type';
+
+const stringList = new GraphQLList(GraphQLString);
+
+stringList.ofType; // => GraphQLString
+String(stringList); // => '[String]'
+```
 
 ## Methods
 
@@ -70,11 +87,26 @@ Defined in: node\_modules/graphql/type/definition.d.ts:180
 toJSON(): string;
 ```
 
-Defined in: node\_modules/graphql/type/definition.d.ts:183
+Defined in: node\_modules/graphql/type/definition.d.ts:1009
+
+Returns the JSON representation used when this object is serialized.
 
 #### Returns
 
 `string`
+
+The JSON-serializable representation.
+
+#### Example
+
+```ts
+import { GraphQLList, GraphQLString } from 'graphql/type';
+
+const stringList = new GraphQLList(GraphQLString);
+
+stringList.toJSON(); // => '[String]'
+JSON.stringify({ type: stringList }); // => '{"type":"[String]"}'
+```
 
 ***
 
@@ -84,14 +116,30 @@ Defined in: node\_modules/graphql/type/definition.d.ts:183
 toString(): string;
 ```
 
-Defined in: node\_modules/graphql/type/definition.d.ts:182
+Defined in: node\_modules/graphql/type/definition.d.ts:995
+
+Returns this wrapping type as a GraphQL type-reference string.
 
 #### Returns
 
 `string`
 
+The GraphQL type-reference string.
+
+#### Example
+
+```ts
+import { GraphQLList, GraphQLNonNull, GraphQLString } from 'graphql/type';
+
+const stringList = new GraphQLList(GraphQLString);
+const requiredStringList = new GraphQLList(new GraphQLNonNull(GraphQLString));
+
+stringList.toString(); // => '[String]'
+requiredStringList.toString(); // => '[String!]'
+```
+
 ## Properties
 
-| Property | Modifier | Type | Defined in |
-| ------ | ------ | ------ | ------ |
-| <a id="oftype"></a> `ofType` | `readonly` | `T` | node\_modules/graphql/type/definition.d.ts:179 |
+| Property | Modifier | Type | Description | Defined in |
+| ------ | ------ | ------ | ------ | ------ |
+| <a id="oftype"></a> `ofType` | `readonly` | `T` | The type wrapped by this list or non-null type. | node\_modules/graphql/type/definition.d.ts:961 |

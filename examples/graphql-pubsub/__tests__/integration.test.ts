@@ -204,6 +204,12 @@ class TestAppModule {}
 
 const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
+let nextPort = 39300;
+
+function getTestPort(): number {
+  return nextPort++;
+}
+
 function gql(
   server: Elysia,
   query: string,
@@ -318,8 +324,8 @@ describe("graphql-pubsub integration", () => {
   beforeAll(async () => {
     app = await createElysiaApplication(TestAppModule, { logger: false });
     server = app.getHttpServer();
-    server.listen(0);
-    port = (server as unknown as { server: { port: number } }).server.port;
+    port = getTestPort();
+    server.listen(port);
   });
 
   afterAll(() => {
@@ -552,6 +558,107 @@ describe("graphql-pubsub integration", () => {
       for (const c of clients) {
         c.close();
       }
+    });
+
+    it("fan-out stress: every subscriber receives every event", async () => {
+      const CLIENTS = 12;
+      const EVENTS = 6;
+      const clients = await Promise.all(
+        Array.from({ length: CLIENTS }, async (_, i) => {
+          const c = new WsClient(`ws://localhost:${port}/graphql`);
+          await c.connect();
+          await c.init();
+          await c.subscribe(
+            `fanout-${i}`,
+            "subscription { notificationAdded { message } }",
+          );
+          return c;
+        }),
+      );
+
+      await wait(50);
+
+      for (let i = 0; i < EVENTS; i++) {
+        await gql(
+          server,
+          `mutation { sendNotification(message: "fanout-${i}") { id } }`,
+        );
+      }
+
+      const allMessages = await Promise.all(
+        clients.map((c) => c.collectNext(EVENTS, 5000)),
+      );
+
+      for (const messages of allMessages) {
+        expect(messages).toHaveLength(EVENTS);
+        expect(messages.every((m) => m.type === "next")).toBe(true);
+        const payloads = messages.map(
+          (m) =>
+            (
+              m.payload as {
+                data: { notificationAdded: { message: string } };
+              }
+            ).data.notificationAdded.message,
+        );
+        expect(payloads).toEqual(
+          Array.from({ length: EVENTS }, (_, i) => `fanout-${i}`),
+        );
+      }
+
+      for (const c of clients) {
+        c.close();
+      }
+    });
+
+    it("stable subscriber receives all events while other clients reconnect", async () => {
+      const EVENTS = 8;
+      const CHURN_CLIENTS = 20;
+      const stable = new WsClient(`ws://localhost:${port}/graphql`);
+      await stable.connect();
+      await stable.init();
+      await stable.subscribe(
+        "stable-during-churn",
+        "subscription { notificationAdded { message } }",
+      );
+      await wait(50);
+
+      const churn = Promise.all(
+        Array.from({ length: CHURN_CLIENTS }, async (_, i) => {
+          const c = new WsClient(`ws://localhost:${port}/graphql`);
+          await c.connect();
+          await c.init();
+          await c.subscribe(
+            `churn-${i}`,
+            "subscription { notificationAdded { message } }",
+          );
+          await wait(i % 4);
+          c.close();
+        }),
+      );
+
+      for (let i = 0; i < EVENTS; i++) {
+        await gql(
+          server,
+          `mutation { sendNotification(message: "stable-churn-${i}") { id } }`,
+        );
+        await wait(2);
+      }
+      await churn;
+
+      const messages = await stable.collectNext(EVENTS, 5000);
+      const payloads = messages.map(
+        (m) =>
+          (
+            m.payload as {
+              data: { notificationAdded: { message: string } };
+            }
+          ).data.notificationAdded.message,
+      );
+      expect(payloads).toEqual(
+        Array.from({ length: EVENTS }, (_, i) => `stable-churn-${i}`),
+      );
+
+      stable.close();
     });
 
     it("multiple concurrent subscriptions on the same connection", async () => {

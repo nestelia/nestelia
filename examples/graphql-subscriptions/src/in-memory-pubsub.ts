@@ -22,6 +22,10 @@ export class InMemoryPubSub implements PubSubEngine {
     { trigger: string; handler: MessageHandler }
   >();
 
+  constructor() {
+    this.ee.setMaxListeners(0);
+  }
+
   async publish(trigger: string, payload: unknown): Promise<void> {
     this.ee.emit(trigger, payload);
   }

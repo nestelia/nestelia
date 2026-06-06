@@ -33,11 +33,15 @@ async createUser(@Args('input') input: CreateUserInput) {
 get toStringTag: string;
 ```
 
-Defined in: node\_modules/graphql/error/GraphQLError.d.ts:107
+Defined in: node\_modules/graphql/error/GraphQLError.d.ts:192
+
+Returns the value used by `Object.prototype.toString`.
 
 ##### Returns
 
 `string`
+
+The built-in string tag for this object.
 
 #### Inherited from
 
@@ -82,11 +86,28 @@ GraphQLError.constructor
 toJSON(): GraphQLFormattedError;
 ```
 
-Defined in: node\_modules/graphql/error/GraphQLError.d.ts:109
+Defined in: node\_modules/graphql/error/GraphQLError.d.ts:225
+
+Returns the JSON representation used when this object is serialized.
 
 #### Returns
 
 `GraphQLFormattedError`
+
+The JSON-serializable representation.
+
+#### Example
+
+```ts
+import { GraphQLError } from 'graphql/error';
+
+const error = new GraphQLError('Resolver failed.', {
+  path: ['viewer', 'name'],
+  extensions: { code: 'INTERNAL' },
+});
+
+error.toJSON(); // => { message: 'Resolver failed.', path: ['viewer', 'name'], extensions: { code: 'INTERNAL' } }
+```
 
 #### Inherited from
 
@@ -102,13 +123,29 @@ GraphQLError.toJSON
 toString(): string;
 ```
 
-Defined in: node\_modules/graphql/error/GraphQLError.d.ts:108
+Defined in: node\_modules/graphql/error/GraphQLError.d.ts:209
 
-Returns a string representation of an object.
+Returns this error as a human-readable message with source locations.
 
 #### Returns
 
 `string`
+
+The formatted error string.
+
+#### Example
+
+```ts
+import { Source } from 'graphql/language';
+import { GraphQLError } from 'graphql/error';
+
+const error = new GraphQLError('Cannot query field "name".', {
+  source: new Source('{ name }'),
+  positions: [2],
+});
+
+error.toString(); // => 'Cannot query field "name".\n\nGraphQL request:1:3\n1 | { name }\n  |   ^'
+```
 
 #### Inherited from
 
@@ -310,15 +347,15 @@ GraphQLError.prepareStackTrace
 | Property | Modifier | Type | Description | Inherited from | Defined in |
 | ------ | ------ | ------ | ------ | ------ | ------ |
 | <a id="cause"></a> `cause?` | `public` | `unknown` | The cause of the error. | `GraphQLError.cause` | node\_modules/typescript/lib/lib.es2022.error.d.ts:24 |
-| <a id="coordinate"></a> `coordinate?` | `readonly` | `string` | An optional schema coordinate (e.g. "MyType.myField") associated with this error. | `GraphQLError.coordinate` | node\_modules/@apollo/server/node\_modules/@graphql-tools/schema/node\_modules/@graphql-tools/utils/typings/errors.d.ts:19 |
-| <a id="extensions"></a> `extensions` | `readonly` | `GraphQLErrorExtensions` | Extension fields to add to the formatted error. | `GraphQLError.extensions` | node\_modules/graphql/error/GraphQLError.d.ts:89 |
-| <a id="locations"></a> `locations` | `readonly` | readonly `SourceLocation`[] \| `undefined` | An array of `{ line, column }` locations within the source GraphQL document which correspond to this error. Errors during validation often contain multiple locations, for example to point out two things with the same name. Errors during execution include a single location, the field which produced the error. Enumerable, and appears in the result of JSON.stringify(). | `GraphQLError.locations` | node\_modules/graphql/error/GraphQLError.d.ts:58 |
+| <a id="coordinate"></a> `coordinate?` | `readonly` | `string` | An optional schema coordinate (e.g. "MyType.myField") associated with this error. | `GraphQLError.coordinate` | node\_modules/@graphql-tools/utils/typings/errors.d.ts:19 |
+| <a id="extensions"></a> `extensions` | `readonly` | `GraphQLErrorExtensions` | Extension fields to add to the formatted error. | `GraphQLError.extensions` | node\_modules/graphql/error/GraphQLError.d.ts:90 |
+| <a id="locations"></a> `locations` | `readonly` | readonly `SourceLocation`[] \| `undefined` | An array of `{ line, column }` locations within the source GraphQL document which correspond to this error. Errors during validation often contain multiple locations, for example to point out two things with the same name. Errors during execution include a single location, the field which produced the error. Enumerable, and appears in the result of JSON.stringify(). | `GraphQLError.locations` | node\_modules/graphql/error/GraphQLError.d.ts:65 |
 | <a id="message"></a> `message` | `public` | `string` | - | `GraphQLError.message` | node\_modules/typescript/lib/lib.es5.d.ts:1075 |
 | <a id="name"></a> `name` | `public` | `string` | - | `GraphQLError.name` | node\_modules/typescript/lib/lib.es5.d.ts:1074 |
-| <a id="nodes"></a> `nodes` | `readonly` | readonly `ASTNode`[] \| `undefined` | An array of GraphQL AST Nodes corresponding to this error. | `GraphQLError.nodes` | node\_modules/graphql/error/GraphQLError.d.ts:69 |
-| <a id="originalerror"></a> `originalError` | `readonly` | `Error` \| `undefined` | The original error thrown from a field resolver during execution. | `GraphQLError.originalError` | node\_modules/graphql/error/GraphQLError.d.ts:85 |
-| <a id="path"></a> `path` | `readonly` | readonly (`string` \| `number`)[] \| `undefined` | An array describing the JSON-path into the execution response which corresponds to this error. Only included for errors during execution. Enumerable, and appears in the result of JSON.stringify(). | `GraphQLError.path` | node\_modules/graphql/error/GraphQLError.d.ts:65 |
-| <a id="positions"></a> `positions` | `readonly` | readonly `number`[] \| `undefined` | An array of character offsets within the source GraphQL document which correspond to this error. | `GraphQLError.positions` | node\_modules/graphql/error/GraphQLError.d.ts:81 |
-| <a id="source"></a> `source` | `readonly` | `Source` \| `undefined` | The source GraphQL document for the first location of this error. Note that if this Error represents more than one node, the source may not represent nodes after the first node. | `GraphQLError.source` | node\_modules/graphql/error/GraphQLError.d.ts:76 |
+| <a id="nodes"></a> `nodes` | `readonly` | readonly `ASTNode`[] \| `undefined` | An array of GraphQL AST Nodes corresponding to this error. | `GraphQLError.nodes` | node\_modules/graphql/error/GraphQLError.d.ts:74 |
+| <a id="originalerror"></a> `originalError` | `readonly` | `Error` \| `undefined` | Original error that caused this GraphQLError, if one exists. | `GraphQLError.originalError` | node\_modules/graphql/error/GraphQLError.d.ts:88 |
+| <a id="path"></a> `path` | `readonly` | readonly (`string` \| `number`)[] \| `undefined` | An array describing the JSON-path into the execution response which corresponds to this error. Only included for errors during execution. Enumerable, and appears in the result of JSON.stringify(). | `GraphQLError.path` | node\_modules/graphql/error/GraphQLError.d.ts:72 |
+| <a id="positions"></a> `positions` | `readonly` | readonly `number`[] \| `undefined` | An array of character offsets within the source GraphQL document which correspond to this error. | `GraphQLError.positions` | node\_modules/graphql/error/GraphQLError.d.ts:86 |
+| <a id="source"></a> `source` | `readonly` | `Source` \| `undefined` | The source GraphQL document for the first location of this error. Note that if this Error represents more than one node, the source may not represent nodes after the first node. | `GraphQLError.source` | node\_modules/graphql/error/GraphQLError.d.ts:81 |
 | <a id="stack"></a> `stack?` | `public` | `string` | - | `GraphQLError.stack` | node\_modules/typescript/lib/lib.es5.d.ts:1076 |
 | <a id="stacktracelimit"></a> `stackTraceLimit` | `static` | `number` | The `Error.stackTraceLimit` property specifies the number of stack frames collected by a stack trace (whether generated by `new Error().stack` or `Error.captureStackTrace(obj)`). The default value is `10` but may be set to any valid JavaScript number. Changes will affect any stack trace captured _after_ the value has been changed. If set to a non-number value, or set to a negative number, stack traces will not capture any frames. | `GraphQLError.stackTraceLimit` | node\_modules/@types/node/globals.d.ts:67 |

@@ -204,10 +204,8 @@ export class GraphQLWsHandler {
     state.keepAliveInterval = undefined;
     for (const handle of state.subscriptions.values()) {
       handle.abortController.abort();
-      try {
-        handle.iterator?.return?.();
-      } catch {
-        // iterator already closed or errored
+      if (handle.iterator) {
+        void this.callReturnWithTimeout(handle.iterator);
       }
     }
     state.subscriptions.clear();
@@ -267,6 +265,7 @@ export class GraphQLWsHandler {
     if (state) {
       this.cleanupConnection(state);
       this.wsOptions.onDisconnect?.(state.context);
+      this.wsOptions.onClose?.(state.context);
       this.connections.delete(socket.id);
     }
   }
@@ -320,10 +319,8 @@ export class GraphQLWsHandler {
         const handle = state.subscriptions.get(id);
         if (handle) {
           handle.abortController.abort();
-          try {
-            handle.iterator?.return?.();
-          } catch {
-            // iterator already closed
+          if (handle.iterator) {
+            void this.callReturnWithTimeout(handle.iterator);
           }
           state.subscriptions.delete(id);
         }
@@ -429,6 +426,11 @@ export class GraphQLWsHandler {
       return;
     }
 
+    if (state.subscriptions.has(subscribeMsg.id)) {
+      socket.close(CloseCode.SubscriberAlreadyExists);
+      return;
+    }
+
     try {
       await this.executeSubscription(subscribeMsg, state);
     } catch (err) {
@@ -465,13 +467,34 @@ export class GraphQLWsHandler {
         return;
       }
 
-      const subscribeArgs = {
+      let subscribeArgs: ExecutionArgs = {
         schema: this.schema,
         document,
         contextValue,
         variableValues: message.payload.variables ?? undefined,
         operationName: message.payload.operationName ?? undefined,
       };
+
+      if (this.wsOptions.onSubscribe) {
+        const hookResult = await this.wsOptions.onSubscribe(
+          state.context,
+          message.id,
+          message.payload,
+        );
+
+        if (Array.isArray(hookResult)) {
+          this.sendError(
+            state.socket,
+            message.id,
+            hookResult.map((error) => ({ message: error.message })),
+          );
+          return;
+        }
+
+        if (this.isExecutionArgs(hookResult)) {
+          subscribeArgs = hookResult;
+        }
+      }
 
       // Use createSourceEventStream instead of subscribe() to get the raw
       // event stream without graphql-js's mapAsyncIterator wrapper.
@@ -559,6 +582,13 @@ export class GraphQLWsHandler {
             rootValue: next.value,
           });
           this.sendNext(state.socket, id, result);
+          await this.wsOptions.onNext?.(
+            state.context,
+            id,
+            next.value,
+            subscribeArgs,
+            result,
+          );
         } catch (err) {
           if (!abortController.signal.aborted) {
             this.sendError(state.socket, id, [{ message: String(err) }]);
@@ -599,8 +629,14 @@ export class GraphQLWsHandler {
     iter: AsyncIterator<unknown>,
   ): Promise<void> {
     if (!iter.return) return;
+    let returnResult: PromiseLike<IteratorResult<unknown>> | IteratorResult<unknown>;
+    try {
+      returnResult = iter.return();
+    } catch {
+      return;
+    }
     const timeoutMs = 5_000;
-    const returnPromise = iter.return().then(
+    const returnPromise = Promise.resolve(returnResult).then(
       () => undefined,
       () => undefined,
     );
@@ -690,5 +726,14 @@ export class GraphQLWsHandler {
 
   private isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === "object" && value !== null && !Array.isArray(value);
+  }
+
+  private isExecutionArgs(value: unknown): value is ExecutionArgs {
+    return (
+      typeof value === "object" &&
+      value !== null &&
+      "schema" in value &&
+      "document" in value
+    );
   }
 }
