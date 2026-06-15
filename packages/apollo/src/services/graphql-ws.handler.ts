@@ -281,10 +281,13 @@ export class GraphQLWsHandler {
       ) {
         return rawMessage as { type: string; [key: string]: unknown };
       }
-      if (typeof rawMessage === "string") {
-        return JSON.parse(rawMessage);
-      }
-      return JSON.parse(String(rawMessage));
+      const text =
+        typeof rawMessage === "string" ? rawMessage : String(rawMessage);
+      // Windows clients (.NET Encoding.UTF8 preamble, PowerShell) often
+      // prepend a UTF-8 BOM, which JSON.parse rejects.
+      return JSON.parse(
+        text.charCodeAt(0) === 0xfeff ? text.slice(1) : text,
+      );
     } catch {
       return undefined;
     }
