@@ -203,6 +203,7 @@ const enDocs = [
     ["GraphQL PubSub",   "packages/graphql-pubsub"],
     ["Drizzle ORM",      "packages/drizzle"],
     ["Event Emitter",    "packages/event-emitter"],
+    ["Queues (BullMQ)",  "packages/bullmq"],
   ]),
   docSection("Advanced", [
     ["Custom Providers",   "advanced/custom-providers"],
@@ -269,6 +270,7 @@ const ruDocs = [
     ["GraphQL PubSub",   "packages/graphql-pubsub"],
     ["Drizzle ORM",      "packages/drizzle"],
     ["Event Emitter",    "packages/event-emitter"],
+    ["Queues (BullMQ)",  "packages/bullmq"],
   ], "/ru"),
   docSection("Продвинутые темы", [
     ["Пользовательские провайдеры", "advanced/custom-providers"],

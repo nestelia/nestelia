@@ -20,6 +20,7 @@ nestelia incluye un conjunto de paquetes opcionales que extienden el framework p
 | `nestelia/graphql-pubsub` | Redis PubSub para suscripciones GraphQL | `ioredis` |
 | `nestelia/drizzle` | Drizzle ORM — type-safe SQL | `drizzle-orm` |
 | `nestelia/event-emitter` | Emisor de eventos tipado y asíncrono con soporte de wildcards | — |
+| `nestelia/bullmq` | Colas de tareas en segundo plano con BullMQ | `bullmq` |
 
 ## Instalación
 
@@ -43,6 +44,9 @@ bun add amqplib
 
 # Microservicios (transporte Redis) / GraphQL PubSub
 bun add ioredis
+
+# Colas BullMQ
+bun add bullmq
 ```
 
 ## Rutas de Importación
@@ -60,4 +64,5 @@ import { RabbitMQModule } from "nestelia/rabbitmq";
 import { GraphQLPubSubModule } from "nestelia/graphql-pubsub";
 import { DrizzleModule } from "nestelia/drizzle";
 import { EventEmitterModule } from "nestelia/event-emitter";
+import { QueueModule } from "nestelia/bullmq";
 ```

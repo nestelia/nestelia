@@ -70,6 +70,11 @@
       "import": "./dist/esm/packages/event-emitter/src/index.js",
       "require": "./dist/cjs/packages/event-emitter/src/index.js",
       "types": "./dist/types/packages/event-emitter/src/index.d.ts"
+    },
+    "./bullmq": {
+      "import": "./dist/esm/packages/bullmq/src/index.js",
+      "require": "./dist/cjs/packages/bullmq/src/index.js",
+      "types": "./dist/types/packages/bullmq/src/index.d.ts"
     }
   },
   "publishConfig": {
@@ -118,7 +123,8 @@
     "passport": "^0.7.0",
     "amqplib": "^0.10.0",
     "amqp-connection-manager": "^4.0.0",
-    "drizzle-orm": ">=0.30.0"
+    "drizzle-orm": ">=0.30.0",
+    "bullmq": "^5.0.0"
   },
   "peerDependenciesMeta": {
     "class-validator": {
@@ -166,6 +172,9 @@
     "drizzle-orm": {
       "optional": true
     },
+    "bullmq": {
+      "optional": true
+    },
     "elysia": {
       "optional": false
     },
@@ -183,6 +192,7 @@
     "@types/passport": "^1.0.17",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.9",
+    "bullmq": "^5.78.1",
     "cache-manager": "^7.2.8",
     "cacheable": "^2.3.5",
     "class-transformer": "^0.5.1",

@@ -29,6 +29,7 @@ const ENTRYPOINTS = [
   "./packages/graphql-pubsub/src/index.ts",
   "./packages/drizzle/src/index.ts",
   "./packages/event-emitter/src/index.ts",
+  "./packages/bullmq/src/index.ts",
 ];
 
 // All peer + optional dependencies — must NOT be bundled
@@ -52,6 +53,7 @@ const EXTERNAL = [
   "passport",
   "amqplib",
   "drizzle-orm",
+  "bullmq",
 ];
 
 // ─── Clean dist ───────────────────────────────────────────────────────────────

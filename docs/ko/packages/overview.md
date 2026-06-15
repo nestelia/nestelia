@@ -20,6 +20,7 @@ nestelia는 코어 프레임워크를 확장하는 선택적 패키지 세트를
 | `nestelia/graphql-pubsub` | GraphQL 구독을 위한 Redis PubSub | `ioredis` |
 | `nestelia/drizzle` | Drizzle ORM — type-safe SQL | `drizzle-orm` |
 | `nestelia/event-emitter` | 와일드카드 지원 타입 안전 비동기 이벤트 이미터 | — |
+| `nestelia/bullmq` | BullMQ를 이용한 백그라운드 작업 큐 | `bullmq` |
 
 ## 설치
 
@@ -43,6 +44,9 @@ bun add amqplib
 
 # 마이크로서비스 (Redis 트랜스포트) / GraphQL PubSub
 bun add ioredis
+
+# BullMQ 큐
+bun add bullmq
 ```
 
 ## 임포트 경로
@@ -60,4 +64,5 @@ import { RabbitMQModule } from "nestelia/rabbitmq";
 import { GraphQLPubSubModule } from "nestelia/graphql-pubsub";
 import { DrizzleModule } from "nestelia/drizzle";
 import { EventEmitterModule } from "nestelia/event-emitter";
+import { QueueModule } from "nestelia/bullmq";
 ```
