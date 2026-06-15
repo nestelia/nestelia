@@ -44,7 +44,7 @@ class CacheService implements OnModuleInit {
 
 ### OnApplicationBootstrap
 
-すべてのモジュールが初期化された後に呼ばれます:
+すべてのモジュールが初期化された後（すべての `onModuleInit` フックが実行された後）に一度だけ呼ばれます。`createElysiaApplication()` の実行中に発火するため、実行するために `listen()` を呼ぶ必要は**ありません**。したがって、サーバーレスや `getHttpServer().handle()` の構成でも動作します:
 
 ```typescript
 @Injectable()
@@ -97,14 +97,20 @@ class CleanupService implements OnApplicationShutdown {
 
 ## 実行順序
 
-起動時:
-1. `OnModuleInit` — モジュールごと、インポート順に
-2. `OnApplicationBootstrap` — すべてのモジュール初期化後
+起動時（`createElysiaApplication()` 内）:
+1. `OnModuleInit` — すべてのプロバイダーがインスタンス化された後
+2. `OnApplicationBootstrap` — すべてのモジュール初期化後に一度だけ
 
-シャットダウン時:
-1. `BeforeApplicationShutdown`
-2. `OnModuleDestroy`
+シャットダウン時（`app.close()` 内）:
+1. `OnModuleDestroy`
+2. `BeforeApplicationShutdown`
 3. `OnApplicationShutdown`
+
+## 保証
+
+- **すべてのフックはすべてのプロバイダーで発火します。** プロバイダーは実装している各フックを個別に受け取ります。他のフックを実行するために `onModuleInit` も併せて実装する必要はありません。
+- **Bootstrap は初期化時に実行されます。** `OnApplicationBootstrap` は `createElysiaApplication()` の実行中に一度だけトリガーされ、冪等です。そのため、後で `app.listen()` を呼んでも 2 回実行されることはありません。
+- **シャットダウンフックには `app.close()` が必要です。** `OnModuleDestroy`、`BeforeApplicationShutdown`、`OnApplicationShutdown` は `app.close()` を呼んだときに実行されます。
 
 ## Elysia ライフサイクルデコレータ
 

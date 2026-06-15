@@ -44,7 +44,7 @@ class CacheService implements OnModuleInit {
 
 ### OnApplicationBootstrap
 
-Called after all modules have been initialized:
+Called once, after every module has been initialized (all `onModuleInit` hooks have run). It fires during `createElysiaApplication()` — you do **not** need to call `listen()` for it to run, so it works for serverless and `getHttpServer().handle()` setups too:
 
 ```typescript
 @Injectable()
@@ -97,14 +97,20 @@ class CleanupService implements OnApplicationShutdown {
 
 ## Execution Order
 
-During startup:
-1. `OnModuleInit` — per module, in import order
-2. `OnApplicationBootstrap` — after all modules initialized
+During startup (inside `createElysiaApplication()`):
+1. `OnModuleInit` — after all providers are instantiated
+2. `OnApplicationBootstrap` — once, after all modules are initialized
 
-During shutdown:
-1. `BeforeApplicationShutdown`
-2. `OnModuleDestroy`
+During shutdown (inside `app.close()`):
+1. `OnModuleDestroy`
+2. `BeforeApplicationShutdown`
 3. `OnApplicationShutdown`
+
+## Guarantees
+
+- **Every hook fires for every provider.** A provider receives each hook it implements independently — you do not need to also implement `onModuleInit` for the other hooks to run.
+- **Bootstrap runs at init.** `OnApplicationBootstrap` is triggered once during `createElysiaApplication()` and is idempotent, so a later `app.listen()` will not run it twice.
+- **Shutdown hooks require `app.close()`.** `OnModuleDestroy`, `BeforeApplicationShutdown`, and `OnApplicationShutdown` run when you call `app.close()`.
 
 ## Elysia Lifecycle Decorators
 

@@ -44,7 +44,7 @@ class CacheService implements OnModuleInit {
 
 ### OnApplicationBootstrap
 
-모든 모듈이 초기화된 후 호출됩니다:
+모든 모듈이 초기화된 후(모든 `onModuleInit` 훅이 실행된 후) 한 번 호출됩니다. 이 훅은 `createElysiaApplication()` 중에 실행됩니다 — 실행을 위해 `listen()`을 호출할 **필요가 없으므로**, 서버리스 및 `getHttpServer().handle()` 구성에서도 동작합니다:
 
 ```typescript
 @Injectable()
@@ -97,14 +97,20 @@ class CleanupService implements OnApplicationShutdown {
 
 ## 실행 순서
 
-시작 시:
-1. `OnModuleInit` — 임포트 순서대로 모듈별
-2. `OnApplicationBootstrap` — 모든 모듈이 초기화된 후
+시작 시 (`createElysiaApplication()` 내부):
+1. `OnModuleInit` — 모든 프로바이더가 인스턴스화된 후
+2. `OnApplicationBootstrap` — 모든 모듈이 초기화된 후 한 번
 
-종료 시:
-1. `BeforeApplicationShutdown`
-2. `OnModuleDestroy`
+종료 시 (`app.close()` 내부):
+1. `OnModuleDestroy`
+2. `BeforeApplicationShutdown`
 3. `OnApplicationShutdown`
+
+## 보장 사항
+
+- **모든 훅은 모든 프로바이더에 대해 실행됩니다.** 프로바이더는 자신이 구현한 각 훅을 독립적으로 받습니다 — 다른 훅이 실행되도록 하기 위해 `onModuleInit`을 함께 구현할 필요는 없습니다.
+- **부트스트랩은 초기화 시 실행됩니다.** `OnApplicationBootstrap`은 `createElysiaApplication()` 중에 한 번 트리거되며 멱등(idempotent)하므로, 이후의 `app.listen()`이 이를 두 번 실행하지 않습니다.
+- **종료 훅은 `app.close()`가 필요합니다.** `OnModuleDestroy`, `BeforeApplicationShutdown`, `OnApplicationShutdown`은 `app.close()`를 호출할 때 실행됩니다.
 
 ## Elysia 라이프사이클 데코레이터
 

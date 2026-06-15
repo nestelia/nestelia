@@ -44,7 +44,7 @@ class CacheService implements OnModuleInit {
 
 ### OnApplicationBootstrap
 
-所有模块初始化完成后调用：
+在每个模块都初始化完成后（所有 `onModuleInit` 钩子都已运行）调用一次。它在 `createElysiaApplication()` 期间触发——你**不**需要调用 `listen()` 它就会运行，因此同样适用于无服务器（serverless）和 `getHttpServer().handle()` 等场景：
 
 ```typescript
 @Injectable()
@@ -97,14 +97,20 @@ class CleanupService implements OnApplicationShutdown {
 
 ## 执行顺序
 
-启动期间：
-1. `OnModuleInit` — 按导入顺序逐模块执行
-2. `OnApplicationBootstrap` — 所有模块初始化完成后执行
+启动期间（在 `createElysiaApplication()` 内部）：
+1. `OnModuleInit` — 在所有提供者实例化完成后
+2. `OnApplicationBootstrap` — 在所有模块初始化完成后调用一次
 
-关闭期间：
-1. `BeforeApplicationShutdown`
-2. `OnModuleDestroy`
+关闭期间（在 `app.close()` 内部）：
+1. `OnModuleDestroy`
+2. `BeforeApplicationShutdown`
 3. `OnApplicationShutdown`
+
+## 保证
+
+- **每个钩子都会为每个提供者触发。** 提供者会独立地接收它所实现的每一个钩子——你不需要为了让其他钩子运行而额外实现 `onModuleInit`。
+- **Bootstrap 在初始化时运行。** `OnApplicationBootstrap` 在 `createElysiaApplication()` 期间触发一次，并且是幂等的，因此之后的 `app.listen()` 不会再次运行它。
+- **关闭钩子需要 `app.close()`。** `OnModuleDestroy`、`BeforeApplicationShutdown` 和 `OnApplicationShutdown` 会在你调用 `app.close()` 时运行。
 
 ## Elysia 生命周期装饰器
 
