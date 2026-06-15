@@ -11,6 +11,7 @@ import type {
  */
 export class LifecycleManager {
   private providers: any[] = [];
+  private bootstrapTriggered = false;
 
   /**
    * Register a provider with lifecycle hooks
@@ -39,6 +40,10 @@ export class LifecycleManager {
    * Trigger onApplicationBootstrap hooks for all registered providers
    */
   public triggerOnApplicationBootstrap() {
+    // Idempotent: bootstrap runs once per application, whether triggered by
+    // createElysiaApplication (init) or a later listen() call.
+    if (this.bootstrapTriggered) return;
+    this.bootstrapTriggered = true;
     for (const provider of this.providers) {
       if (
         typeof provider === "object" &&
@@ -82,6 +87,7 @@ export class LifecycleManager {
    */
   public clear(): void {
     this.providers = [];
+    this.bootstrapTriggered = false;
   }
 
   /**

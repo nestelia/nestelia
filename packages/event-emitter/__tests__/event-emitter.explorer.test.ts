@@ -35,7 +35,7 @@ describe("EventEmitterExplorer", () => {
       isPending: false,
     });
 
-    explorer.onApplicationBootstrap();
+    explorer.onModuleInit();
     emitter.emit("test.event");
 
     expect(called).toBe(true);
@@ -66,7 +66,7 @@ describe("EventEmitterExplorer", () => {
       manualCount++;
     });
 
-    explorer.onApplicationBootstrap();
+    explorer.onModuleInit();
     explorer.onModuleDestroy();
 
     // After destroy, manual handler should still work
@@ -100,7 +100,7 @@ describe("EventEmitterExplorer", () => {
       isPending: false,
     });
 
-    explorer.onApplicationBootstrap();
+    explorer.onModuleInit();
     expect(emitter.listenerCount("test.event")).toBe(2);
 
     explorer.onModuleDestroy();

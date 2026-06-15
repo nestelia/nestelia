@@ -8,7 +8,7 @@ Defined in: [packages/event-emitter/src/decorators/on-event.decorator.ts:45](htt
 
 Marks a method as a listener for the given event (or wildcard pattern).
 
-The method is automatically registered during `onApplicationBootstrap` by
+The method is automatically registered during `onModuleInit` by
 `EventEmitterExplorer` — no extra wiring is required.
 
 ## Parameters

@@ -3,7 +3,6 @@ import type { Provider } from "../di/provider.interface";
 import { Container, isCustomProvider, isTypeProvider, Scope, type Type } from "../di";
 import { INJECTABLE_METADATA, MODULE_METADATA } from "../decorators/constants";
 import { getLifecycleManager } from "../lifecycle/lifecycle-manager";
-import { Logger } from "../logger/logger.service";
 
 export interface DynamicModule {
   module: Type;
@@ -95,7 +94,11 @@ export async function initializeSingletonProviders(): Promise<void> {
     }
   }
 
-  // Second pass: call onModuleInit after all providers are loaded
+  // Second pass: call onModuleInit after all providers are loaded, and register
+  // EVERY provider with the lifecycle manager so the remaining hooks
+  // (onApplicationBootstrap, onModuleDestroy, beforeApplicationShutdown,
+  // onApplicationShutdown) fire even when a provider does not also implement
+  // onModuleInit.
   for (const instance of instances) {
     if (
       typeof (instance as any).onModuleInit === "function" &&
@@ -103,6 +106,10 @@ export async function initializeSingletonProviders(): Promise<void> {
     ) {
       await (instance as any).onModuleInit();
       (instance as any).__onModuleInitCalled = true;
+    }
+
+    if (!(instance as any).__lifecycleRegistered) {
+      (instance as any).__lifecycleRegistered = true;
       getLifecycleManager().register(instance);
     }
   }

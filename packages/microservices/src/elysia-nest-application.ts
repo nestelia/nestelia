@@ -590,6 +590,9 @@ export class ElysiaNestApplication<TApp extends AnyElysia = Elysia> {
    * triggering the corresponding lifecycle hooks.
    */
   public async close(): Promise<void> {
+    // Order mirrors NestJS: onModuleDestroy → beforeApplicationShutdown →
+    // onApplicationShutdown.
+    getLifecycleManager().triggerOnModuleDestroy();
     getLifecycleManager().triggerBeforeApplicationShutdown();
 
     for (const { server } of this.microservices) {

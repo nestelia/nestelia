@@ -1,5 +1,5 @@
 import { Container, Injectable, STATIC_CONTEXT } from "nestelia";
-import type { OnApplicationBootstrap, OnModuleDestroy } from "nestelia";
+import type { OnModuleDestroy, OnModuleInit } from "nestelia";
 
 import { ON_EVENT_METADATA } from "./event-emitter.constants";
 import { EventEmitterService } from "./event-emitter.service";
@@ -9,7 +9,10 @@ import type { OnEventMetadata } from "./interfaces";
  * Scans all providers registered in the DI container for `@OnEvent`-decorated
  * methods and registers them with the `EventEmitterService` instance.
  *
- * Runs automatically during `onApplicationBootstrap`.
+ * Runs automatically during `onModuleInit`, after all provider instances have
+ * been resolved. (Note: `onApplicationBootstrap` is NOT used — the core
+ * LifecycleManager only registers a provider for lifecycle hooks if it
+ * implements `onModuleInit`, so a bootstrap-only explorer would never run.)
  *
  * @internal
  */
@@ -20,9 +23,7 @@ interface RegisteredHandler {
 }
 
 @Injectable()
-export class EventEmitterExplorer
-  implements OnApplicationBootstrap, OnModuleDestroy
-{
+export class EventEmitterExplorer implements OnModuleInit, OnModuleDestroy {
   private readonly registeredHandlers: RegisteredHandler[] = [];
 
   constructor(private readonly eventEmitter: EventEmitterService) {}
@@ -34,7 +35,7 @@ export class EventEmitterExplorer
     this.registeredHandlers.length = 0;
   }
 
-  onApplicationBootstrap(): void {
+  onModuleInit(): void {
     for (const moduleRef of Container.instance.getModules().values()) {
       for (const [, wrapper] of moduleRef.getProviders()) {
         const instancePerContext = wrapper.getInstanceByContextId(STATIC_CONTEXT);

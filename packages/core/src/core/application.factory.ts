@@ -6,6 +6,7 @@ import { Container, DIError, type Type } from "../di";
 import type { ExceptionFilter } from "../exceptions";
 import type { LoggerService, LogLevel } from "../logger";
 import { Logger } from "../logger";
+import { getLifecycleManager } from "../lifecycle/lifecycle-manager";
 import { validateTsConfig } from "./helpers";
 import { initializeSingletonProviders } from "./module.utils";
 
@@ -93,6 +94,12 @@ export async function createElysiaApplication(
     }
     throw e;
   }
+
+  // All providers are initialized — fire onApplicationBootstrap now (at init),
+  // mirroring NestJS, so it runs even when the app never calls listen()
+  // (e.g. serverless / getHttpServer().handle()). The trigger is idempotent,
+  // so a later listen() is a safe no-op.
+  getLifecycleManager().triggerOnApplicationBootstrap();
 
   // Get module metadata to extract controllers
   const moduleMetadata: ModuleOptions = Reflect.getMetadata(MODULE_METADATA, rootModule) || {};

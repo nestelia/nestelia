@@ -24,7 +24,7 @@ new LifecycleManager(): LifecycleManager;
 clear(): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:83](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L83)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:88](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L88)
 
 Clear all registered providers to prevent memory leaks
 
@@ -40,7 +40,7 @@ Clear all registered providers to prevent memory leaks
 register(provider): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:18](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L18)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:19](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L19)
 
 Register a provider with lifecycle hooks
 
@@ -62,7 +62,7 @@ Register a provider with lifecycle hooks
 triggerBeforeApplicationShutdown(): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:69](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L69)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:74](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L74)
 
 Trigger beforeApplicationShutdown hooks for all registered providers
 
@@ -78,7 +78,7 @@ Trigger beforeApplicationShutdown hooks for all registered providers
 triggerOnApplicationBootstrap(): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:41](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L41)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:42](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L42)
 
 Trigger onApplicationBootstrap hooks for all registered providers
 
@@ -94,7 +94,7 @@ Trigger onApplicationBootstrap hooks for all registered providers
 triggerOnApplicationShutdown(): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:90](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L90)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:96](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L96)
 
 Trigger onApplicationShutdown hooks for all registered providers
 
@@ -110,7 +110,7 @@ Trigger onApplicationShutdown hooks for all registered providers
 triggerOnModuleDestroy(): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:55](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L55)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:60](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L60)
 
 Trigger onModuleDestroy hooks for all registered providers
 
@@ -126,7 +126,7 @@ Trigger onModuleDestroy hooks for all registered providers
 triggerOnModuleInit(): void;
 ```
 
-Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:27](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L27)
+Defined in: [packages/core/src/lifecycle/lifecycle-manager.ts:28](https://github.com/nestelia/nestelia/blob/main/packages/core/src/lifecycle/lifecycle-manager.ts#L28)
 
 Trigger onModuleInit hooks for all registered providers
 
